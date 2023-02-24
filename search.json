@@ -25,7 +25,14 @@
     "href": "posts/01_blog_setup/index.html#step-3-create-a-quarto-project-in-the-repo",
     "title": "Blog setup",
     "section": "Step 3: create a Quarto project in the repo",
-    "text": "Step 3: create a Quarto project in the repo\nNext, head over to VS Code, and open the cloned repo. Open the terminal inside of VS Code and run:\nquarto create-project --type website:blog\nThis will add a number of files to our repo, which represent the basic structure of our blog. Most importantly:\n\nposts: here we will create our blog entries (one subfolder per blog entry)\n_quarto.yml: configuration file for our blog such as the theme, name, GitHub and Twitter links\nabout.qmd: source code for the “about” page.\nindex.qmd: source code for the landing page.\n\n\n\n\n\n\n\nNote\n\n\n\n.qmd files are like markdown files, but with lots of additional functionality from Quarto. Go here for more information on Markdown syntax and here for Quarto Markdown\n\n\nTo see what we currently have, let’s render our blog locally. We can do this by running\nquarto preview\nAlternatively, we can install the Quarto extension in VS Code, which will show a render button in the top right corner on any opened qmd file.\nTo publish to GitHub pages, we can run:\nquarto publish gh-pages"
+    "text": "Step 3: create a Quarto project in the repo\nNext, head over to VS Code, and open the cloned repo. Open the terminal inside of VS Code and run:\nquarto create-project --type website:blog\nThis will add a number of files to our repo, which represent the basic structure of our blog. Most importantly:\n\nposts: here we will create our blog entries (one subfolder per blog entry)\n_quarto.yml: configuration file for our blog such as the theme, name, GitHub and Twitter links\nabout.qmd: source code for the “about” page.\nindex.qmd: source code for the landing page.\n\n\n\n\n\n\n\nNote\n\n\n\n.qmd files are like markdown files, but with lots of additional functionality from Quarto. Go here for more information on Markdown syntax and here for Quarto Markdown\n\n\nTo see what we currently have, let’s render our blog locally. We can do this by running\nquarto preview\nAlternatively, we can install the Quarto extension in VS Code, which will show a render button in the top right corner on any opened qmd file.\nTo publish to GitHub pages, we can run:\nquarto publish gh-pages\nWhen we run this, we get a message that we have to change the branch from which GitHub Pages builds the site. To do this, I go to https://github.com/lucasvw/lucasvw.github.io/settings/pages and select gh-pages instead of the main branch.\nAnd voila, in a few moments our blog will be running live at https://lucasvw.github.io/"
+  },
+  {
+    "objectID": "posts/01_blog_setup/index.html#step-4-finalize-set-up-and-create-first-blog-entry",
+    "href": "posts/01_blog_setup/index.html#step-4-finalize-set-up-and-create-first-blog-entry",
+    "title": "Blog setup",
+    "section": "Step 4: finalize set-up and create first blog entry",
+    "text": "Step 4: finalize set-up and create first blog entry\nWhen we run the quarto publish gh-pages command, Quarto processes our files and turns them into web readable files (HTML, JS, CSS etc). Next, it will push these files to the gh-pages branch. This is great, but it means that this doesn’t store our source files in GitHub.\nTo do so, let’s first open our .gitignore file and make sure that it contains the following entries:\n# Quarto\n/.quarto/\n_site/\n\n# Mac files\n.DS_Store\nNext, we can commit all the remaining files to Git and push them to our remote repo.\nFinally, we can start tweaking our about.qmd files and create a new blog entry"
   },
   {
     "objectID": "index.html",
@@ -39,6 +46,6 @@
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "About this blog"
+    "text": "Hello👋 and welcome to my blog!"
   }
 ]

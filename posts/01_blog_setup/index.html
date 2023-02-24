@@ -254,6 +254,21 @@ Note
 <p>Alternatively, we can install the Quarto extension in VS Code, which will show a <code>render</code> button in the top right corner on any opened <code>qmd</code> file.</p>
 <p>To publish to GitHub pages, we can run:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> publish gh-pages</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>When we run this, we get a message that we have to change the branch from which GitHub Pages builds the site. To do this, I go to <a href="https://github.com/lucasvw/lucasvw.github.io/settings/pages">https://github.com/lucasvw/lucasvw.github.io/settings/pages</a> and select <code>gh-pages</code> instead of the <code>main</code> branch.</p>
+<p>And voila, in a few moments our blog will be running live at <a href="https://lucasvw.github.io/">https://lucasvw.github.io/</a></p>
+</section>
+<section id="step-4-finalize-set-up-and-create-first-blog-entry" class="level2">
+<h2 class="anchored" data-anchor-id="step-4-finalize-set-up-and-create-first-blog-entry">Step 4: finalize set-up and create first blog entry</h2>
+<p>When we run the <code>quarto publish gh-pages</code> command, Quarto processes our files and turns them into web readable files (HTML, JS, CSS etc). Next, it will push these files to the <code>gh-pages</code> branch. This is great, but it means that this doesn’t store our source files in GitHub.</p>
+<p>To do so, let’s first open our <code>.gitignore</code> file and make sure that it contains the following entries:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a># Quarto</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>/.quarto/</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>_site/</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a># Mac files</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>.DS_Store</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Next, we can commit all the remaining files to Git and push them to our remote repo.</p>
+<p>Finally, we can start tweaking our <code>about.qmd</code> files and create a new blog entry</p>
 
 
 </section>
