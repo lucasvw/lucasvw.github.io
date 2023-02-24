@@ -5,7 +5,7 @@ execute:
     freeze: auto
 
 website:
-  title: "lucasvw.github.io"
+  title: "Lucas van Walstijn"
   navbar:
     right:
       - about.qmd
