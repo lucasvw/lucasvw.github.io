@@ -208,26 +208,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 <p>In this blog post I’ll explain how I created this blog, using Quarto, GitHub (and GitHub Pages). I’m working on a Macbook, and using VS Code for code editing. If you are on a Linux or Windows machine, be aware that things might be a bit different from what I describe here.</p>
-<p>I am assuming you already have a GitHub account, that you have VS Code installed and set up in a way that you can run Python and Jupyter Notebooks.</p>
+<p>I am assuming you already have a GitHub account, that VS Code is installed and configured to run Python and Jupyter Notebooks.</p>
 <section id="step-1-install-quarto" class="level2">
 <h2 class="anchored" data-anchor-id="step-1-install-quarto">Step 1: install Quarto</h2>
-<p>First of all you need to install Quarto, head over to <a href="https://quarto.org/docs/get-started/">here</a> and download and install the software. You should do this on the machine that you want to use for writing your blog, in my case my Macbook laptop.</p>
+<p>First of all you need to install Quarto, go <a href="https://quarto.org/docs/get-started/">here</a> and download and install the software. You should do this on the machine that you want to use for writing your blog, in my case my Macbook laptop.</p>
 <p>Once installed you will have access to the quarto Command Line Interface (CLI). To make sure everything works as expected, open a terminal and execute:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> <span class="at">--help</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This should give some outputs describing the different commands and options that are part of the Quarto CLI and shows that Quarto is installed successfully.</p>
+<p>This should render some outputs describing the different commands and options that are part of the Quarto CLI and shows that Quarto is installed successfully.</p>
 </section>
 <section id="step-2-create-a-github-repo" class="level2">
 <h2 class="anchored" data-anchor-id="step-2-create-a-github-repo">Step 2: create a GitHub repo</h2>
-<p>To host our blog, we will use GitHub Pages, which is a service to host a website from a GitHub repository. Based on the name you pick for your repository you will create a so-called “project website” or your unique “user website”. For any repo named <code>my-awesome-repo</code>, the website will be hosted on <code>https://&lt;github-username&gt;.github.io/my-awesome-repo</code>, this is what’s called a project website and you can create as many as you like.</p>
-<p>You can create your “user website” by creating a repo called <code>&lt;github-username&gt;.github.io</code>, which will be hosted at <code>https://&lt;github-username&gt;.github.io</code>.</p>
-<p>Since I want my blog to be hosted as “user website”, I thus create a new repo with the name: <code>lucasvw.github.io</code>.</p>
+<p>To host our blog, we will use GitHub Pages, which is a service to host a website from a GitHub repository. Based on the name you pick for your repository you will create a so-called project-website or your unique user-website. For any general repo named <code>my-awesome-repo</code>, the website will be hosted on <code>https://&lt;github-username&gt;.github.io/my-awesome-repo</code>. This is a project-websites and you can create as many as you like.</p>
+<p>To create your user-website, you have to name the repo exactly like this: <code>&lt;github-username&gt;.github.io</code>, the user-website will be hosted at <code>https://&lt;github-username&gt;.github.io</code>.</p>
+<p>Since I want my blog to be hosted as my user-website, I thus create a new repo with the name: <code>lucasvw.github.io</code>.</p>
 <p>I find it helpful to add a <code>.gitignore</code> file with a Python template, to which we can later add some more entries to facilitate storing the right files on GitHub. Also make sure that the repo is Public (and not set to Private). Additionally, I added a README file and choose the Apache2 License.</p>
 <p>Next, I clone this repo to my machine by running the following command:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone git@github.com:lucasvw/lucasvw.github.io.git</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="step-3-create-a-quarto-project-in-the-repo" class="level2">
 <h2 class="anchored" data-anchor-id="step-3-create-a-quarto-project-in-the-repo">Step 3: create a Quarto project in the repo</h2>
-<p>Next, head over to VS Code, and open the cloned repo. Open the terminal inside of VS Code and run:</p>
+<p>Next, open VS Code and open the cloned repo. Then access the VS Code terminal and run:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> create-project <span class="at">--type</span> website:blog</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>This will add a number of files to our repo, which represent the basic structure of our blog. Most importantly:</p>
 <ul>
@@ -252,15 +252,15 @@ Note
 <p>To see what we currently have, let’s render our blog locally. We can do this by running</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> preview</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Alternatively, we can install the Quarto extension in VS Code, which will show a <code>render</code> button in the top right corner on any opened <code>qmd</code> file.</p>
-<p>To publish to GitHub pages, we can run:</p>
+<p>To publish the current contents to GitHub pages, we can run:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> publish gh-pages</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>When we run this, we get a message that we have to change the branch from which GitHub Pages builds the site. To do this, I go to <a href="https://github.com/lucasvw/lucasvw.github.io/settings/pages">https://github.com/lucasvw/lucasvw.github.io/settings/pages</a> and select <code>gh-pages</code> instead of the <code>main</code> branch.</p>
 <p>And voila, in a few moments our blog will be running live at <a href="https://lucasvw.github.io/">https://lucasvw.github.io/</a></p>
 </section>
 <section id="step-4-finalize-set-up" class="level2">
 <h2 class="anchored" data-anchor-id="step-4-finalize-set-up">Step 4: Finalize set-up</h2>
-<p>When we run the <code>quarto publish gh-pages</code> command, Quarto processes our files and turns them into web readable files (HTML, JS, CSS etc). It stores these files in our <code>gh-pages</code> branch and finally pushes them to our remote GitHub repo. This is great, but it means that this doesn’t store our source files contained in the <code>main</code> branch to GitHub.</p>
-<p>To do so, let’s first open our <code>.gitignore</code> file and make sure that it contains the following entries:</p>
+<p>When we run the <code>quarto publish gh-pages</code> command, Quarto processes our files and turns them into web readable files (HTML, JS, CSS etc). It stores these files in our <code>gh-pages</code> branch and pushes them to our remote GitHub repo. This is great, but it means that this doesn’t store our source files.</p>
+<p>To do so, let’s first open our <code>.gitignore</code> file and make sure that it contains the following entries to make sure we don’t check in any files we don’t need.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a># Quarto</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>/.quarto/</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>_site/</span>
@@ -270,7 +270,7 @@ Note
 <p>Next, we can commit all the remaining files to Git and push them to our remote repo. If we ever lose access to our local machine, we can restore everything we need from GitHub.</p>
 <p>However, now we have 2 things we need to do whenever we finish our work:</p>
 <ul>
-<li>store our source files on the main branch</li>
+<li>store our source files on the main branch and push to GitHub</li>
 <li>run the publish command to update the blog</li>
 </ul>
 <p>This is a bit annoying and it would be much better if we can just push to the main branch and GitHub would take care of building our website and updating it. So let’s use GitHub actions for this.</p>
@@ -317,6 +317,7 @@ Note
 <span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">target</span><span class="kw">:</span><span class="at"> gh-pages</span></span>
 <span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">env</span><span class="kw">:</span></span>
 <span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">GITHUB_TOKEN</span><span class="kw">:</span><span class="at"> ${{ secrets.GITHUB_TOKEN }}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Once we push these things to GitHub, we are good to go. Whenever we push anything to the <code>main</code> branch, this workflow will execute and take care of updating the <code>gh-pages</code> branch and updating the blog.</p>
 
 
 </section>
