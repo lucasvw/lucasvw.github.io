@@ -133,3 +133,4 @@ dmypy.json
 
 # Quarto
 _site/
+.DS_Store
