@@ -1,1 +1,1 @@
-Sitemap: https://lucasvw.github.io/sitemap.xml
+Sitemap: https://github.com/lucasvw/lucasvw.github.io/sitemap.xml

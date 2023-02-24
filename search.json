@@ -35,17 +35,17 @@
     "text": "Step 4: Finalize set-up\nWhen we run the quarto publish gh-pages command, Quarto processes our files and turns them into web readable files (HTML, JS, CSS etc). It stores these files in our gh-pages branch and finally pushes them to our remote GitHub repo. This is great, but it means that this doesn’t store our source files contained in the main branch to GitHub.\nTo do so, let’s first open our .gitignore file and make sure that it contains the following entries:\n# Quarto\n/.quarto/\n_site/\n\n# Mac files\n.DS_Store\nNext, we can commit all the remaining files to Git and push them to our remote repo. If we ever lose access to our local machine, we can restore everything we need from GitHub.\nHowever, now we have 2 things we need to do whenever we finish our work:\n\nstore our source files on the main branch\nrun the publish command to update the blog\n\nThis is a bit annoying and it would be much better if we can just push to the main branch and GitHub would take care of building our website and updating it. So let’s use GitHub actions for this.\n\n\n\n\n\n\nNote\n\n\n\nBefore you continue make sure you have at least once run a quarto publish gh-pages command, this is necessary for the things below to work\n\n\nFirst we need to add the following snippet to _quarto.yml\nexecute:\n  freeze: auto\nThis will make sure that GitHub actions doesn’t execute any executable code, but will show the pre-rendered outputs it finds in the _freeze folder.\nFinally, create the file .github/workflow/publish.yml and populate it with the following code:\non:\n  workflow_dispatch:\n  push:\n    branches: main\n\nname: Quarto Publish\n\njobs:\n  build-deploy:\n    runs-on: ubuntu-latest\n    permissions:\n      contents: write\n    steps:\n      - name: Check out repository\n        uses: actions/checkout@v3\n\n      - name: Set up Quarto\n        uses: quarto-dev/quarto-actions/setup@v2\n\n      - name: Render and Publish\n        uses: quarto-dev/quarto-actions/publish@v2\n        with:\n          target: gh-pages\n        env:\n          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}"
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "lucasvw.github.io",
-    "section": "",
-    "text": "Blog setup\n\n\n\n\n\n\n\nblogging\n\n\nsetup\n\n\n\n\n\n\n\n\n\n\n\nFeb 24, 2023\n\n\nLucas van Walstijn\n\n\n\n\n\n\nNo matching items"
-  },
-  {
     "objectID": "about.html",
     "href": "about.html",
     "title": "About",
     "section": "",
     "text": "Hello👋 and welcome to my blog!"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "lucasvw.github.io",
+    "section": "",
+    "text": "Blog setup\n\n\n\n\n\n\n\nblogging\n\n\nsetup\n\n\n\n\n\n\n\n\n\n\n\nFeb 24, 2023\n\n\nLucas van Walstijn\n\n\n\n\n\n\nNo matching items"
   }
 ]
