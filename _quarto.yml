@@ -4,8 +4,11 @@ project:
 execute:
     freeze: auto
 
+cookie-consent: true
+
 website:
   title: "Lucas van Walstijn"
+  google-analytics: "G-05FDFMB3LP"
   navbar:
     right:
       - about.qmd
