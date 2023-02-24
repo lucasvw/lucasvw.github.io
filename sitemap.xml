@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://lucasvw.github.io/posts/01_blog_setup/index.html</loc>
+    <lastmod>2023-02-24T11:17:06.779Z</lastmod>
+  </url>
+  <url>
     <loc>https://lucasvw.github.io/index.html</loc>
-    <lastmod>2023-02-24T09:33:39.675Z</lastmod>
+    <lastmod>2023-02-24T11:17:07.144Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/about.html</loc>
-    <lastmod>2023-02-24T09:33:39.952Z</lastmod>
+    <lastmod>2023-02-24T11:17:07.433Z</lastmod>
   </url>
 </urlset>

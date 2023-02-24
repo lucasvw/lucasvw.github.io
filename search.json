@@ -1,10 +1,38 @@
 [
   {
+    "objectID": "posts/01_blog_setup/index.html",
+    "href": "posts/01_blog_setup/index.html",
+    "title": "Blog setup",
+    "section": "",
+    "text": "In this blog post I’ll explain how I created this blog, using Quarto, GitHub (and GitHub Pages). I’m working on a Macbook, and using VS Code for code editing. If you are on a Linux or Windows machine, be aware that things might be a bit different from what I describe here.\nI am assuming you already have a GitHub account, that you have VS Code installed and set up in a way that you can run Python and Jupyter Notebooks."
+  },
+  {
+    "objectID": "posts/01_blog_setup/index.html#step-1-install-quarto",
+    "href": "posts/01_blog_setup/index.html#step-1-install-quarto",
+    "title": "Blog setup",
+    "section": "Step 1: install Quarto",
+    "text": "Step 1: install Quarto\nFirst of all you need to install Quarto, head over to here and download and install the software. You should do this on the machine that you want to use for writing your blog, in my case my Macbook laptop.\nOnce installed you will have access to the quarto Command Line Interface (CLI). To make sure everything works as expected, open a terminal and execute:\nquarto --help\nThis should give some outputs describing the different commands and options that are part of the Quarto CLI and shows that Quarto is installed successfully."
+  },
+  {
+    "objectID": "posts/01_blog_setup/index.html#step-2-create-a-github-repo",
+    "href": "posts/01_blog_setup/index.html#step-2-create-a-github-repo",
+    "title": "Blog setup",
+    "section": "Step 2: create a GitHub repo",
+    "text": "Step 2: create a GitHub repo\nTo host our blog, we will use GitHub Pages, which is a service to host a website from a GitHub repository. Based on the name you pick for your repository you will create a so-called “project website” or your unique “user website”. For any repo named my-awesome-repo, the website will be hosted on https://<github-username>.github.io/my-awesome-repo, this is what’s called a project website and you can create as many as you like.\nYou can create your “user website” by creating a repo called <github-username>.github.io, which will be hosted at https://<github-username>.github.io.\nSince I want my blog to be hosted as “user website”, I thus create a new repo with the name: lucasvw.github.io.\nI find it helpful to add a .gitignore file with a Python template, to which we can later add some more entries to facilitate storing the right files on GitHub. Also make sure that the repo is Public (and not set to Private). Additionally, I added a README file and choose the Apache2 License.\nNext, I clone this repo to my machine by running the following command in the folder where I have all my code project.\ngit clone git@github.com:lucasvw/lucasvw.github.io.git"
+  },
+  {
+    "objectID": "posts/01_blog_setup/index.html#step-3-create-a-quarto-project-in-the-repo",
+    "href": "posts/01_blog_setup/index.html#step-3-create-a-quarto-project-in-the-repo",
+    "title": "Blog setup",
+    "section": "Step 3: create a Quarto project in the repo",
+    "text": "Step 3: create a Quarto project in the repo\nNext, head over to VS Code, and open the cloned repo. Open the terminal inside of VS Code and run:\nquarto create-project --type website:blog\nThis will add a number of files to our repo, which represent the basic structure of our blog. Most importantly:\n\nposts: here we will create our blog entries (one subfolder per blog entry)\n_quarto.yml: configuration file for our blog such as the theme, name, GitHub and Twitter links\nabout.qmd: source code for the “about” page.\nindex.qmd: source code for the landing page.\n\n\n\n\n\n\n\nNote\n\n\n\n.qmd files are like markdown files, but with lots of additional functionality from Quarto. Go here for more information on Markdown syntax and here for Quarto Markdown\n\n\nTo see what we currently have, let’s render our blog locally. We can do this by running\nquarto preview\nAlternatively, we can install the Quarto extension in VS Code, which will show a render button in the top right corner on any opened qmd file.\nTo publish to GitHub pages, we can run:\nquarto publish gh-pages"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "lucasvw.github.io",
     "section": "",
-    "text": "No matching items"
+    "text": "Blog setup\n\n\n\n\n\n\n\nblogging\n\n\nsetup\n\n\n\n\n\n\n\n\n\n\n\nFeb 24, 2023\n\n\nLucas van Walstijn\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "about.html",
