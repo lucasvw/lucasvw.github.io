@@ -128,9 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-/.quarto/
-
-
 # Quarto
+/.quarto/
 _site/
+
+# Mac files
 .DS_Store
