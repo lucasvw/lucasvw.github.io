@@ -222,7 +222,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>You can create your “user website” by creating a repo called <code>&lt;github-username&gt;.github.io</code>, which will be hosted at <code>https://&lt;github-username&gt;.github.io</code>.</p>
 <p>Since I want my blog to be hosted as “user website”, I thus create a new repo with the name: <code>lucasvw.github.io</code>.</p>
 <p>I find it helpful to add a <code>.gitignore</code> file with a Python template, to which we can later add some more entries to facilitate storing the right files on GitHub. Also make sure that the repo is Public (and not set to Private). Additionally, I added a README file and choose the Apache2 License.</p>
-<p>Next, I clone this repo to my machine by running the following command in the folder where I have all my code project.</p>
+<p>Next, I clone this repo to my machine by running the following command:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone git@github.com:lucasvw/lucasvw.github.io.git</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="step-3-create-a-quarto-project-in-the-repo" class="level2">
@@ -257,9 +257,9 @@ Note
 <p>When we run this, we get a message that we have to change the branch from which GitHub Pages builds the site. To do this, I go to <a href="https://github.com/lucasvw/lucasvw.github.io/settings/pages">https://github.com/lucasvw/lucasvw.github.io/settings/pages</a> and select <code>gh-pages</code> instead of the <code>main</code> branch.</p>
 <p>And voila, in a few moments our blog will be running live at <a href="https://lucasvw.github.io/">https://lucasvw.github.io/</a></p>
 </section>
-<section id="step-4-finalize-set-up-and-create-first-blog-entry" class="level2">
-<h2 class="anchored" data-anchor-id="step-4-finalize-set-up-and-create-first-blog-entry">Step 4: finalize set-up and create first blog entry</h2>
-<p>When we run the <code>quarto publish gh-pages</code> command, Quarto processes our files and turns them into web readable files (HTML, JS, CSS etc). Next, it will push these files to the <code>gh-pages</code> branch. This is great, but it means that this doesn’t store our source files in GitHub.</p>
+<section id="step-4-finalize-set-up" class="level2">
+<h2 class="anchored" data-anchor-id="step-4-finalize-set-up">Step 4: Finalize set-up</h2>
+<p>When we run the <code>quarto publish gh-pages</code> command, Quarto processes our files and turns them into web readable files (HTML, JS, CSS etc). It stores these files in our <code>gh-pages</code> branch and finally pushes them to our remote GitHub repo. This is great, but it means that this doesn’t store our source files contained in the <code>main</code> branch to GitHub.</p>
 <p>To do so, let’s first open our <code>.gitignore</code> file and make sure that it contains the following entries:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a># Quarto</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>/.quarto/</span>
@@ -267,8 +267,56 @@ Note
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a># Mac files</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>.DS_Store</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Next, we can commit all the remaining files to Git and push them to our remote repo.</p>
-<p>Finally, we can start tweaking our <code>about.qmd</code> files and create a new blog entry</p>
+<p>Next, we can commit all the remaining files to Git and push them to our remote repo. If we ever lose access to our local machine, we can restore everything we need from GitHub.</p>
+<p>However, now we have 2 things we need to do whenever we finish our work:</p>
+<ul>
+<li>store our source files on the main branch</li>
+<li>run the publish command to update the blog</li>
+</ul>
+<p>This is a bit annoying and it would be much better if we can just push to the main branch and GitHub would take care of building our website and updating it. So let’s use GitHub actions for this.</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Before you continue make sure you have at least once run a <code>quarto publish gh-pages</code> command, this is necessary for the things below to work</p>
+</div>
+</div>
+<p>First we need to add the following snippet to <code>_quarto.yml</code></p>
+<pre><code>execute:
+  freeze: auto</code></pre>
+<p>This will make sure that GitHub actions doesn’t execute any executable code, but will show the pre-rendered outputs it finds in the <code>_freeze</code> folder.</p>
+<p>Finally, create the file <code>.github/workflow/publish.yml</code> and populate it with the following code:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">on</span><span class="kw">:</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">workflow_dispatch</span><span class="kw">:</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">push</span><span class="kw">:</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">branches</span><span class="kw">:</span><span class="at"> main</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> Quarto Publish</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">jobs</span><span class="kw">:</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">build-deploy</span><span class="kw">:</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">runs-on</span><span class="kw">:</span><span class="at"> ubuntu-latest</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">permissions</span><span class="kw">:</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">contents</span><span class="kw">:</span><span class="at"> write</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Check out repository</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v3</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Set up Quarto</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> quarto-dev/quarto-actions/setup@v2</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Render and Publish</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> quarto-dev/quarto-actions/publish@v2</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">target</span><span class="kw">:</span><span class="at"> gh-pages</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">env</span><span class="kw">:</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">GITHUB_TOKEN</span><span class="kw">:</span><span class="at"> ${{ secrets.GITHUB_TOKEN }}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
 </section>
