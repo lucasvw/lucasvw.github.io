@@ -211,18 +211,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<p>Most people don’t have a GPU that is suited for Deep Learning installed in their working machine, and in fact you don’t need to. It’s quite easy to setup a remote GPU server nowadays, and in this blog I will explain how to do so with Paperspace Gradient.</p>
-<p>I started using Paperspace because of a recommendation from Jeremy Howard in his Live Coding Videos, see <a href="https://www.youtube.com/playlist?list=PLfYUBJiXbdtSLBPJ1GMx-sQWf6iNhb8mM">here</a>.</p>
-<p>If you haven’t seen these lectures, I can highly recommend them. They are a great resource on many things related to getting started with Deep Learning, especially a lot of productivity hacks and practical tips on getting a good setup.</p>
+<p>Most people don’t have a GPU that is suited for Deep Learning installed in their working machine, and in fact you don’t need to. It’s quite easy to setup a remote GPU server nowadays, and in this blog I will explain how to do so with <a href="https://www.paperspace.com/gradient">Paperspace Gradient</a>.</p>
+<p>I started using Paperspace because of a recommendation from Jeremy Howard in his <a href="https://www.youtube.com/playlist?list=PLfYUBJiXbdtSLBPJ1GMx-sQWf6iNhb8mM">Live Coding Videos</a>. If you haven’t seen these lectures, I can highly recommend them. They are a great resource on many things related to getting started with Deep Learning, especially he shows a lot of productivity hacks and practical tips on getting a good setup.</p>
 <p>However, the Paperspace setup explanations are a bit out-dated which can lead to confusion when following along with the video’s. This blog will hopefully help others to navigate this and quickly set-up a remote GPU server. I would advice anybody who wants to try Paperspace, to first watch the videos from Jeremy to have a general idea of how it works, and then follow these steps to quickly get set-up.</p>
-<p>Once you have signed up to Paperspace, go to their Gradient service and create a new project. Paperspace has a free tier, as well as a pro- ($8/month) and growth-plan ($39/month). I personally signed up for the pro-plan, which has a very good value for money. You get 15Gb persistent storage and free Mid instance types:</p>
-<ul>
-<li>A4000</li>
-<li>RTX5000</li>
-<li>RTX4000</li>
-<li>P5000</li>
-</ul>
-<p>If available, I take the A4000, which is the fastest and comes with 16GB of GPU memory.</p>
+<p>Once you have signed up to Paperspace, go to their Gradient service and create a new project. Paperspace has a free tier, as well as a pro- ($8/month) and growth-plan ($39/month). I personally signed up for the pro-plan, which has a very good value for money. You get 15Gb persistent storage and free Mid instance types. If available, I use the A4000, which is the fastest and comes with 16GB of GPU memory.</p>
 <div class="callout-note callout callout-style-default callout-captioned">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -236,7 +228,7 @@ Note
 <p>Paperspace has both free and paid servers. The free ones come with a 6 hour usage limit, after that they are automatically shut down. The paid servers you can use as long as you like. Sometimes the free servers are out of capacity, which is a bit annoying. In my experience however most of the time I’m able to get what I need.</p>
 </div>
 </div>
-<p>With the pro-plan you can create up to 3 servers, or “Notebooks” as they are called at Paperspace (I’ll call them Notebook Servers). So let’s create our first Notebook Server:</p>
+<p>With the pro-plan you can create up to 3 servers, or “Notebooks” as they are called by Paperspace (Throughout this blog I’ll refer to Notebook Servers). So let’s create our first Notebook Server:</p>
 <ul>
 <li>Select the “Fast.AI” runtime</li>
 <li>Select a machine, for example the Free-A4000 if you have the pro-plan. You can always change this afterwards.</li>
@@ -249,8 +241,8 @@ Note
 <p></p><figcaption class="figure-caption">Click the JupyterLab icon to open up a JupyterLab environment for your GPU server</figcaption><p></p>
 </figure>
 </div>
-<section id="which-python-are-we-running" class="level2">
-<h2 class="anchored" data-anchor-id="which-python-are-we-running">Which Python are we running?</h2>
+<section id="first-look-at-our-notebook-server" class="level2">
+<h2 class="anchored" data-anchor-id="first-look-at-our-notebook-server">First look at our Notebook Server</h2>
 <p>Next, let’s open a terminal and get familiar with our Server</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
@@ -262,13 +254,13 @@ Note
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> python <span class="ex">--version</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">Python</span> 3.9.13</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>This is thus pointing to the base Python installation. However, in the <code>PATH</code> variable we are also seeing things related to <code>conda</code> / <code>mamba</code>:</p>
+<p>This is thus pointing to the system Python installation. However, on the <code>PATH</code> variable we are also seeing things related to <code>conda</code> / <code>mamba</code>:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> echo <span class="va">$PATH</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/root/.local/bin:/root/.conda/bin/:/usr/local/nvidia/bin:/usr/local/cuda/bin:</span> /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/mambaforge/bin</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:</span> /usr/sbin:/usr/bin:/sbin:/bin:/root/mambaforge/bin</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>And indeed we can execute:</p>
 <div class="code-with-filename">
@@ -284,7 +276,7 @@ Note
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="ex">python-fastjsonschema</span>     2.16.2             pyhd8ed1ab_0    conda-forge</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">python_abi</span>                3.10                    2_cp310    conda-forge</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>So we are having both a <code>mamba</code> based Python 3.10.6 and a base installation of Python 3.9.13.</p>
+<p>So we are having both a <code>mamba</code> based Python 3.10.6 and a system installation of Python 3.9.13.</p>
 <p>Let’s open a Jupyter Notebook and see which Python version is running:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
@@ -293,7 +285,7 @@ Note
 <div class="sourceCode" id="cb4"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">import</span> sys</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">sys.version</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>From which we get <code>'3.9.13 (main, May 23 2022, 22:01:06) \n[GCC 9.4.0]'</code>. Jupyter is thus running the base Python installation.</p>
+<p>Which returns: <code>'3.9.13 (main, May 23 2022, 22:01:06) \n[GCC 9.4.0]'</code>. Jupyter is thus running the system Python installation.</p>
 <div class="callout-note callout callout-style-default callout-captioned">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -304,10 +296,10 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This is different from the videos, back when the videos were recorded the setup of these servers was different and the mamba based Python was being used. This shouldn’t be a problem, but it’s something to be aware of.</p>
+<p>In the videos Jeremy mentions that we should never use the system Python but instead always create a Mamba installation. However, since we are working here on a virtual machine that is only used for running Python, this shouldn’t be a problem. Just be aware that we are using the system Python which is totally separate from the Mamba setup.</p>
 </div>
 </div>
-<p>Since we are running the base Python version, we can inspect all the packages that are installed:</p>
+<p>Since we are running the system Python version, we can inspect all the packages that are installed:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
@@ -331,21 +323,21 @@ Note
 </section>
 <section id="persisted-storage-at-paperspace" class="level2">
 <h2 class="anchored" data-anchor-id="persisted-storage-at-paperspace">Persisted Storage at Paperspace</h2>
-<p>We have 2 special folders at Paperspace, in which we can store things that we want to persist. Anything that we store outside of these folders will not be there whenever we close and restart the Notebook Server.</p>
-<p>Naturally, we will make lots of use of these folders, since any additional installations of Python packages, configuration files for interacting with GitHub, Kaggle or HuggingFace, as well as any notebooks we create or models we would like to store need to be persisted in these folders.</p>
-<p>These two folders are called <code>/storage</code> and <code>/notebooks</code>. Anything in our <code>/storage</code> is shared among all the Notebook Servers we are running (with the pro-plan you can create up to 3 different Notebook Servers), whereas anything that is stored in the <code>/notebooks</code> folder is only persisted on that specific Notebook Server.</p>
+<p>In general, things are not persisted on Paperspace. That means that anything we store during a session, will be gone when we restart our Notebook Server. However, Paperspace comes with two special folders that are persisted. It’s important to understand how these folder works, since we obviously need to persist our work. Besides that, we would also like to persist configuration files from GitHub, Kaggle, HuggingFace or any other service we are interacting with.</p>
+<p>The persisted folders are called <code>/storage</code> and <code>/notebooks</code>. Anything in our <code>/storage</code> is shared among all the Notebook Servers we are running, whereas anything that is stored in the <code>/notebooks</code> folder is only persisted on that specific Notebook Server.</p>
 </section>
 <section id="set-up" class="level2">
 <h2 class="anchored" data-anchor-id="set-up">Set up</h2>
-<p>In the first few videos, Jeremy shows a lot of tricks on how to install new packages and set up Git. After the recording of these videos, he made a GitHub repo which facilitates this setup greatly and makes most of the steps he is doing in the videos no longer necessary. So let’s use that:</p>
+<p>In the first few videos, Jeremy shows a lot of tricks on how to install new packages and set up Git. After the recording of these videos, he made a <a href="https://github.com/fastai/paperspace-setup">GitHub repo</a> which facilitates this setup greatly and makes most of the steps from the videos unnecessary. So let’s use that:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/fastai/paperspace-setup.git</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> git <span class="ex">clone</span> https://github.com/fastai/paperspace-setup.git</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> cd <span class="ex">paperspace-setup</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> ./setup.sh</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Next, we can: - <code>cd paperspace-setup</code> - <code>./setup.sh</code></p>
-<p>Let’s have a look at what the <code>setup.sh</code> file does:</p>
+<p>To understand what this does, let’s have a look at <code>setup.sh</code>:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>setup.py</strong></pre>
@@ -357,13 +349,12 @@ Note
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> .bash.local /storage/</span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> install complete. please start a new instance</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>First it’s creating a new directory inside of our <code>/storage</code> folder called <code>cfg</code>. As we will see, inside of which all our configurations will be stored.</p>
+<p>First it’s creating a new directory inside of our <code>/storage</code> folder called <code>cfg</code>. As we will see, this is where we will store all our configuration files and folders.</p>
 <p>Next, the script copies 2 files to our storage folder. Let’s have a closer look at those</p>
-</section>
-<section id="pre-run.sh" class="level2">
-<h2 class="anchored" data-anchor-id="pre-run.sh">pre-run.sh</h2>
-<p>Paperspace executes <code>/storage/pre-run.sh</code> right in the beginning of when we are creating or restarting our Notebook Server. This is great, because it allows us to set things up the way we need it.</p>
-<p>Let’s first have a closer look at this snippet:</p>
+<section id="pre-run.sh" class="level4">
+<h4 class="anchored" data-anchor-id="pre-run.sh"><strong>pre-run.sh</strong></h4>
+<p>Paperspace automatically executes <code>/storage/pre-run.sh</code> during startup of our Notebook Server (upon creation or restart). This is great, because we can use this to automate our setup.</p>
+<p>Have a look <a href="https://github.com/fastai/paperspace-setup/blob/master/pre-run.sh">here</a> for the full script. Let’s have a closer look at this snippet:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>pre-run.sh (snippet)</strong></pre>
@@ -377,19 +368,22 @@ Note
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ln</span> <span class="at">-s</span> /storage/cfg/<span class="va">$p</span> ~/</span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>So for a list of strings (<code>.local .ssh ...</code>), we are creating a directory inside of our <code>/storage/cfg</code> folder if it doesn’t exist, and then symlinks are created to the home directory (<code>~</code>).</p>
-<p>This means that: - Whenever something is stored during a session in any of these symlinked folders (e.g.&nbsp;<code>~/.local</code>), this is actually stored in the associated storage folder (e.g.&nbsp;<code>/storage/cfg/.local</code>). All this is thus persisted! - Whenever we restart our Notebook Server, all the things that have been previously been persisted (e.g.&nbsp;in <code>/storage/cfg/.local</code>) are available again in the home directory (e.g.&nbsp;<code>~/.local</code>).</p>
-<p>And as it turns out, many tools we want to use have their configuration files in this home folder. So this will ensure they work across restarts of our Notebook servers.</p>
-<section id="local" class="level3">
-<h3 class="anchored" data-anchor-id="local">.local</h3>
-<p>Before we saw that the FastAI runtime comes with a number of installed Python packages. If we want to install new packages, we could do: <code>pip install &lt;package&gt;</code>. This installs the packages in <code>/usr/local/lib</code>, so this is not persisted and would mean that every time we restart the Notebook Server we would have to reinstall the package.</p>
-<p>Instead, we can install the package in a different location with <code>pip install -U &lt;package&gt;</code>. This installs the package only for the user in the <code>~/.local</code> directory, and as we have seen this folder is persisted!</p>
+<p>So for any of these folder names(<code>.local .ssh ...</code>) we are creating a directory inside of <code>/storage/cfg</code> if it doesn’t exist. Also, each of these folders is symlinked to the home directory (<code>~</code>).</p>
+<p>This means that:</p>
+<ol type="1">
+<li>When we store something in any of these symlinked folders (e.g.&nbsp;<code>~/.local</code>), it’s actually being written to the associated storage folder (e.g.&nbsp;<code>/storage/cfg/.local</code>).</li>
+<li>Whenever we restart our Notebook Server, all the things that have been previously been persisted (e.g.&nbsp;in <code>/storage/cfg/.local</code>) are available again in the home directory (e.g.&nbsp;<code>~/.local</code>).</li>
+</ol>
+<p>And as it turns out, many tools we want to use keep their configuration files in this home folder. So by persisting this data, we will ensure they work across restarts of our Notebook servers.</p>
+<section id="local" class="level5">
+<h5 class="anchored" data-anchor-id="local"><strong>.local</strong></h5>
+<p>We saw before that the FastAI runtime comes with a number of installed Python packages. If we want to install additional packages, we could do: <code>pip install &lt;package&gt;</code>. Pip installs the packages in <code>/usr/local/lib</code>, and are thus not persisted. Since it’s very annoying to install all our additional packages upon restart, we can install with <code>pip install -U &lt;package&gt;</code>. This installs the package only for the user in the <code>~/.local</code> directory, and as we have seen this folder is persisted!</p>
 </section>
-<section id="ssh" class="level3">
-<h3 class="anchored" data-anchor-id="ssh">.ssh</h3>
-<p>To authenticate with GitHub without using passwords, we use GitHub ssh keys. We can create them by running <code>ssh-keygen</code>. This creates by default two files in <code>~/.ssh</code>, the private key (<code>id_rsa</code>) and the public file (<code>id_rsa.pub</code>). We need to upload the public key to GitHub and we need to keep the private key in the <code>~/.ssh</code> folder. Since this folder is now persisted, we can authenticate with GitHub across restarts!</p>
+<section id="ssh" class="level5">
+<h5 class="anchored" data-anchor-id="ssh"><strong>.ssh</strong></h5>
+<p>To authenticate with GitHub without using passwords, we use ssh keys. We can create them by running <code>ssh-keygen</code>, which adds the private key (<code>id_rsa</code>) and the public file (<code>id_rsa.pub</code>) to the <code>~/.ssh</code> folder. Once we upload the public key to GitHub we have continuous authentication with GitHub, since this folder is also persisted.</p>
 <p>By now you probably get the idea, any of these folders represent a certain configuration we want to persist.</p>
-<p>In the second part of the scrip we do exactly the same thing, but for a number of files instead of directories:</p>
+<p>In the second part of the script we do exactly the same thing, but for a number of files instead of directories:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>pre-run.sh (snippet)</strong></pre>
@@ -403,10 +397,11 @@ Note
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ln</span> <span class="at">-s</span> /storage/cfg/<span class="va">$p</span> ~/</span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now that we understand this file, let’s have a closer look at the second file.</p>
+<p>Now let’s have a look at the second file we store in our <code>/storage</code> folder:</p>
 </section>
-<section id="bash.local" class="level3">
-<h3 class="anchored" data-anchor-id="bash.local">.bash.local</h3>
+</section>
+<section id="bash.local" class="level4">
+<h4 class="anchored" data-anchor-id="bash.local"><strong>.bash.local</strong></h4>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>.bash.local</strong></pre>
@@ -418,8 +413,17 @@ Note
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span>~/.local/bin:~/.conda/bin/:<span class="va">$PATH</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>This is a short script that gets called whenever we open a terminal. As you can see it defines two aliases to install things persistently with either mamba (<code>mambai</code>) or pip (<code>pipi</code>).</p>
-<p>At this point you might wonder why we have mamba at all, since we have seen that we are using a base Python version and we can install things with <code>pip</code> (or <code>pipi</code>). And in fact installing packages through <code>mamba</code> will not make them accessible to our Jupyter Notebook environment. I guess Jeremy has done this to be able to install none-Python specific packages that he wants to use from the Terminal. For example, in the videos he talks about <code>ctags</code> which he installs through <code>mamba</code>. So it functions as a general package manager, somewhat similar to <code>apt-get</code>.</p>
+<p>Paperspace runs this script whenever we open a terminal. As you can see it defines two aliases to easily install things persistently with either mamba (<code>mambai</code>) or pip (<code>pipi</code>).</p>
+<p>Any <strong>binaries</strong> that are installed this way, are installed in <code>~/.local/bin</code> (through <code>pip</code>) and to <code>~/.conda/bin/</code> (through <code>mamba</code>). We need to add these paths to the <code>PATH</code> variable, to make sure we can call them from the command line.</p>
+</section>
+<section id="note-on-mamba" class="level3">
+<h3 class="anchored" data-anchor-id="note-on-mamba">Note on Mamba</h3>
+<p>At this point you might wonder why we have the Mamba installation at all, since we have seen that the system Python is used. In fact, our Mamba environment is totally decoupled from what we are using in our Jupyter notebook, and installing packages through <code>mamba</code> will not make them available to our Jupyter Notebook environment. Instead, we should install Python packages with <code>pip</code> (or <code>pipi</code>)</p>
+<p>I guess Jeremy has done this to be able to install none-Python specific packages that he wants to use from the Terminal. For example, in the videos he talks about <code>ctags</code> which he installs through <code>mamba</code>. So it functions as a general package manager, somewhat similar to <code>apt-get</code>.</p>
+</section>
+<section id="final-words" class="level3">
+<h3 class="anchored" data-anchor-id="final-words">Final words</h3>
+<p>In my opinion Paperspace offers a great product for very fair money, especially if combined with the setup described in this blog!</p>
 
 
 </section>
