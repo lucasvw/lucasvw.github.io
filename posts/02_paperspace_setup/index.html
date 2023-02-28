@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Lucas van Walstijn">
+<meta name="dcterms.date" content="2023-02-26">
+
+<title>Lucas van Walstijn - Paperspace setup</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../profile.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Lucas van Walstijn</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Paperspace setup</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">setup</div>
+                <div class="quarto-category">paperspace</div>
+                <div class="quarto-category">GPU</div>
+                <div class="quarto-category">Deep Learning server</div>
+                <div class="quarto-category">how-to</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Lucas van Walstijn </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">February 26, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<p>Most people don’t have a GPU that is suited for Deep Learning installed in their working machine, and in fact you don’t need to. It’s quite easy to setup a remote GPU server nowadays, and in this blog I will explain how to do so with Paperspace Gradient.</p>
+<p>I started using Paperspace because of a recommendation from Jeremy Howard in his Live Coding Videos, see <a href="https://www.youtube.com/playlist?list=PLfYUBJiXbdtSLBPJ1GMx-sQWf6iNhb8mM">here</a>.</p>
+<p>If you haven’t seen these lectures, I can highly recommend them. They are a great resource on many things related to getting started with Deep Learning, especially a lot of productivity hacks and practical tips on getting a good setup.</p>
+<p>However, the Paperspace setup explanations are a bit out-dated which can lead to confusion when following along with the video’s. This blog will hopefully help others to navigate this and quickly set-up a remote GPU server. I would advice anybody who wants to try Paperspace, to first watch the videos from Jeremy to have a general idea of how it works, and then follow these steps to quickly get set-up.</p>
+<p>Once you have signed up to Paperspace, go to their Gradient service and create a new project. Paperspace has a free tier, as well as a pro- ($8/month) and growth-plan ($39/month). I personally signed up for the pro-plan, which has a very good value for money. You get 15Gb persistent storage and free Mid instance types:</p>
+<ul>
+<li>A4000</li>
+<li>RTX5000</li>
+<li>RTX4000</li>
+<li>P5000</li>
+</ul>
+<p>If available, I take the A4000, which is the fastest and comes with 16GB of GPU memory.</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Paperspace has both free and paid servers. The free ones come with a 6 hour usage limit, after that they are automatically shut down. The paid servers you can use as long as you like. Sometimes the free servers are out of capacity, which is a bit annoying. In my experience however most of the time I’m able to get what I need.</p>
+</div>
+</div>
+<p>With the pro-plan you can create up to 3 servers, or “Notebooks” as they are called at Paperspace (I’ll call them Notebook Servers). So let’s create our first Notebook Server:</p>
+<ul>
+<li>Select the “Fast.AI” runtime</li>
+<li>Select a machine, for example the Free-A4000 if you have the pro-plan. You can always change this afterwards.</li>
+<li>Remove the Workspace URL under the advanced options to create a totally empty server.</li>
+</ul>
+<p>The best user experience is through the JupyterLab interface:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="screenshot.png" class="img-fluid figure-img" width="300"></p>
+<p></p><figcaption class="figure-caption">Click the JupyterLab icon to open up a JupyterLab environment for your GPU server</figcaption><p></p>
+</figure>
+</div>
+<section id="which-python-are-we-running" class="level2">
+<h2 class="anchored" data-anchor-id="which-python-are-we-running">Which Python are we running?</h2>
+<p>Next, let’s open a terminal and get familiar with our Server</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> which <span class="ex">python</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/usr/local/bin/python</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> python <span class="ex">--version</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">Python</span> 3.9.13</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This is thus pointing to the base Python installation. However, in the <code>PATH</code> variable we are also seeing things related to <code>conda</code> / <code>mamba</code>:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> echo <span class="va">$PATH</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/root/.local/bin:/root/.conda/bin/:/usr/local/nvidia/bin:/usr/local/cuda/bin:</span> /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/mambaforge/bin</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>And indeed we can execute:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> mamba <span class="ex">list</span> <span class="kw">|</span> <span class="fu">grep</span> python</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">ipython</span>                   8.5.0              pyh41d4057_1    conda-forge</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">ipython_genutils</span>          0.2.0                      py_1    conda-forge</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span>                    3.10.6          h582c2e5_0_cpython    conda-forge</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="ex">python-dateutil</span>           2.8.2              pyhd8ed1ab_0    conda-forge</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="ex">python-fastjsonschema</span>     2.16.2             pyhd8ed1ab_0    conda-forge</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">python_abi</span>                3.10                    2_cp310    conda-forge</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>So we are having both a <code>mamba</code> based Python 3.10.6 and a base installation of Python 3.9.13.</p>
+<p>Let’s open a Jupyter Notebook and see which Python version is running:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Untitled.ipynb</strong></pre>
+</div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">import</span> sys</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">sys.version</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>From which we get <code>'3.9.13 (main, May 23 2022, 22:01:06) \n[GCC 9.4.0]'</code>. Jupyter is thus running the base Python installation.</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This is different from the videos, back when the videos were recorded the setup of these servers was different and the mamba based Python was being used. This shouldn’t be a problem, but it’s something to be aware of.</p>
+</div>
+</div>
+<p>Since we are running the base Python version, we can inspect all the packages that are installed:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> pip <span class="ex">list</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">...</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">fastai</span>                            2.7.10</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">fastapi</span>                           0.92.0</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="ex">fastbook</span>                          0.0.28</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="ex">fastcore</span>                          1.5.27</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="ex">fastdownload</span>                      0.0.7</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="ex">fastjsonschema</span>                    2.15.3</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="ex">fastprogress</span>                      1.0.3</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="ex">...</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="ex">torch</span>                             1.12.0+cu116</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="ex">torchaudio</span>                        0.12.0+cu116</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="ex">torchvision</span>                       0.13.0+cu116</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="ex">...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="persisted-storage-at-paperspace" class="level2">
+<h2 class="anchored" data-anchor-id="persisted-storage-at-paperspace">Persisted Storage at Paperspace</h2>
+<p>We have 2 special folders at Paperspace, in which we can store things that we want to persist. Anything that we store outside of these folders will not be there whenever we close and restart the Notebook Server.</p>
+<p>Naturally, we will make lots of use of these folders, since any additional installations of Python packages, configuration files for interacting with GitHub, Kaggle or HuggingFace, as well as any notebooks we create or models we would like to store need to be persisted in these folders.</p>
+<p>These two folders are called <code>/storage</code> and <code>/notebooks</code>. Anything in our <code>/storage</code> is shared among all the Notebook Servers we are running (with the pro-plan you can create up to 3 different Notebook Servers), whereas anything that is stored in the <code>/notebooks</code> folder is only persisted on that specific Notebook Server.</p>
+</section>
+<section id="set-up" class="level2">
+<h2 class="anchored" data-anchor-id="set-up">Set up</h2>
+<p>In the first few videos, Jeremy shows a lot of tricks on how to install new packages and set up Git. After the recording of these videos, he made a GitHub repo which facilitates this setup greatly and makes most of the steps he is doing in the videos no longer necessary. So let’s use that:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/fastai/paperspace-setup.git</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, we can: - <code>cd paperspace-setup</code> - <code>./setup.sh</code></p>
+<p>Let’s have a look at what the <code>setup.sh</code> file does:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>setup.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> /storage/cfg</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> pre-run.sh /storage/</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> .bash.local /storage/</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> install complete. please start a new instance</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>First it’s creating a new directory inside of our <code>/storage</code> folder called <code>cfg</code>. As we will see, inside of which all our configurations will be stored.</p>
+<p>Next, the script copies 2 files to our storage folder. Let’s have a closer look at those</p>
+</section>
+<section id="pre-run.sh" class="level2">
+<h2 class="anchored" data-anchor-id="pre-run.sh">pre-run.sh</h2>
+<p>Paperspace executes <code>/storage/pre-run.sh</code> right in the beginning of when we are creating or restarting our Notebook Server. This is great, because it allows us to set things up the way we need it.</p>
+<p>Let’s first have a closer look at this snippet:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>pre-run.sh (snippet)</strong></pre>
+</div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> p <span class="kw">in</span> .local .ssh .config .ipython .fastai .jupyter .conda .kaggle</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">do</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-e</span> /storage/cfg/<span class="va">$p</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                <span class="fu">mkdir</span> /storage/cfg/<span class="va">$p</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">fi</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rm</span> <span class="at">-rf</span> ~/<span class="va">$p</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ln</span> <span class="at">-s</span> /storage/cfg/<span class="va">$p</span> ~/</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>So for a list of strings (<code>.local .ssh ...</code>), we are creating a directory inside of our <code>/storage/cfg</code> folder if it doesn’t exist, and then symlinks are created to the home directory (<code>~</code>).</p>
+<p>This means that: - Whenever something is stored during a session in any of these symlinked folders (e.g.&nbsp;<code>~/.local</code>), this is actually stored in the associated storage folder (e.g.&nbsp;<code>/storage/cfg/.local</code>). All this is thus persisted! - Whenever we restart our Notebook Server, all the things that have been previously been persisted (e.g.&nbsp;in <code>/storage/cfg/.local</code>) are available again in the home directory (e.g.&nbsp;<code>~/.local</code>).</p>
+<p>And as it turns out, many tools we want to use have their configuration files in this home folder. So this will ensure they work across restarts of our Notebook servers.</p>
+<section id="local" class="level3">
+<h3 class="anchored" data-anchor-id="local">.local</h3>
+<p>Before we saw that the FastAI runtime comes with a number of installed Python packages. If we want to install new packages, we could do: <code>pip install &lt;package&gt;</code>. This installs the packages in <code>/usr/local/lib</code>, so this is not persisted and would mean that every time we restart the Notebook Server we would have to reinstall the package.</p>
+<p>Instead, we can install the package in a different location with <code>pip install -U &lt;package&gt;</code>. This installs the package only for the user in the <code>~/.local</code> directory, and as we have seen this folder is persisted!</p>
+</section>
+<section id="ssh" class="level3">
+<h3 class="anchored" data-anchor-id="ssh">.ssh</h3>
+<p>To authenticate with GitHub without using passwords, we use GitHub ssh keys. We can create them by running <code>ssh-keygen</code>. This creates by default two files in <code>~/.ssh</code>, the private key (<code>id_rsa</code>) and the public file (<code>id_rsa.pub</code>). We need to upload the public key to GitHub and we need to keep the private key in the <code>~/.ssh</code> folder. Since this folder is now persisted, we can authenticate with GitHub across restarts!</p>
+<p>By now you probably get the idea, any of these folders represent a certain configuration we want to persist.</p>
+<p>In the second part of the scrip we do exactly the same thing, but for a number of files instead of directories:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>pre-run.sh (snippet)</strong></pre>
+</div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> p <span class="kw">in</span> .git-credentials .gitconfig .bash_history</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">do</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-e</span> /storage/cfg/<span class="va">$p</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                <span class="fu">touch</span> /storage/cfg/<span class="va">$p</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">fi</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rm</span> <span class="at">-rf</span> ~/<span class="va">$p</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ln</span> <span class="at">-s</span> /storage/cfg/<span class="va">$p</span> ~/</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now that we understand this file, let’s have a closer look at the second file.</p>
+</section>
+<section id="bash.local" class="level3">
+<h3 class="anchored" data-anchor-id="bash.local">.bash.local</h3>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.bash.local</strong></pre>
+</div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="bu">alias</span> mambai=<span class="st">'mamba install -p ~/.conda '</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="bu">alias</span> pipi=<span class="st">'pip install --user '</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span>~/.local/bin:~/.conda/bin/:<span class="va">$PATH</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This is a short script that gets called whenever we open a terminal. As you can see it defines two aliases to install things persistently with either mamba (<code>mambai</code>) or pip (<code>pipi</code>).</p>
+<p>At this point you might wonder why we have mamba at all, since we have seen that we are using a base Python version and we can install things with <code>pip</code> (or <code>pipi</code>). And in fact installing packages through <code>mamba</code> will not make them accessible to our Jupyter Notebook environment. I guess Jeremy has done this to be able to install none-Python specific packages that he wants to use from the Terminal. For example, in the videos he talks about <code>ctags</code> which he installs through <code>mamba</code>. So it functions as a general package manager, somewhat similar to <code>apt-get</code>.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://utteranc.es/client.js" repo="lucasvw/BlogComments" issue-term="pathname" theme="github-light" crossorigin="anonymous" async="">
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

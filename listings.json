@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/02_paperspace_setup/index.html",
       "/posts/01_blog_setup/index.html"
     ]
   }
