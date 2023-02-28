@@ -377,12 +377,19 @@ Note
 <p>And as it turns out, many tools we want to use keep their configuration files in this home folder. So by persisting this data, we will ensure they work across restarts of our Notebook servers.</p>
 <section id="local" class="level5">
 <h5 class="anchored" data-anchor-id="local"><strong>.local</strong></h5>
-<p>We saw before that the FastAI runtime comes with a number of installed Python packages. If we want to install additional packages, we could do: <code>pip install &lt;package&gt;</code>. Pip installs the packages in <code>/usr/local/lib</code>, and are thus not persisted. Since it’s very annoying to install all our additional packages upon restart, we can install with <code>pip install -U &lt;package&gt;</code>. This installs the package only for the user in the <code>~/.local</code> directory, and as we have seen this folder is persisted!</p>
+<p>We saw before that the FastAI runtime comes with a number of installed Python packages. If we want to install additional packages, we could do: <code>pip install &lt;package&gt;</code>. Pip installs the packages in <code>/usr/local/lib</code>, and are thus not persisted. Since it’s very annoying to install all our additional packages upon restart, we can install with <code>pip install --user &lt;package&gt;</code>. This installs the package only for the user in the <code>~/.local</code> directory, and as we have seen this folder is persisted!</p>
 </section>
 <section id="ssh" class="level5">
 <h5 class="anchored" data-anchor-id="ssh"><strong>.ssh</strong></h5>
 <p>To authenticate with GitHub without using passwords, we use ssh keys. We can create them by running <code>ssh-keygen</code>, which adds the private key (<code>id_rsa</code>) and the public file (<code>id_rsa.pub</code>) to the <code>~/.ssh</code> folder. Once we upload the public key to GitHub we have continuous authentication with GitHub, since this folder is also persisted.</p>
-<p>By now you probably get the idea, any of these folders represent a certain configuration we want to persist.</p>
+<p>By now you probably get the idea, any of these folders represent a certain configuration we want to persist:</p>
+<ul>
+<li><code>.conda</code>: contains conda/mamba installed packages</li>
+<li><code>.kaggle</code>: contains a <code>kaggle.json</code> authentication file</li>
+<li><code>.fastai</code>: contains downloaded datasets</li>
+<li><code>.config</code>, <code>.ipython</code> and <code>.jupyter</code>: contain config files</li>
+</ul>
+<p>I also added <code>.huggingface</code> to this list, to make sure my HuggingFace credentials are also persisted. See <a href="https://github.com/fastai/paperspace-setup/pull/4">here</a> for the PR into the main repo.</p>
 <p>In the second part of the script we do exactly the same thing, but for a number of files instead of directories:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
