@@ -67,14 +67,14 @@
     "href": "posts/03_aiornot/index.html",
     "title": "First competition🏅",
     "section": "",
-    "text": "In the past couple of weeks I have participated in the first ever Hugging Face competition: aiornot. And as a matter of fact, it was also my first ever competition to participate in! The competition consisted of 62060 images (18618 train and 43442 test images) which were either created by an AI or not (binary image classification).\nToday, the competition has finished and the private leaderboard has been made public. I’m super happy (and proud 😇) that I finished in 15th place (98 participants):"
+    "text": "In the past couple of weeks I have participated in the first ever Hugging Face competition: aiornot. And as a matter of fact, it was also my first competition to participate in! The competition consisted of 62060 images (18618 train and 43442 test images) which were either created by an AI or not (binary image classification).\nToday, the competition has finished and the private leaderboard has been made public. I’m super happy (and proud 😇) that I finished in 15th place (98 participants):"
   },
   {
     "objectID": "posts/03_aiornot/index.html#credit-where-credit-is-due",
     "href": "posts/03_aiornot/index.html#credit-where-credit-is-due",
     "title": "First competition🏅",
     "section": "Credit where credit is due:",
-    "text": "Credit where credit is due:\n\n🤗 Hugging Face\nI would like to thank Hugging Face and in particular Abhishek Thakur for organizing this competition. I started looking for a first competition at Kaggle a few weeks back, and was very interested in the RSNA competition but quickly found that it was probably a bit too complicated for my first ever competition. I then saw a tweet from Abhishek announcing this competition and found it a perfect competition to get started.\n\n\nfastai\nIn the past month I have been following the fastai course and I am extremely grateful to Jeremy Howard and Sylvain Gugger for creating fastai. The book, the course, the videos and the great community they have built is really something special and is perfectly tailored for anybody who wants to get started with Deep Learning. Without fastai I could never have pulled this off 🙏."
+    "text": "Credit where credit is due:\n\n🤗 Hugging Face\nI would like to thank Hugging Face and in particular Abhishek Thakur for organizing this competition. I started looking for a first competition at Kaggle a few weeks back, and was very interested in the RSNA competition but quickly found that it was probably a bit too complicated for my first competition. I then saw a tweet from Abhishek announcing this competition and found it a perfect competition to get started.\n\n\nfastai\nIn the past month I have been following the fastai course and I am extremely grateful to Jeremy Howard and Sylvain Gugger for creating fastai. The book, the course, the videos and the great community they have built is really something special and is perfectly tailored for anybody who wants to get started with Deep Learning. Without fastai I could never have pulled this off 🙏."
   },
   {
     "objectID": "posts/03_aiornot/index.html#learnings-and-notes",
