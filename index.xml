@@ -6,15 +6,15 @@
       version="2.0">
 <channel>
 <title>Lucas van Walstijn</title>
-<link>https://github.com/lucasvw/lucasvw.github.io/index.html</link>
-<atom:link href="https://github.com/lucasvw/lucasvw.github.io/index.xml" rel="self" type="application/rss+xml"/>
+<link>https://lucasvw.github.io/index.html</link>
+<atom:link href="https://lucasvw.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.2.475</generator>
 <lastBuildDate>Tue, 07 Mar 2023 00:00:00 GMT</lastBuildDate>
 <item>
   <title>Fast Matrix Multiplications</title>
   <dc:creator>Lucas van Walstijn</dc:creator>
-  <link>https://github.com/lucasvw/lucasvw.github.io/posts/04_matmul/index.html</link>
+  <link>https://lucasvw.github.io/posts/04_matmul/index.html</link>
   <description><![CDATA[ 
 
 
@@ -33,7 +33,7 @@
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://github.com/lucasvw/lucasvw.github.io/posts/04_matmul/image.png" class="img-fluid figure-img"></p>
+<p><img src="https://lucasvw.github.io/posts/04_matmul/image.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 <p>So for any valid matrix multiplication, we have three dimensions that need to considered:</p>
@@ -45,13 +45,13 @@
 <p>Why do <code>ac</code> and <code>bc</code> need to be equal? Well, because we take the inner product over this dimension when computing the cell values of the new matrix, and inner-products are only defined for vectors of equal length. Below, I will also refer to this dimension as the dimension over which we collapse (or the “collapsible” dimension), since in the output matrix, this dimension is no longer present.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://github.com/lucasvw/lucasvw.github.io/posts/04_matmul/image1.png" class="img-fluid figure-img"></p>
+<p><img src="https://lucasvw.github.io/posts/04_matmul/image1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 <p>In other words, to compute cell <img src="https://latex.codecogs.com/png.latex?C_%7Bi,j%7D"> we take the inner product between row <code>i</code> of matrix A and column <code>j</code> of matrix B. Let’s have a look at one other cell, to make sure we understand fully what’s going on. In the next figure we compute the value for cell <img src="https://latex.codecogs.com/png.latex?C_%7B3,2%7D">, we thus take the inner-product between row 3 of matrix A and column 2 of matrix B:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://github.com/lucasvw/lucasvw.github.io/posts/04_matmul/image2.png" class="img-fluid figure-img"></p>
+<p><img src="https://lucasvw.github.io/posts/04_matmul/image2.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 <p>Let’s do this in code and confirm what we have established above about the shapes of the matrices:</p>
@@ -280,14 +280,14 @@ C0_manual.shape=torch.Size([2])</code></pre>
   <category>Maths</category>
   <category>Vectorization</category>
   <category>Linear Algebra</category>
-  <guid>https://github.com/lucasvw/lucasvw.github.io/posts/04_matmul/index.html</guid>
+  <guid>https://lucasvw.github.io/posts/04_matmul/index.html</guid>
   <pubDate>Tue, 07 Mar 2023 00:00:00 GMT</pubDate>
-  <media:content url="https://github.com/lucasvw/lucasvw.github.io/posts/04_matmul/image.png" medium="image" type="image/png" height="89" width="144"/>
+  <media:content url="https://lucasvw.github.io/posts/04_matmul/image.png" medium="image" type="image/png" height="89" width="144"/>
 </item>
 <item>
   <title>First competition🏅</title>
   <dc:creator>Lucas van Walstijn</dc:creator>
-  <link>https://github.com/lucasvw/lucasvw.github.io/posts/03_aiornot/index.html</link>
+  <link>https://lucasvw.github.io/posts/03_aiornot/index.html</link>
   <description><![CDATA[ 
 
 
@@ -295,7 +295,7 @@ C0_manual.shape=torch.Size([2])</code></pre>
 
 <p>In the past couple of weeks I have participated in the first ever Hugging Face competition: <a href="https://huggingface.co/spaces/competitions/aiornot" target="_blank">aiornot</a>. And as a matter of fact, it was also my first competition to participate in! The competition consisted of 62060 images (18618 train and 43442 test images) which were either created by an AI or not (binary image classification).</p>
 <p>Today, the competition has finished and the private leaderboard has been made public. I’m super happy (and proud 😇) that I finished in <strong>15th place</strong> (98 participants):</p>
-<p><img src="https://github.com/lucasvw/lucasvw.github.io/posts/03_aiornot/screenshot.png" class="img-fluid"></p>
+<p><img src="https://lucasvw.github.io/posts/03_aiornot/screenshot.png" class="img-fluid"></p>
 <section id="credit-where-credit-is-due" class="level2">
 <h2 class="anchored" data-anchor-id="credit-where-credit-is-due">Credit where credit is due:</h2>
 <section id="hugging-face" class="level4">
@@ -321,7 +321,7 @@ C0_manual.shape=torch.Size([2])</code></pre>
 <p>It’s also great that it has a finite timeline, so that afterwards you can have a sense of achievement which motivates a lot. The Germans have a very nice word for this: <em>Erfolgserlebnis</em>.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://github.com/lucasvw/lucasvw.github.io/posts/03_aiornot/ss2.png" class="img-fluid figure-img" width="500"></p>
+<p><img src="https://lucasvw.github.io/posts/03_aiornot/ss2.png" class="img-fluid figure-img" width="500"></p>
 <p></p><figcaption class="figure-caption">Image for <a href="https://stablediffusionweb.com/#demo">Stable Diffusion</a> prompt: <em>“Sense of achievement when finishing my first ever machine learning competition”</em></figcaption><p></p>
 </figure>
 </div>
@@ -333,14 +333,14 @@ C0_manual.shape=torch.Size([2])</code></pre>
   <category>Deep Learning</category>
   <category>Image Classification</category>
   <category>Competition</category>
-  <guid>https://github.com/lucasvw/lucasvw.github.io/posts/03_aiornot/index.html</guid>
+  <guid>https://lucasvw.github.io/posts/03_aiornot/index.html</guid>
   <pubDate>Wed, 01 Mar 2023 00:00:00 GMT</pubDate>
-  <media:content url="https://github.com/lucasvw/lucasvw.github.io/posts/03_aiornot/image.png" medium="image" type="image/png" height="71" width="144"/>
+  <media:content url="https://lucasvw.github.io/posts/03_aiornot/image.png" medium="image" type="image/png" height="71" width="144"/>
 </item>
 <item>
   <title>Paperspace setup</title>
   <dc:creator>Lucas van Walstijn</dc:creator>
-  <link>https://github.com/lucasvw/lucasvw.github.io/posts/02_paperspace_setup/index.html</link>
+  <link>https://lucasvw.github.io/posts/02_paperspace_setup/index.html</link>
   <description><![CDATA[ 
 
 
@@ -372,7 +372,7 @@ Note
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://github.com/lucasvw/lucasvw.github.io/posts/02_paperspace_setup/screenshot.png" class="img-fluid figure-img" width="300"></p>
+<p><img src="https://lucasvw.github.io/posts/02_paperspace_setup/screenshot.png" class="img-fluid figure-img" width="300"></p>
 <p></p><figcaption class="figure-caption">Click the JupyterLab icon to open up a JupyterLab environment for your GPU server</figcaption><p></p>
 </figure>
 </div>
@@ -579,14 +579,14 @@ Note
   <category>GPU</category>
   <category>how-to</category>
   <category>MLOps</category>
-  <guid>https://github.com/lucasvw/lucasvw.github.io/posts/02_paperspace_setup/index.html</guid>
+  <guid>https://lucasvw.github.io/posts/02_paperspace_setup/index.html</guid>
   <pubDate>Sun, 26 Feb 2023 00:00:00 GMT</pubDate>
-  <media:content url="https://github.com/lucasvw/lucasvw.github.io/posts/02_paperspace_setup/image.png" medium="image" type="image/png" height="144" width="144"/>
+  <media:content url="https://lucasvw.github.io/posts/02_paperspace_setup/image.png" medium="image" type="image/png" height="144" width="144"/>
 </item>
 <item>
   <title>Blog setup</title>
   <dc:creator>Lucas van Walstijn</dc:creator>
-  <link>https://github.com/lucasvw/lucasvw.github.io/posts/01_blog_setup/index.html</link>
+  <link>https://lucasvw.github.io/posts/01_blog_setup/index.html</link>
   <description><![CDATA[ 
 
 
@@ -756,9 +756,9 @@ Note
   <category>blogging</category>
   <category>setup</category>
   <category>how-to</category>
-  <guid>https://github.com/lucasvw/lucasvw.github.io/posts/01_blog_setup/index.html</guid>
+  <guid>https://lucasvw.github.io/posts/01_blog_setup/index.html</guid>
   <pubDate>Fri, 24 Feb 2023 00:00:00 GMT</pubDate>
-  <media:content url="https://github.com/lucasvw/lucasvw.github.io/posts/01_blog_setup/profile.png" medium="image" type="image/png" height="133" width="144"/>
+  <media:content url="https://lucasvw.github.io/posts/01_blog_setup/profile.png" medium="image" type="image/png" height="133" width="144"/>
 </item>
 </channel>
 </rss>
