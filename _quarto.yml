@@ -6,6 +6,7 @@ execute:
 
 website:
   title: "Lucas van Walstijn"
+  site-url: https://lucasvw.github.io
   favicon: profile.png
   navbar:
     right:
@@ -16,6 +17,8 @@ website:
         href: https://twitter.com/lvWal
       - icon: linkedin
         href: https://www.linkedin.com/in/lucasvanwalstijn/
+      - icon: rss
+        href: https://lucasvw.github.io/index.xml
 format:
   html:
     theme: cosmo
