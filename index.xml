@@ -1,0 +1,764 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>Lucas van Walstijn</title>
+<link>https://github.com/lucasvw/lucasvw.github.io/index.html</link>
+<atom:link href="https://github.com/lucasvw/lucasvw.github.io/index.xml" rel="self" type="application/rss+xml"/>
+<description></description>
+<generator>quarto-1.2.475</generator>
+<lastBuildDate>Tue, 07 Mar 2023 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Fast Matrix Multiplications</title>
+  <dc:creator>Lucas van Walstijn</dc:creator>
+  <link>https://github.com/lucasvw/lucasvw.github.io/posts/04_matmul/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Matrix multiplications are kind of boring, so why write a blog post about them? Well, matrix multiplications are the most basic computation that is being performed by neural networks. So it’s probably good to be familiar with them (although we never do them by hand). Also, we are going to focus on speeding them up by doing vectorization. Vectorization is something we often have to do, to make sure everything runs as quickly as possible, and it’s thus a good exercise to understand how to achieve this. Especially since it involves being very familiar with matrices, their shapes, broadcasting operations and the like.</p>
+<p>This post follows the first lecture of Part 2 of the FastAI course (2019), I will provide some additional explanations, and present one other optimization that is not presented in the <a href="https://%20youtu.be/4u8FxNEDUeg?t=2392">lecture</a>.</p>
+<section id="definition" class="level2">
+<h2 class="anchored" data-anchor-id="definition">Definition</h2>
+<p>Matrix multiplication is not difficult, it basically goes like this:</p>
+<ul>
+<li>For matrix A of size <code>[ar x ac]</code> &nbsp; (<code>[4 x 3]</code> in the image below)</li>
+<li>and matrix B of size <code>[br x bc]</code> &nbsp; (<code>[3 x 2]</code> in the image below)</li>
+<li>the matrix product <code>A * B</code> is of size <code>[br x bc]</code> (<code>[4 x 2]</code> in the image below).</li>
+<li>So the matrix product is thus only defined when <code>ac == br</code> (<code>3 == 3</code> in the image below)</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://github.com/lucasvw/lucasvw.github.io/posts/04_matmul/image.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>So for any valid matrix multiplication, we have three dimensions that need to considered:</p>
+<ul>
+<li><code>ar</code>: the row dimension of matrix A. The size of this dimension will become the size of the row dimension of the output matrix (black arrow in the image above)</li>
+<li><code>bc</code>: the column dimension of matrix B. The size of this dimension will become the size of the column dimension of the output matrix (purple arrow in the image above)</li>
+<li><code>ac</code>: the column dimension of Matrix A and <code>br</code>: the row dimension of matrix B: <strong>they need to be equal</strong> (red arrow in the image above)</li>
+</ul>
+<p>Why do <code>ac</code> and <code>bc</code> need to be equal? Well, because we take the inner product over this dimension when computing the cell values of the new matrix, and inner-products are only defined for vectors of equal length. Below, I will also refer to this dimension as the dimension over which we collapse (or the “collapsible” dimension), since in the output matrix, this dimension is no longer present.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://github.com/lucasvw/lucasvw.github.io/posts/04_matmul/image1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>In other words, to compute cell <img src="https://latex.codecogs.com/png.latex?C_%7Bi,j%7D"> we take the inner product between row <code>i</code> of matrix A and column <code>j</code> of matrix B. Let’s have a look at one other cell, to make sure we understand fully what’s going on. In the next figure we compute the value for cell <img src="https://latex.codecogs.com/png.latex?C_%7B3,2%7D">, we thus take the inner-product between row 3 of matrix A and column 2 of matrix B:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://github.com/lucasvw/lucasvw.github.io/posts/04_matmul/image2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>Let’s do this in code and confirm what we have established above about the shapes of the matrices:</p>
+<div class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;">import</span> torch</span>
+<span id="cb1-2"></span>
+<span id="cb1-3">a <span class="op" style="color: #5E5E5E;">=</span> torch.randn(<span class="dv" style="color: #AD0000;">4</span>,<span class="dv" style="color: #AD0000;">3</span>)</span>
+<span id="cb1-4">b <span class="op" style="color: #5E5E5E;">=</span> torch.randn(<span class="dv" style="color: #AD0000;">3</span>,<span class="dv" style="color: #AD0000;">2</span>)</span></code></pre></div>
+</div>
+<div class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;"># Confirm the shape of the output matrix</span></span>
+<span id="cb2-2">(a<span class="op" style="color: #5E5E5E;">@</span>b).shape</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="22">
+<pre><code>torch.Size([4, 2])</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="153">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="co" style="color: #5E5E5E;"># Confirm the value of one output cell (C00)</span></span>
+<span id="cb4-2">C00_manual <span class="op" style="color: #5E5E5E;">=</span> (a[<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">0</span>] <span class="op" style="color: #5E5E5E;">*</span> b[<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">0</span>]) <span class="op" style="color: #5E5E5E;">+</span> (a[<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">1</span>] <span class="op" style="color: #5E5E5E;">*</span> b[<span class="dv" style="color: #AD0000;">1</span>,<span class="dv" style="color: #AD0000;">0</span>]) <span class="op" style="color: #5E5E5E;">+</span> (a[<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">2</span>] <span class="op" style="color: #5E5E5E;">*</span> b[<span class="dv" style="color: #AD0000;">2</span>,<span class="dv" style="color: #AD0000;">0</span>])</span>
+<span id="cb4-3">C00_auto <span class="op" style="color: #5E5E5E;">=</span> (a<span class="op" style="color: #5E5E5E;">@</span>b)[<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">0</span>]</span>
+<span id="cb4-4"></span>
+<span id="cb4-5"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(C00_manual, C00_auto)</span></code></pre></div>
+</div>
+<p>With what we know, let’s create our own <code>matmul</code> function:</p>
+<div class="cell" data-execution_count="115">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="kw" style="color: #003B4F;">def</span> matmul(a, b):</span>
+<span id="cb5-2">    <span class="co" style="color: #5E5E5E;"># fill in the sizes of the dimensions</span></span>
+<span id="cb5-3">    ar, ac <span class="op" style="color: #5E5E5E;">=</span> a.shape</span>
+<span id="cb5-4">    br, bc <span class="op" style="color: #5E5E5E;">=</span> b.shape</span>
+<span id="cb5-5"></span>
+<span id="cb5-6">    <span class="co" style="color: #5E5E5E;"># assert that our matrices can be multiplied </span></span>
+<span id="cb5-7">    <span class="cf" style="color: #003B4F;">assert</span> ac <span class="op" style="color: #5E5E5E;">==</span> br</span>
+<span id="cb5-8"></span>
+<span id="cb5-9">    <span class="co" style="color: #5E5E5E;"># create an output tensor of the expected size (ar x bc)</span></span>
+<span id="cb5-10">    out <span class="op" style="color: #5E5E5E;">=</span> torch.zeros(ar, bc)</span>
+<span id="cb5-11"></span>
+<span id="cb5-12">    <span class="co" style="color: #5E5E5E;"># iterate over the rows of the output matrix (--&gt; length ar)</span></span>
+<span id="cb5-13">    <span class="cf" style="color: #003B4F;">for</span> i <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(out.shape[<span class="dv" style="color: #AD0000;">0</span>]):</span>
+<span id="cb5-14">        <span class="co" style="color: #5E5E5E;"># iterate over the columns of the output matrix (--&gt; length bc)</span></span>
+<span id="cb5-15">        <span class="cf" style="color: #003B4F;">for</span> j <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(out.shape[<span class="dv" style="color: #AD0000;">1</span>]):</span>
+<span id="cb5-16">            <span class="co" style="color: #5E5E5E;"># iterate over the "collapsed" dimension (--&gt; length ac and length br), </span></span>
+<span id="cb5-17">            <span class="cf" style="color: #003B4F;">for</span> k <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(ac):</span>
+<span id="cb5-18">                out[i, j] <span class="op" style="color: #5E5E5E;">+=</span> a[i, k] <span class="op" style="color: #5E5E5E;">*</span> b[k, j]</span>
+<span id="cb5-19">    </span>
+<span id="cb5-20">    <span class="cf" style="color: #003B4F;">return</span> out</span>
+<span id="cb5-21"></span>
+<span id="cb5-22"><span class="co" style="color: #5E5E5E;"># Confirm that the result is correct</span></span>
+<span id="cb5-23"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(matmul(a,b), a<span class="op" style="color: #5E5E5E;">@</span>b)</span></code></pre></div>
+</div>
+<p>Although this is functionally correct, it’s not very efficient. In fact, to compute the value of one cell of the output matrix, we are doing three separate multiplications. In other words, for each cell <code>out[i,j]</code> we are calling three times (once for every value of <code>k</code>):</p>
+<pre><code>out[i, j] += a[i, k] * b[k, j]</code></pre>
+<p>Let’s try to reduce the computation of one cell to just one single call.</p>
+</section>
+<section id="first-improvement" class="level2">
+<h2 class="anchored" data-anchor-id="first-improvement">First improvement</h2>
+<p>To do so, we need to get rid of the loop over the “collapsible” dimension <code>k</code>. We can simply do this by replacing the <code>k</code> with a <code>:</code>, so that we select the whole dimension instead of just one element in that dimension. The multiplication (<code>*</code>) is doing an element wise multiplication, so we have to wrap the result with a <code>.sum()</code>.</p>
+<div class="cell" data-execution_count="114">
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="kw" style="color: #003B4F;">def</span> matmul2(a, b):</span>
+<span id="cb7-2">    ar, ac <span class="op" style="color: #5E5E5E;">=</span> a.shape</span>
+<span id="cb7-3">    br, bc <span class="op" style="color: #5E5E5E;">=</span> b.shape</span>
+<span id="cb7-4">    <span class="cf" style="color: #003B4F;">assert</span> ac <span class="op" style="color: #5E5E5E;">==</span> br</span>
+<span id="cb7-5"></span>
+<span id="cb7-6">    out <span class="op" style="color: #5E5E5E;">=</span> torch.zeros(ar,bc)</span>
+<span id="cb7-7">    <span class="co" style="color: #5E5E5E;"># iterate over the rows of the output matrix (i)</span></span>
+<span id="cb7-8">    <span class="cf" style="color: #003B4F;">for</span> i <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(out.shape[<span class="dv" style="color: #AD0000;">0</span>]):</span>
+<span id="cb7-9">        <span class="co" style="color: #5E5E5E;"># iterate over the columns of the output matrix (j)</span></span>
+<span id="cb7-10">        <span class="cf" style="color: #003B4F;">for</span> j <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(out.shape[<span class="dv" style="color: #AD0000;">1</span>]):</span>
+<span id="cb7-11">            out[i, j] <span class="op" style="color: #5E5E5E;">=</span> (a[i, :] <span class="op" style="color: #5E5E5E;">*</span> b[:, j]).<span class="bu" style="color: null;">sum</span>()</span>
+<span id="cb7-12">    </span>
+<span id="cb7-13">    <span class="cf" style="color: #003B4F;">return</span> out</span>
+<span id="cb7-14"></span>
+<span id="cb7-15"><span class="co" style="color: #5E5E5E;"># Confirm that the result is correct</span></span>
+<span id="cb7-16"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(matmul(a,b), a<span class="op" style="color: #5E5E5E;">@</span>b)</span></code></pre></div>
+</div>
+</section>
+<section id="second-improvement" class="level2">
+<h2 class="anchored" data-anchor-id="second-improvement">Second improvement</h2>
+<p>The improvement above, gives us the value of a cell in one single call:</p>
+<pre><code>out[i, j] = (a[i, :] * b[:, j]).sum()</code></pre>
+<p>This is great, let’s try to vectorize this even further, and get rid of the second loop (the loop over <code>j</code>), this means that we need to compute the values of a single row of the output matrix in one call, e.g.</p>
+<pre><code>out[i,:] = ...</code></pre>
+<p>We know that the value of cell <img src="https://latex.codecogs.com/png.latex?C_%7Bij%7D"> is the inner product between row <code>i</code> of A and column <code>j</code> of B. We also know that any row of matrix C will have two values. Let’s compute them manually:</p>
+<div class="cell" data-execution_count="99">
+<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">out_00 <span class="op" style="color: #5E5E5E;">=</span> (a[<span class="dv" style="color: #AD0000;">0</span>,:] <span class="op" style="color: #5E5E5E;">*</span> b[:,<span class="dv" style="color: #AD0000;">0</span>]).<span class="bu" style="color: null;">sum</span>()</span>
+<span id="cb10-2">out_01 <span class="op" style="color: #5E5E5E;">=</span> (a[<span class="dv" style="color: #AD0000;">0</span>,:] <span class="op" style="color: #5E5E5E;">*</span> b[:,<span class="dv" style="color: #AD0000;">1</span>]).<span class="bu" style="color: null;">sum</span>()</span>
+<span id="cb10-3"></span>
+<span id="cb10-4">C0_manual <span class="op" style="color: #5E5E5E;">=</span> torch.stack([out_00, out_01])</span>
+<span id="cb10-5">C0_auto <span class="op" style="color: #5E5E5E;">=</span> (a<span class="op" style="color: #5E5E5E;">@</span>b)[<span class="dv" style="color: #AD0000;">0</span>]</span>
+<span id="cb10-6"></span>
+<span id="cb10-7"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(C0_manual, C0_auto)</span>
+<span id="cb10-8"></span>
+<span id="cb10-9"><span class="bu" style="color: null;">print</span>(<span class="ss" style="color: #20794D;">f'</span><span class="sc" style="color: #5E5E5E;">{</span>out_00<span class="op" style="color: #5E5E5E;">=</span><span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">'</span>, <span class="ss" style="color: #20794D;">f'</span><span class="sc" style="color: #5E5E5E;">{</span>out_01<span class="op" style="color: #5E5E5E;">=</span><span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">'</span>, <span class="ss" style="color: #20794D;">f'</span><span class="sc" style="color: #5E5E5E;">{</span>C0_manual<span class="op" style="color: #5E5E5E;">=</span><span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">'</span>, sep<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'</span><span class="ch" style="color: #20794D;">\n</span><span class="st" style="color: #20794D;">'</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>out_00=tensor(-0.0213)
+out_01=tensor(0.3668)
+C0_manual=tensor([-0.0213,  0.3668])</code></pre>
+</div>
+</div>
+<p>Observe that for the computation of one row of output, we need:</p>
+<ul>
+<li>one single row of A (<code>a[0,:]</code>)</li>
+<li>the full matrix of B, we need both the first (<code>b[:,0]</code>) column and the second column (<code>b[:,1]</code>).</li>
+</ul>
+<p>Let’s check the sizes of both and see whether we can use broadcasting:</p>
+<div class="cell" data-execution_count="100">
+<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><span class="bu" style="color: null;">print</span>(<span class="ss" style="color: #20794D;">f'</span><span class="sc" style="color: #5E5E5E;">{</span>a[<span class="dv" style="color: #AD0000;">0</span>,:]<span class="sc" style="color: #5E5E5E;">.</span>shape<span class="op" style="color: #5E5E5E;">=</span><span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">'</span>, <span class="ss" style="color: #20794D;">f'</span><span class="sc" style="color: #5E5E5E;">{</span>b<span class="sc" style="color: #5E5E5E;">.</span>shape<span class="op" style="color: #5E5E5E;">=</span><span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">'</span>, sep<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'</span><span class="ch" style="color: #20794D;">\n</span><span class="st" style="color: #20794D;">'</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>a[0,:].shape=torch.Size([3])
+b.shape=torch.Size([3, 2])</code></pre>
+</div>
+</div>
+<p>Unfortunately, size <code>[3]</code> and <code>[3,2]</code> don’t broadcast. To make them broadcast, we have to add an empty dimension at the end of the row of the A matrix. Then, the shapes <code>[3, 1]</code> and <code>[3, 2]</code> can be broadcasted to another by duplicating the former in the column direction:</p>
+<div class="cell" data-execution_count="102">
+<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">t <span class="op" style="color: #5E5E5E;">=</span> a[<span class="dv" style="color: #AD0000;">0</span>,:].unsqueeze(<span class="op" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">1</span>) <span class="co" style="color: #5E5E5E;"># [3, 1]</span></span>
+<span id="cb14-2"></span>
+<span id="cb14-3">t.broadcast_to(b.shape) <span class="co" style="color: #5E5E5E;"># [3, 2]</span></span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="102">
+<pre><code>tensor([[ 0.9193,  0.9193],
+        [-0.0426, -0.0426],
+        [ 1.3566,  1.3566]])</code></pre>
+</div>
+</div>
+<p>Now that both object are the same size we can do an element-wise multiplication and then sum over the rows to arrive at an output of size <code>[1,2]</code>:</p>
+<div class="cell" data-execution_count="156">
+<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">C0_manual <span class="op" style="color: #5E5E5E;">=</span> (t<span class="op" style="color: #5E5E5E;">*</span>b).<span class="bu" style="color: null;">sum</span>(dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">0</span>)</span>
+<span id="cb16-2">C0_auto <span class="op" style="color: #5E5E5E;">=</span> (a<span class="op" style="color: #5E5E5E;">@</span>b)[<span class="dv" style="color: #AD0000;">0</span>,:]</span>
+<span id="cb16-3"></span>
+<span id="cb16-4"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(C0_manual, C0_auto)</span>
+<span id="cb16-5"></span>
+<span id="cb16-6"><span class="bu" style="color: null;">print</span>(<span class="ss" style="color: #20794D;">f'</span><span class="sc" style="color: #5E5E5E;">{</span>C0_manual<span class="op" style="color: #5E5E5E;">=</span><span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">'</span>, <span class="ss" style="color: #20794D;">f'</span><span class="sc" style="color: #5E5E5E;">{</span>C0_manual<span class="sc" style="color: #5E5E5E;">.</span>shape<span class="op" style="color: #5E5E5E;">=</span><span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">'</span>, sep<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'</span><span class="ch" style="color: #20794D;">\n</span><span class="st" style="color: #20794D;">'</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>C0_manual=tensor([-0.0213,  0.3668])
+C0_manual.shape=torch.Size([2])</code></pre>
+</div>
+</div>
+<p>So let’s implement this:</p>
+<div class="cell" data-execution_count="116">
+<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><span class="kw" style="color: #003B4F;">def</span> matmul3(a, b):</span>
+<span id="cb18-2">    ar, ac <span class="op" style="color: #5E5E5E;">=</span> a.shape</span>
+<span id="cb18-3">    br, bc <span class="op" style="color: #5E5E5E;">=</span> b.shape</span>
+<span id="cb18-4">    <span class="cf" style="color: #003B4F;">assert</span> ac <span class="op" style="color: #5E5E5E;">==</span> br</span>
+<span id="cb18-5"></span>
+<span id="cb18-6">    out <span class="op" style="color: #5E5E5E;">=</span> torch.zeros(ar,bc)</span>
+<span id="cb18-7">    <span class="co" style="color: #5E5E5E;"># iterate over the rows of the output matrix (i)</span></span>
+<span id="cb18-8">    <span class="cf" style="color: #003B4F;">for</span> i <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(out.shape[<span class="dv" style="color: #AD0000;">0</span>]):</span>
+<span id="cb18-9">        out[i, :] <span class="op" style="color: #5E5E5E;">=</span> (a[i, :].unsqueeze(<span class="op" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">1</span>) <span class="op" style="color: #5E5E5E;">*</span> b).<span class="bu" style="color: null;">sum</span>(dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">0</span>)</span>
+<span id="cb18-10">    </span>
+<span id="cb18-11">    <span class="cf" style="color: #003B4F;">return</span> out</span>
+<span id="cb18-12"></span>
+<span id="cb18-13"><span class="co" style="color: #5E5E5E;"># Confirm that the result is correct</span></span>
+<span id="cb18-14"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(matmul(a,b), a<span class="op" style="color: #5E5E5E;">@</span>b)</span></code></pre></div>
+</div>
+</section>
+<section id="third-improvement" class="level2">
+<h2 class="anchored" data-anchor-id="third-improvement">Third improvement</h2>
+<p>For the final improvement, we need to get rid of the only remaining loop over the rows of our output matrix (<code>i</code>). So let’s understand very well what we are having at the moment:</p>
+<ul>
+<li>We are iterating over the (4) rows of our output matrix</li>
+<li>For each row, we are computing the (2) values of our row at once by doing <code>out[i, :] = (a[i, :].unsqueeze(-1) * b).sum(dim=0)</code> and let’s break this down once again in steps:
+<ol type="1">
+<li><code>a[i, :]</code> has shape <code>[3]</code> and represents one row of A</li>
+<li>with <code>a[i, :].unsqueeze(-1)</code> we add an extra dimension so that we can broadcast, the result has shape <code>[3, 1]</code></li>
+<li><code>b</code> has shape <code>[3, 2]</code> and is the full B matrix</li>
+<li>element-wise multiplication of 2. and 3. gives a matrix of shape <code>[3, 2]</code></li>
+<li>by summing over the rows (<code>.sum(dim=0)</code>) we arrive at the result of shape <code>[2]</code></li>
+</ol></li>
+</ul>
+<p>We want to improve this by <strong>instead of iterating over the 4 rows, do these computations all at once for all rows</strong>. So let’s start by not selecting one row of A (<code>a[i,:]</code>) but instead just the whole <code>a</code> matrix:</p>
+<ol type="1">
+<li><code>a</code> has shape <code>[4, 3]</code></li>
+<li>similarly to what we did before, we can <code>a.unsqueeze(-1)</code> to add an extra dimension, the result has shape <code>[4, 3, 1]</code></li>
+<li>same as before, <code>b</code> has shape <code>[3, 2]</code> and is the full B matrix</li>
+<li>broadcasting of 2. and 3. will do the following:
+<ul>
+<li><code>a.unsqueeze(-1)</code> has shape <code>[4, 3, 1]</code> and get’s expanded to <code>[4, 3, 2]</code> to match the shape of <code>b</code> (<code>[3, 2]</code>)</li>
+<li>but <code>b</code> also needs to match <code>a</code>, first an additional empty dimension is added in the front: <code>[1, 3, 2]</code> and then it get’s expanded to <code>[4, 3, 2]</code></li>
+<li>next, the element-wise multiplication of 2. and 3. gives a matrix (tensor) of shape <code>[4, 3, 2]</code>, let’s call it <code>t</code>. It’s import to realize what this <code>t</code> represents. For that, notice that the first dimension (length 4) and last dimension (length 2) are the dimensions of our output matrix (<code>[4, 2]</code>). <strong>The middle dimension (length 3) represents the element wise multiplications of any row in matrix A and any column of matrix B</strong>. So by doing for example <code>t[i, :, j].sum()</code> we get the value for cell <img src="https://latex.codecogs.com/png.latex?C_%7Bi,j%7D"> of our output matrix!</li>
+</ul></li>
+<li>This means, that to arrive at the final result, we will have to collapse (sum) over the middle dimension!</li>
+</ol>
+<div class="cell" data-execution_count="154">
+<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><span class="kw" style="color: #003B4F;">def</span> matmul4(a, b):</span>
+<span id="cb19-2">    <span class="cf" style="color: #003B4F;">return</span> (a.unsqueeze(<span class="op" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">1</span>) <span class="op" style="color: #5E5E5E;">*</span> b).<span class="bu" style="color: null;">sum</span>(dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>)</span>
+<span id="cb19-3"></span>
+<span id="cb19-4"><span class="co" style="color: #5E5E5E;"># Confirm that the result is correct</span></span>
+<span id="cb19-5"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(matmul(a,b), a<span class="op" style="color: #5E5E5E;">@</span>b)</span></code></pre></div>
+</div>
+</section>
+<section id="timings" class="level2">
+<h2 class="anchored" data-anchor-id="timings">Timings</h2>
+<p>To see what kind of a speed-up we have achieved, let’s look at the timings of our first version with three loops and the timings of our optimized version:</p>
+<div class="cell" data-execution_count="147">
+<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><span class="op" style="color: #5E5E5E;">%</span>timeit <span class="op" style="color: #5E5E5E;">-</span>n <span class="dv" style="color: #AD0000;">1000</span> matmul(a,b)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>318 µs ± 13.7 µs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="155">
+<div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><span class="op" style="color: #5E5E5E;">%</span>timeit <span class="op" style="color: #5E5E5E;">-</span>n <span class="dv" style="color: #AD0000;">1000</span> matmul4(a,b)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>10.7 µs ± 1.46 µs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)</code></pre>
+</div>
+</div>
+<p>Nice, our optimized version is about 30 times faster then our un-optimized version with 3 loops! Additionally, let’s check the timings of doing the matrix multiplication with <code>einsum</code>:</p>
+<div class="cell" data-execution_count="151">
+<div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><span class="op" style="color: #5E5E5E;">%</span>timeit <span class="op" style="color: #5E5E5E;">-</span>n <span class="dv" style="color: #AD0000;">1000</span> torch.einsum(<span class="st" style="color: #20794D;">'ij,jk-&gt;ik'</span>, a, b)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>25.9 µs ± 3.78 µs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)</code></pre>
+</div>
+</div>
+<p>Surprisingly, our optimized version is twice as fast as <code>einsum</code>. This is certainly something I didn’t expect.</p>
+<p>Finally, let’s also check the timings of using the <code>@</code> operator:</p>
+<div class="cell" data-execution_count="152">
+<div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><span class="op" style="color: #5E5E5E;">%</span>timeit <span class="op" style="color: #5E5E5E;">-</span>n <span class="dv" style="color: #AD0000;">1000</span> a<span class="op" style="color: #5E5E5E;">@</span>b</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>3.29 µs ± 522 ns per loop (mean ± std. dev. of 7 runs, 1,000 loops each)</code></pre>
+</div>
+</div>
+<p>As expected, this is even faster then our optimized version, probably because it runs in optimized C / CUDA code</p>
+
+
+</section>
+
+ ]]></description>
+  <category>Foundations</category>
+  <category>Maths</category>
+  <category>Vectorization</category>
+  <category>Linear Algebra</category>
+  <guid>https://github.com/lucasvw/lucasvw.github.io/posts/04_matmul/index.html</guid>
+  <pubDate>Tue, 07 Mar 2023 00:00:00 GMT</pubDate>
+  <media:content url="https://github.com/lucasvw/lucasvw.github.io/posts/04_matmul/image.png" medium="image" type="image/png" height="89" width="144"/>
+</item>
+<item>
+  <title>First competition🏅</title>
+  <dc:creator>Lucas van Walstijn</dc:creator>
+  <link>https://github.com/lucasvw/lucasvw.github.io/posts/03_aiornot/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>In the past couple of weeks I have participated in the first ever Hugging Face competition: <a href="https://huggingface.co/spaces/competitions/aiornot" target="_blank">aiornot</a>. And as a matter of fact, it was also my first competition to participate in! The competition consisted of 62060 images (18618 train and 43442 test images) which were either created by an AI or not (binary image classification).</p>
+<p>Today, the competition has finished and the private leaderboard has been made public. I’m super happy (and proud 😇) that I finished in <strong>15th place</strong> (98 participants):</p>
+<p><img src="https://github.com/lucasvw/lucasvw.github.io/posts/03_aiornot/screenshot.png" class="img-fluid"></p>
+<section id="credit-where-credit-is-due" class="level2">
+<h2 class="anchored" data-anchor-id="credit-where-credit-is-due">Credit where credit is due:</h2>
+<section id="hugging-face" class="level4">
+<h4 class="anchored" data-anchor-id="hugging-face"><strong>🤗 Hugging Face</strong></h4>
+<p>I would like to thank Hugging Face and in particular <a href="https://twitter.com/abhi1thakur" target="_blank">Abhishek Thakur</a> for organizing this competition. I started looking for a first competition at Kaggle a few weeks back, and was very interested in the <a href="https://www.kaggle.com/competitions/rsna-breast-cancer-detection" target="_blank">RSNA competition</a> but quickly found that it was probably a bit too complicated for my first competition. I then saw a tweet from Abhishek announcing this competition and found it a perfect competition to get started.</p>
+</section>
+<section id="fastai" class="level4">
+<h4 class="anchored" data-anchor-id="fastai"><strong>fastai</strong></h4>
+<p>In the past month I have been following the fastai <a href="https://course.fast.ai/" target="_blank">course</a> and I am extremely grateful to <a href="https://twitter.com/jeremyphoward" target="_blank">Jeremy Howard</a> and <a href="https://twitter.com/GuggerSylvain" target="_blank">Sylvain Gugger</a> for creating fastai. The book, the course, the videos and the great community they have built is really something special and is perfectly tailored for anybody who wants to get started with Deep Learning. Without fastai I could never have pulled this off 🙏.</p>
+</section>
+</section>
+<section id="learnings-and-notes" class="level2">
+<h2 class="anchored" data-anchor-id="learnings-and-notes">Learnings and notes</h2>
+<ul>
+<li><p>I quickly learned that data augmentation didn’t work well on this data. Initially I was a bit surprised by this, but upon inspection of the images I arrived at the following intuition. Normally we want to classify images by what’s being displayed in the image. So 2 images of a bike should both be classified as such. However, in this dataset we can have images of the same object but if one is created by an AI, and the other is not then they should be classified differently. So instead of looking at what’s being displayed, it probably has to learn more about the style or the way the image is built up. I can imagine that data augmentation makes this more difficult, especially warping, affine transformations and brightness, contrast augmentations. I was happily surprised to find that the <a href="https://huggingface.co/spaces/competitions/aiornot/discussions/29" target="_blank">2nd</a> and <a href="https://huggingface.co/spaces/competitions/aiornot/discussions/30" target="_blank">4th</a> place solutions also didn’t use these data augmentation!</p></li>
+<li><p>Training on larger images works very well. I got a large performance boost for switching to sizes of 416. Jeremy Howard mentioned that this generally works well, and I think because of the nature of these images it worked especially well. To train large models on large images, I heavily relied on Gradient Accumulation to not have to reduce the batchsize.</p></li>
+<li><p>Transformer based models such as SWIN and VIT performed not as good as models based on convolutions, I used the convnext models.</p></li>
+<li><p>Progressive resizing didn’t work for me.</p></li>
+<li><p>I tried training on 5 epochs and 10 epochs. 10 epochs never gave me better results.</p></li>
+</ul>
+<p>Last but not least:</p>
+<p>Participating in competitions is very motivating and rewarding. Working individually through courses, exercises and lecture notes is very interesting, but you don’t get a lot of feedback to how you are doing. <em>Am I doing well? Should I spend more time on investigations into certain areas?</em> When participating in a real-world competition you have a very clear goal, and you get immediate feedback on how you are doing. This type of project based learning has the advantage that it’s very clear what you need to focus on: anything that you encounter during the project.</p>
+<p>It’s also great that it has a finite timeline, so that afterwards you can have a sense of achievement which motivates a lot. The Germans have a very nice word for this: <em>Erfolgserlebnis</em>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://github.com/lucasvw/lucasvw.github.io/posts/03_aiornot/ss2.png" class="img-fluid figure-img" width="500"></p>
+<p></p><figcaption class="figure-caption">Image for <a href="https://stablediffusionweb.com/#demo">Stable Diffusion</a> prompt: <em>“Sense of achievement when finishing my first ever machine learning competition”</em></figcaption><p></p>
+</figure>
+</div>
+
+
+</section>
+
+ ]]></description>
+  <category>Deep Learning</category>
+  <category>Image Classification</category>
+  <category>Competition</category>
+  <guid>https://github.com/lucasvw/lucasvw.github.io/posts/03_aiornot/index.html</guid>
+  <pubDate>Wed, 01 Mar 2023 00:00:00 GMT</pubDate>
+  <media:content url="https://github.com/lucasvw/lucasvw.github.io/posts/03_aiornot/image.png" medium="image" type="image/png" height="71" width="144"/>
+</item>
+<item>
+  <title>Paperspace setup</title>
+  <dc:creator>Lucas van Walstijn</dc:creator>
+  <link>https://github.com/lucasvw/lucasvw.github.io/posts/02_paperspace_setup/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Most people don’t have a GPU installed in their working machine that is suited for Deep Learning, and in fact you don’t need to. It’s quite easy to setup a remote GPU server nowadays, and in this blog I will explain how to do so with <a href="https://www.paperspace.com/gradient">Paperspace Gradient</a>.</p>
+<p>I started using Paperspace because of a recommendation from Jeremy Howard in his <a href="https://www.youtube.com/playlist?list=PLfYUBJiXbdtSLBPJ1GMx-sQWf6iNhb8mM">Live Coding Videos</a>. If you haven’t seen these lectures, I can highly recommend them. They are a great resource on many things related to getting started with Deep Learning. Jeremy shows a lot of productivity hacks and practical tips on getting a good setup.</p>
+<p>However, the Paperspace setup explanations are a bit out-dated which can lead to confusion when following along with the video’s. Also, after the recording of the videos Jeremy created some nice scripts which simplify the setup. This blog will hopefully help others to navigate this and quickly set-up a remote GPU server. I would advice anybody who wants to try Paperspace, to first watch the videos from Jeremy to have a general idea of how it works, and then follow these steps to quickly get set-up.</p>
+<p>Once you have signed up to Paperspace, go to their Gradient service and create a new project. Paperspace has a free tier, as well as a pro- ($8/month) and growth-plan ($39/month). I personally signed up for the pro-plan, which has a very good value for money. You get 15Gb persistent storage and free Mid instance types. If available, I use the A4000, which is the fastest and comes with 16GB of GPU memory.</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Paperspace has both free and paid servers. The free ones come with a 6 hour usage limit, after that they are automatically shut down. The paid servers you can use as long as you like. Sometimes the free servers are out of capacity, which is a bit annoying. In my experience however most of the time I’m able to get what I need.</p>
+</div>
+</div>
+<p>With the pro-plan you can create up to 3 servers, or “Notebooks” as they are called by Paperspace (throughout this blog I’ll refer to them as <em>Notebook Servers</em>). So let’s create one:</p>
+<ul>
+<li>Select the “Fast.AI” runtime</li>
+<li>Select a machine, for example the Free-A4000. You can always change this when you restart your machine</li>
+<li>Remove the Workspace URL under the advanced options to create a totally empty server</li>
+<li>Navigate to JupyterLab</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://github.com/lucasvw/lucasvw.github.io/posts/02_paperspace_setup/screenshot.png" class="img-fluid figure-img" width="300"></p>
+<p></p><figcaption class="figure-caption">Click the JupyterLab icon to open up a JupyterLab environment for your GPU server</figcaption><p></p>
+</figure>
+</div>
+<section id="first-look-at-our-notebook-server" class="level2">
+<h2 class="anchored" data-anchor-id="first-look-at-our-notebook-server">First look at our Notebook Server</h2>
+<p>Next, let’s open a terminal and get familiar with our Server</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="op" style="color: #5E5E5E;">&gt;</span> which <span class="ex" style="color: null;">python</span></span>
+<span id="cb1-2"><span class="ex" style="color: null;">/usr/local/bin/python</span></span>
+<span id="cb1-3"></span>
+<span id="cb1-4"><span class="op" style="color: #5E5E5E;">&gt;</span> python <span class="ex" style="color: null;">--version</span></span>
+<span id="cb1-5"><span class="ex" style="color: null;">Python</span> 3.9.13</span></code></pre></div>
+</div>
+<p>And let’s also check the <code>PATH</code> variable:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="op" style="color: #5E5E5E;">&gt;</span> echo <span class="va" style="color: #111111;">$PATH</span></span>
+<span id="cb2-2"><span class="ex" style="color: null;">/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:</span> /usr/sbin:/usr/bin:/sbin:/bin:/root/mambaforge/bin</span></code></pre></div>
+</div>
+<p>The <code>python</code> command is thus pointing to the system Python installation. However, on the <code>PATH</code> variable we are also seeing an entry at the end mentioning mambaforge.</p>
+<p>And indeed we can execute:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="op" style="color: #5E5E5E;">&gt;</span> mamba <span class="ex" style="color: null;">list</span> <span class="kw" style="color: #003B4F;">|</span> <span class="fu" style="color: #4758AB;">grep</span> python</span>
+<span id="cb3-2"></span>
+<span id="cb3-3"><span class="ex" style="color: null;">ipython</span>                   8.5.0              pyh41d4057_1    conda-forge</span>
+<span id="cb3-4"><span class="ex" style="color: null;">ipython_genutils</span>          0.2.0                      py_1    conda-forge</span>
+<span id="cb3-5"><span class="ex" style="color: null;">python</span>                    3.10.6          h582c2e5_0_cpython    conda-forge</span>
+<span id="cb3-6"><span class="ex" style="color: null;">python-dateutil</span>           2.8.2              pyhd8ed1ab_0    conda-forge</span>
+<span id="cb3-7"><span class="ex" style="color: null;">python-fastjsonschema</span>     2.16.2             pyhd8ed1ab_0    conda-forge</span>
+<span id="cb3-8"><span class="ex" style="color: null;">python_abi</span>                3.10                    2_cp310    conda-forge</span></code></pre></div>
+</div>
+<p>So we are having both a <code>mamba</code> based Python 3.10.6 and a system installation of Python 3.9.13.</p>
+<p>Let’s open a Jupyter Notebook and see which Python version is running:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Untitled.ipynb</strong></pre>
+</div>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;">import</span> sys</span>
+<span id="cb4-2"><span class="ex" style="color: null;">sys.version</span></span></code></pre></div>
+</div>
+<p>Which returns: <code>'3.9.13 (main, May 23 2022, 22:01:06) \n[GCC 9.4.0]'</code>. Jupyter is thus running the system Python installation.</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In the videos Jeremy mentions that we should never use the system Python but instead always create a Mamba installation. However, since we are working here on a virtual machine that is only used for running Python, this shouldn’t be a problem. Just be aware that we are using the system Python which is totally separate from the Mamba setup.</p>
+</div>
+</div>
+<p>Since we are running the system Python version, we can inspect all the packages that are installed:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><span class="op" style="color: #5E5E5E;">&gt;</span> pip <span class="ex" style="color: null;">list</span></span>
+<span id="cb5-2"></span>
+<span id="cb5-3"><span class="ex" style="color: null;">...</span></span>
+<span id="cb5-4"><span class="ex" style="color: null;">fastai</span>                            2.7.10</span>
+<span id="cb5-5"><span class="ex" style="color: null;">fastapi</span>                           0.92.0</span>
+<span id="cb5-6"><span class="ex" style="color: null;">fastbook</span>                          0.0.28</span>
+<span id="cb5-7"><span class="ex" style="color: null;">fastcore</span>                          1.5.27</span>
+<span id="cb5-8"><span class="ex" style="color: null;">fastdownload</span>                      0.0.7</span>
+<span id="cb5-9"><span class="ex" style="color: null;">fastjsonschema</span>                    2.15.3</span>
+<span id="cb5-10"><span class="ex" style="color: null;">fastprogress</span>                      1.0.3</span>
+<span id="cb5-11"><span class="ex" style="color: null;">...</span></span>
+<span id="cb5-12"><span class="ex" style="color: null;">torch</span>                             1.12.0+cu116</span>
+<span id="cb5-13"><span class="ex" style="color: null;">torchaudio</span>                        0.12.0+cu116</span>
+<span id="cb5-14"><span class="ex" style="color: null;">torchvision</span>                       0.13.0+cu116</span>
+<span id="cb5-15"><span class="ex" style="color: null;">...</span></span></code></pre></div>
+</div>
+</section>
+<section id="persisted-storage-at-paperspace" class="level2">
+<h2 class="anchored" data-anchor-id="persisted-storage-at-paperspace">Persisted Storage at Paperspace</h2>
+<p>In general, things are not persisted on Paperspace. So anything we store during a session, will be gone when we restart our Notebook Server. However, Paperspace comes with two special folders that are persisted. It’s important to understand how these folder works since we obviously need to persist our work. Not only that, but we also need to persist our configuration files from services lik GitHub, Kaggle and HuggingFace and potentially any other config files for tools or services we are using.</p>
+<p>The persisted folders are called <code>/storage</code> and <code>/notebooks</code>. Anything in our <code>/storage</code> is <strong>shared among all the Notebook Servers</strong> we are running, whereas anything that is stored in the <code>/notebooks</code> folder is only persisted on <strong>that specific Notebook Server</strong>.</p>
+</section>
+<section id="set-up" class="level2">
+<h2 class="anchored" data-anchor-id="set-up">Set up</h2>
+<p>In the first few videos, Jeremy shows a lot of tricks on how to install new packages and set up things like Git and GitHub. After the recording of these videos, he made a <a href="https://github.com/fastai/paperspace-setup">GitHub repo</a> which facilitates this setup greatly and makes most of the steps from the videos unnecessary. So let’s use that:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><span class="op" style="color: #5E5E5E;">&gt;</span> git <span class="ex" style="color: null;">clone</span> https://github.com/fastai/paperspace-setup.git</span>
+<span id="cb6-2"><span class="op" style="color: #5E5E5E;">&gt;</span> cd <span class="ex" style="color: null;">paperspace-setup</span></span>
+<span id="cb6-3"><span class="op" style="color: #5E5E5E;">&gt;</span> ./setup.sh</span></code></pre></div>
+</div>
+<p>To understand what this does, let’s have a look at <code>setup.sh</code>:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>setup.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><span class="co" style="color: #5E5E5E;">#!/usr/bin/env bash</span></span>
+<span id="cb7-2"></span>
+<span id="cb7-3"><span class="fu" style="color: #4758AB;">mkdir</span> /storage/cfg</span>
+<span id="cb7-4"><span class="fu" style="color: #4758AB;">cp</span> pre-run.sh /storage/</span>
+<span id="cb7-5"><span class="fu" style="color: #4758AB;">cp</span> .bash.local /storage/</span>
+<span id="cb7-6"><span class="bu" style="color: null;">echo</span> install complete. please start a new instance</span></code></pre></div>
+</div>
+<p>First it’s creating a new directory inside of our <code>/storage</code> folder called <code>cfg</code>. As we will see, this is where we will store all our configuration files and folders.</p>
+<p>Next, the script copies 2 files to our storage folder. Let’s have a closer look at those</p>
+<section id="pre-run.sh" class="level4">
+<h4 class="anchored" data-anchor-id="pre-run.sh"><strong>pre-run.sh</strong></h4>
+<p>During startup of a Notebook Server (upon creation or restart), Paperspace automatically executes the script it finds at <code>/storage/pre-run.sh</code>. This is really neat, since we can create a script at this location to automate our setup!</p>
+<p>For the full script, click <a href="https://github.com/fastai/paperspace-setup/blob/master/pre-run.sh">here</a>, and let’s have a closer look at this first snippet:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>pre-run.sh (snippet)</strong></pre>
+</div>
+<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode numberSource bash code-overflow-wrap number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><span class="cf" style="color: #003B4F;">for</span> p <span class="kw" style="color: #003B4F;">in</span> .local .ssh .config .ipython .fastai .jupyter .conda .kaggle</span>
+<span id="cb8-2"><span class="cf" style="color: #003B4F;">do</span></span>
+<span id="cb8-3">        <span class="cf" style="color: #003B4F;">if</span> <span class="bu" style="color: null;">[</span> <span class="ot" style="color: #003B4F;">!</span> <span class="ot" style="color: #003B4F;">-e</span> /storage/cfg/<span class="va" style="color: #111111;">$p</span> <span class="bu" style="color: null;">]</span><span class="kw" style="color: #003B4F;">;</span> <span class="cf" style="color: #003B4F;">then</span></span>
+<span id="cb8-4">                <span class="fu" style="color: #4758AB;">mkdir</span> /storage/cfg/<span class="va" style="color: #111111;">$p</span></span>
+<span id="cb8-5">        <span class="cf" style="color: #003B4F;">fi</span></span>
+<span id="cb8-6">        <span class="fu" style="color: #4758AB;">rm</span> <span class="at" style="color: #657422;">-rf</span> ~/<span class="va" style="color: #111111;">$p</span></span>
+<span id="cb8-7">        <span class="fu" style="color: #4758AB;">ln</span> <span class="at" style="color: #657422;">-s</span> /storage/cfg/<span class="va" style="color: #111111;">$p</span> ~/</span>
+<span id="cb8-8"><span class="cf" style="color: #003B4F;">done</span></span></code></pre></div>
+</div>
+<p>So we are iterating through a list of folder names (<code>.local .ssh ...</code>) on line 1, and for each one we create a directory inside of <code>/storage/cfg</code> on line 4. We only do this if the directory doesn’t already exist on line 3. Next, each of these folders is symlinked to the home directory (<code>~/</code>) on line 7.</p>
+<p>This means that:</p>
+<ol type="1">
+<li>When we store something in any of these symlinked folders (e.g.&nbsp;<code>~/.local</code>), it’s actually being written to the associated storage folder (e.g.&nbsp;<code>/storage/cfg/.local</code>) because of the symlink.</li>
+<li>Whenever we restart our Notebook Server, all the stuff that has previously been persisted (e.g.&nbsp;in <code>/storage/cfg/.local</code>) are made available again in the home directory (e.g.&nbsp;<code>~/.local</code>).</li>
+</ol>
+<p>This is very nice, because as it turns out: many tools keep their configuration files in this home folder. So by persisting this data, they will keep working across restarts of our Notebook servers.</p>
+<p>Let’s a closer look at the folders we are persisting:</p>
+<section id="local" class="level5">
+<h5 class="anchored" data-anchor-id="local"><strong>.local</strong></h5>
+<p>We saw before that the FastAI runtime comes with a number of installed Python packages. If we want to install additional packages, we could do: <code>pip install &lt;package&gt;</code>. However, pip installs the packages in <code>/usr/local/lib</code>, and are thus not persisted. To make sure our packages are persisted, we can instead install with <code>pip install --user &lt;package&gt;</code>. This <code>--user</code> flag, tells <code>pip</code> to install the package only for the current user, and so it installs into the <code>~/.local</code> directory. So by persisting this folder, we make sure that we our custom installed python packages are persisted, awesome!</p>
+</section>
+<section id="ssh" class="level5">
+<h5 class="anchored" data-anchor-id="ssh"><strong>.ssh</strong></h5>
+<p>To authenticate with GitHub without using passwords, we use ssh keys. To create a pair of keys, we run: <code>ssh-keygen</code>. This creates the private key (<code>id_rsa</code>) and the public key (<code>id_rsa.pub</code>) to the <code>~/.ssh</code> folder. Once we upload the public key to GitHub we can authenticate with GitHub, and by persisting this folder we can authenticate upon restart!</p>
+<p>By now you probably get the idea, any of these folders represent a certain configuration we want to persist:</p>
+<ul>
+<li><code>.conda</code>: contains conda/mamba installed packages</li>
+<li><code>.kaggle</code>: contains a <code>kaggle.json</code> authentication file</li>
+<li><code>.fastai</code>: contains downloaded datasets and some other configuration</li>
+<li><code>.config</code>, <code>.ipython</code> and <code>.jupyter</code>: contain config files for various pieces of software such as matplotlib, ipython and jupyter.</li>
+</ul>
+<p>I personally also added <code>.huggingface</code> to this list, to make sure my HuggingFace credentials are also persisted. See <a href="https://github.com/fastai/paperspace-setup/pull/4">here</a> for the PR back into the main repo.</p>
+<p>In the second part of the script we do exactly the same thing, but for a number of files instead of directories.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>pre-run.sh (snippet)</strong></pre>
+</div>
+<div class="sourceCode" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><span class="cf" style="color: #003B4F;">for</span> p <span class="kw" style="color: #003B4F;">in</span> .git-credentials .gitconfig .bash_history</span>
+<span id="cb9-2"><span class="cf" style="color: #003B4F;">do</span></span>
+<span id="cb9-3">        <span class="cf" style="color: #003B4F;">if</span> <span class="bu" style="color: null;">[</span> <span class="ot" style="color: #003B4F;">!</span> <span class="ot" style="color: #003B4F;">-e</span> /storage/cfg/<span class="va" style="color: #111111;">$p</span> <span class="bu" style="color: null;">]</span><span class="kw" style="color: #003B4F;">;</span> <span class="cf" style="color: #003B4F;">then</span></span>
+<span id="cb9-4">                <span class="fu" style="color: #4758AB;">touch</span> /storage/cfg/<span class="va" style="color: #111111;">$p</span></span>
+<span id="cb9-5">        <span class="cf" style="color: #003B4F;">fi</span></span>
+<span id="cb9-6">        <span class="fu" style="color: #4758AB;">rm</span> <span class="at" style="color: #657422;">-rf</span> ~/<span class="va" style="color: #111111;">$p</span></span>
+<span id="cb9-7">        <span class="fu" style="color: #4758AB;">ln</span> <span class="at" style="color: #657422;">-s</span> /storage/cfg/<span class="va" style="color: #111111;">$p</span> ~/</span>
+<span id="cb9-8"><span class="cf" style="color: #003B4F;">done</span></span></code></pre></div>
+</div>
+<p>Now that we understand <code>pre-run.sh</code>, let’s have a look at the second file we store in our <code>/storage</code> folder:</p>
+</section>
+</section>
+<section id="bash.local" class="level4">
+<h4 class="anchored" data-anchor-id="bash.local"><strong>.bash.local</strong></h4>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.bash.local</strong></pre>
+</div>
+<div class="sourceCode" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><span class="co" style="color: #5E5E5E;">#!/usr/bin/env bash</span></span>
+<span id="cb10-2"></span>
+<span id="cb10-3"><span class="bu" style="color: null;">alias</span> mambai=<span class="st" style="color: #20794D;">'mamba install -p ~/.conda '</span></span>
+<span id="cb10-4"><span class="bu" style="color: null;">alias</span> pipi=<span class="st" style="color: #20794D;">'pip install --user '</span></span>
+<span id="cb10-5"></span>
+<span id="cb10-6"><span class="bu" style="color: null;">export</span> <span class="va" style="color: #111111;">PATH</span><span class="op" style="color: #5E5E5E;">=</span>~/.local/bin:~/.conda/bin/:<span class="va" style="color: #111111;">$PATH</span></span></code></pre></div>
+</div>
+<p>Paperspace runs this script whenever we open a terminal. As you can see it defines two aliases to easily install things persistently with either mamba (<code>mambai</code>) or pip (<code>pipi</code>).</p>
+<p>Any <strong>binaries</strong> that are installed this way, are installed in <code>~/.local/bin</code> (through <code>pip</code>) and to <code>~/.conda/bin/</code> (through <code>mamba</code>). We need to add these paths to the <code>PATH</code> variable, to make sure we can call them from the command line.</p>
+</section>
+<section id="note-on-mamba" class="level3">
+<h3 class="anchored" data-anchor-id="note-on-mamba">Note on Mamba</h3>
+<p>At this point you might wonder why we have the Mamba installation at all, since we have seen that the system Python is used. In fact, our Mamba environment is totally decoupled from what we are using in our Jupyter notebook, and installing packages through <code>mamba</code> will <strong>not make them available in Jupyter</strong>. Instead, we should install Python packages through <code>pip</code>.</p>
+<p>So what do we need Mamba for? I guess Jeremy has done this to be able to install binaries that he wants to use from the Terminal. For example, in the videos he talks about <code>ctags</code> which he installs through <code>mamba</code>. Since installing none-Python specific binaries through pip can be complicated, we can use Mamba instead. In other words, we can use it as a general package manager, somewhat similar to <code>apt-get</code>.</p>
+</section>
+<section id="final-words" class="level3">
+<h3 class="anchored" data-anchor-id="final-words">Final words</h3>
+<p>In my opinion Paperspace offers a great product for very fair money, especially if combined with the setup described in this blog!</p>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <category>setup</category>
+  <category>paperspace</category>
+  <category>GPU</category>
+  <category>how-to</category>
+  <category>MLOps</category>
+  <guid>https://github.com/lucasvw/lucasvw.github.io/posts/02_paperspace_setup/index.html</guid>
+  <pubDate>Sun, 26 Feb 2023 00:00:00 GMT</pubDate>
+  <media:content url="https://github.com/lucasvw/lucasvw.github.io/posts/02_paperspace_setup/image.png" medium="image" type="image/png" height="144" width="144"/>
+</item>
+<item>
+  <title>Blog setup</title>
+  <dc:creator>Lucas van Walstijn</dc:creator>
+  <link>https://github.com/lucasvw/lucasvw.github.io/posts/01_blog_setup/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>In this blog post I’ll explain how I created this blog, using Quarto and GitHub. In step 4 I’ll show how to setup GitHub Actions, this has advantages over the other ways to publish our blog:</p>
+<ol type="1">
+<li>Our source code is also stored safely on GitHub</li>
+<li>We can easily create blog entries anywhere we want, especially also from our deep learning server without having to install quarto. We can simply push to the remote branch and GitHub Actions will build the blog for us.</li>
+</ol>
+<p>I’m working on a Macbook, and using VS Code for code editing. If you are on a Linux or Windows machine, be aware that things might be a bit different from what I describe here.</p>
+<p>I am assuming you already have a GitHub account, that VS Code is installed and configured to run Python and Jupyter Notebooks.</p>
+<section id="step-1-install-quarto" class="level2">
+<h2 class="anchored" data-anchor-id="step-1-install-quarto">Step 1: install Quarto</h2>
+<p>First of all you need to install Quarto, go <a href="https://quarto.org/docs/get-started/">here</a>, download and install the software. You should do this on the machine that you want to use for writing your blog, in my case my Macbook laptop.</p>
+<p>Once installed you will have access to the quarto Command Line Interface (CLI). To make sure everything works as expected, open a terminal and execute:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="ex" style="color: null;">quarto</span> <span class="at" style="color: #657422;">--help</span></span></code></pre></div>
+</div>
+<p>This should render some outputs describing the different commands and options that are part of the Quarto CLI and shows that Quarto is installed successfully.</p>
+</section>
+<section id="step-2-create-a-github-repo" class="level2">
+<h2 class="anchored" data-anchor-id="step-2-create-a-github-repo">Step 2: create a GitHub repo</h2>
+<p>To host our blog we will use GitHub Pages, which is a service to host a website from a GitHub repository. Based on the name you pick for your repository you will create a so-called project-website or your unique user-website. For any general repo named <code>my-awesome-repo</code>, the website will be hosted on <code>https://&lt;github-username&gt;.github.io/my-awesome-repo</code>. This is a project-websites and you can create as many as you like.</p>
+<p>To create your user-website, you have to name the repo exactly like this: <code>&lt;github-username&gt;.github.io</code>, the user-website will be hosted at <code>https://&lt;github-username&gt;.github.io</code>.</p>
+<p>This is exactly what I want, so I create a new repo with the name: <code>lucasvw.github.io</code>.</p>
+<p>I find it helpful to add a <code>.gitignore</code> file with a Python template, to which we can later add some more entries to facilitate storing the right files on GitHub. Also make sure that the repo is Public (and not set to Private). Additionally, I added a README file and choose the Apache2 License.</p>
+<p>Next, I clone this repo to my machine by running:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="fu" style="color: #4758AB;">git</span> clone git@github.com:lucasvw/lucasvw.github.io.git</span></code></pre></div>
+</div>
+</section>
+<section id="step-3-add-a-quarto-project-to-the-repo" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-add-a-quarto-project-to-the-repo">Step 3: add a Quarto project to the repo</h2>
+<p>Next, open VS Code and open the cloned repo. Then access the VS Code terminal and run:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="ex" style="color: null;">quarto</span> create-project <span class="at" style="color: #657422;">--type</span> website:blog</span></code></pre></div>
+</div>
+<p>This will add a number of files to our repo, which represent the basic structure of our blog. Most importantly:</p>
+<ul>
+<li><code>posts</code>: here we will create our blog entries (one subfolder per blog entry)</li>
+<li><code>_quarto.yml</code>: configuration file for our blog such as the theme, name, GitHub and Twitter links</li>
+<li><code>about.qmd</code>: source code for the “about” page.</li>
+<li><code>index.qmd</code>: source code for the landing page.</li>
+</ul>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>.qmd</code> files are like markdown files, but with lots of additional functionality from Quarto. Go <a href="https://www.markdownguide.org/basic-syntax/">here</a> for more information on Markdown syntax and <a href="https://nbdev.fast.ai/tutorials/qmd_intro.html">here</a> for Quarto Markdown</p>
+</div>
+</div>
+<p>To see what we currently have, let’s render our blog locally:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;">quarto</span> preview</span></code></pre></div>
+</div>
+<p>Alternatively, we can install the Quarto extension in VS Code, which will show a <code>render</code> button in the top right corner on any opened <code>qmd</code> file.</p>
+<p>To publish the current contents to GitHub pages, we can run:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><span class="ex" style="color: null;">quarto</span> publish gh-pages</span></code></pre></div>
+</div>
+<p>When doing so, we get a message that we have to change the branch from which GitHub Pages builds the site. To do this, I go to <a href="https://github.com/lucasvw/lucasvw.github.io/settings/pages">https://github.com/lucasvw/lucasvw.github.io/settings/pages</a> and select <code>gh-pages</code> instead of the <code>main</code> branch.</p>
+<p>And voila, in a few moments our blog will be running live at <a href="https://lucasvw.github.io/">https://lucasvw.github.io/</a></p>
+</section>
+<section id="step-4-finalize-set-up-github-actions" class="level2">
+<h2 class="anchored" data-anchor-id="step-4-finalize-set-up-github-actions">Step 4: Finalize set-up: GitHub Actions</h2>
+<p>When we run the <code>quarto publish gh-pages</code> command, Quarto processes our files and turns them into web readable files (HTML, JS, CSS etc). It stores these files in our <code>gh-pages</code> branch and pushes them to our remote GitHub repo. This is great, but it means that this doesn’t store our source files.</p>
+<p>To do so, let’s first open our <code>.gitignore</code> file and make sure that it contains the following entries so that we don’t check in any files we don’t need.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.gitignore</strong></pre>
+</div>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb6-1"># Quarto</span>
+<span id="cb6-2">/.quarto/</span>
+<span id="cb6-3">_site/</span>
+<span id="cb6-4"></span>
+<span id="cb6-5"># Mac files</span>
+<span id="cb6-6">.DS_Store</span></code></pre></div>
+</div>
+<p>Next, we can commit all the remaining files to Git and push them to our remote repo. If we ever lose access to our local machine, we can restore everything we need from GitHub.</p>
+<p>However, now we have 2 things we need to do whenever we finish our work:</p>
+<ul>
+<li>store our source files on the main branch and push to GitHub</li>
+<li>run the publish command to update the blog</li>
+</ul>
+<p>This is a bit annoying and it would be much better if we can just push to the main branch and GitHub would take care of building our website and updating it. This also allows us to create blog entries on any machine that has access to git, we don’t need to have quarto installed. This is particularly practical if we want to write blog entries from our deep learning server. So let’s use GitHub actions for this.</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Before you continue make sure you have at least once run a <code>quarto publish gh-pages</code> command, this is necessary for the things below to work</p>
+</div>
+</div>
+<p>First we need to add the following snippet to <code>_quarto.yml</code></p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>_quarto.yml</strong></pre>
+</div>
+<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb7-1"><span class="fu" style="color: #4758AB;">execute</span><span class="kw" style="color: #003B4F;">:</span></span>
+<span id="cb7-2"><span class="at" style="color: #657422;">  </span><span class="fu" style="color: #4758AB;">freeze</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> auto</span></span></code></pre></div>
+</div>
+<p>This will make sure that GitHub actions doesn’t execute any executable code, but will show the pre-rendered outputs it finds in the <code>_freeze</code> folder.</p>
+<p>Finally, create the file <code>.github/workflows/publish.yml</code> and populate it with the following code:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.github/workflows/publish.yml</strong></pre>
+</div>
+<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb8-1"><span class="fu" style="color: #4758AB;">on</span><span class="kw" style="color: #003B4F;">:</span></span>
+<span id="cb8-2"><span class="at" style="color: #657422;">  </span><span class="fu" style="color: #4758AB;">workflow_dispatch</span><span class="kw" style="color: #003B4F;">:</span></span>
+<span id="cb8-3"><span class="at" style="color: #657422;">  </span><span class="fu" style="color: #4758AB;">push</span><span class="kw" style="color: #003B4F;">:</span></span>
+<span id="cb8-4"><span class="at" style="color: #657422;">    </span><span class="fu" style="color: #4758AB;">branches</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> main</span></span>
+<span id="cb8-5"></span>
+<span id="cb8-6"><span class="fu" style="color: #4758AB;">name</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> Quarto Publish</span></span>
+<span id="cb8-7"></span>
+<span id="cb8-8"><span class="fu" style="color: #4758AB;">jobs</span><span class="kw" style="color: #003B4F;">:</span></span>
+<span id="cb8-9"><span class="at" style="color: #657422;">  </span><span class="fu" style="color: #4758AB;">build-deploy</span><span class="kw" style="color: #003B4F;">:</span></span>
+<span id="cb8-10"><span class="at" style="color: #657422;">    </span><span class="fu" style="color: #4758AB;">runs-on</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> ubuntu-latest</span></span>
+<span id="cb8-11"><span class="at" style="color: #657422;">    </span><span class="fu" style="color: #4758AB;">permissions</span><span class="kw" style="color: #003B4F;">:</span></span>
+<span id="cb8-12"><span class="at" style="color: #657422;">      </span><span class="fu" style="color: #4758AB;">contents</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> write</span></span>
+<span id="cb8-13"><span class="at" style="color: #657422;">    </span><span class="fu" style="color: #4758AB;">steps</span><span class="kw" style="color: #003B4F;">:</span></span>
+<span id="cb8-14"><span class="at" style="color: #657422;">      </span><span class="kw" style="color: #003B4F;">-</span><span class="at" style="color: #657422;"> </span><span class="fu" style="color: #4758AB;">name</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> Check out repository</span></span>
+<span id="cb8-15"><span class="at" style="color: #657422;">        </span><span class="fu" style="color: #4758AB;">uses</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> actions/checkout@v3</span></span>
+<span id="cb8-16"></span>
+<span id="cb8-17"><span class="at" style="color: #657422;">      </span><span class="kw" style="color: #003B4F;">-</span><span class="at" style="color: #657422;"> </span><span class="fu" style="color: #4758AB;">name</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> Set up Quarto</span></span>
+<span id="cb8-18"><span class="at" style="color: #657422;">        </span><span class="fu" style="color: #4758AB;">uses</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> quarto-dev/quarto-actions/setup@v2</span></span>
+<span id="cb8-19"></span>
+<span id="cb8-20"><span class="at" style="color: #657422;">      </span><span class="kw" style="color: #003B4F;">-</span><span class="at" style="color: #657422;"> </span><span class="fu" style="color: #4758AB;">name</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> Render and Publish</span></span>
+<span id="cb8-21"><span class="at" style="color: #657422;">        </span><span class="fu" style="color: #4758AB;">uses</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> quarto-dev/quarto-actions/publish@v2</span></span>
+<span id="cb8-22"><span class="at" style="color: #657422;">        </span><span class="fu" style="color: #4758AB;">with</span><span class="kw" style="color: #003B4F;">:</span></span>
+<span id="cb8-23"><span class="at" style="color: #657422;">          </span><span class="fu" style="color: #4758AB;">target</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> gh-pages</span></span>
+<span id="cb8-24"><span class="at" style="color: #657422;">        </span><span class="fu" style="color: #4758AB;">env</span><span class="kw" style="color: #003B4F;">:</span></span>
+<span id="cb8-25"><span class="at" style="color: #657422;">          </span><span class="fu" style="color: #4758AB;">GITHUB_TOKEN</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> ${{ secrets.GITHUB_TOKEN }}</span></span></code></pre></div>
+</div>
+<p>Once we push these things to GitHub, we are good to go. Whenever we push anything to the <code>main</code> branch, this workflow will execute and take care of updating the <code>gh-pages</code> branch and updating the blog.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>blogging</category>
+  <category>setup</category>
+  <category>how-to</category>
+  <guid>https://github.com/lucasvw/lucasvw.github.io/posts/01_blog_setup/index.html</guid>
+  <pubDate>Fri, 24 Feb 2023 00:00:00 GMT</pubDate>
+  <media:content url="https://github.com/lucasvw/lucasvw.github.io/posts/01_blog_setup/profile.png" medium="image" type="image/png" height="133" width="144"/>
+</item>
+</channel>
+</rss>
