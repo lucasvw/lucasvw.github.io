@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/04_matmul/index.html",
       "/posts/03_aiornot/index.html",
       "/posts/02_paperspace_setup/index.html",
       "/posts/01_blog_setup/index.html"
