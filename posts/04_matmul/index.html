@@ -415,15 +415,14 @@ C0_manual.shape=torch.Size([2])</code></pre>
 <li>by summing over the rows (<code>.sum(dim=0)</code>) we arrive at the result of shape <code>[2]</code></li>
 </ol></li>
 </ul>
-<p>We want to improve this, by instead of iterating over the 4 rows, <strong>do these computations all at once</strong> for all rows. So let’s start by not selecting one row of A (<code>a[i,:]</code>) but instead just the whole <code>a</code> matrix:</p>
+<p>We want to improve this by <strong>instead of iterating over the 4 rows, do these computations all at once for all rows</strong>. So let’s start by not selecting one row of A (<code>a[i,:]</code>) but instead just the whole <code>a</code> matrix:</p>
 <ol type="1">
 <li><code>a</code> has shape <code>[4, 3]</code></li>
 <li>similarly to what we did before, we can <code>a.unsqueeze(-1)</code> to add an extra dimension, the result has shape <code>[4, 3, 1]</code></li>
-<li>same as before <code>b</code> has shape <code>[3, 2]</code> and is the full B matrix</li>
+<li>same as before, <code>b</code> has shape <code>[3, 2]</code> and is the full B matrix</li>
 <li>broadcasting of 2. and 3. will do the following:
 <ul>
-<li><code>a.unsqueeze(-1)</code> has shape <code>[4, 3, 1]</code></li>
-<li>this get’s expanded to <code>[4, 3, 2]</code> to match the shape of <code>b</code> (<code>[3, 2]</code>)</li>
+<li><code>a.unsqueeze(-1)</code> has shape <code>[4, 3, 1]</code> and get’s expanded to <code>[4, 3, 2]</code> to match the shape of <code>b</code> (<code>[3, 2]</code>)</li>
 <li>but <code>b</code> also needs to match <code>a</code>, first an additional empty dimension is added in the front: <code>[1, 3, 2]</code> and then it get’s expanded to <code>[4, 3, 2]</code></li>
 <li>next, the element-wise multiplication of 2. and 3. gives a matrix (tensor) of shape <code>[4, 3, 2]</code>. <strong>This tensor represents the element wise multiplications of all rows and columns of A and B.</strong></li>
 </ul></li>
