@@ -10,7 +10,215 @@
 <atom:link href="https://lucasvw.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.2.475</generator>
-<lastBuildDate>Tue, 07 Mar 2023 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 15 Mar 2023 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Cross entropy any which way</title>
+  <dc:creator>Lucas van Walstijn</dc:creator>
+  <link>https://lucasvw.github.io/posts/05_crossentropy/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Cross entropy is one of the most commonly used loss functions. In this post, we will have a look at how it works, and compute it in a couple of different ways.</p>
+<p>Consider a network that is build for image classification. During the forward pass, images are passed into the network and the network processes the data layer by layer, until evenually some final activations are being returned by the model. These final activations are called “logits” and represent the unnormalized predictions of our model.</p>
+<p>Since we generally use mini-batches during training, these logits are of shape <code>[bs, num_classes]</code></p>
+<div class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;">import</span> torch</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;">import</span> torch.nn.functional <span class="im" style="color: #00769E;">as</span> F</span>
+<span id="cb1-3"></span>
+<span id="cb1-4">g <span class="op" style="color: #5E5E5E;">=</span> torch.manual_seed(<span class="dv" style="color: #AD0000;">42</span>) <span class="co" style="color: #5E5E5E;"># use a generator for reproducability</span></span>
+<span id="cb1-5"></span>
+<span id="cb1-6">bs <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">32</span> <span class="co" style="color: #5E5E5E;"># batch size of 32</span></span>
+<span id="cb1-7">num_classes <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">3</span> <span class="co" style="color: #5E5E5E;"># image classification with 3 different classes</span></span>
+<span id="cb1-8"></span>
+<span id="cb1-9">logits <span class="op" style="color: #5E5E5E;">=</span> torch.randn(size<span class="op" style="color: #5E5E5E;">=</span>(bs, num_classes), generator<span class="op" style="color: #5E5E5E;">=</span>g) <span class="co" style="color: #5E5E5E;"># size: [32,3]</span></span>
+<span id="cb1-10"></span>
+<span id="cb1-11">logits[<span class="dv" style="color: #AD0000;">0</span>:<span class="dv" style="color: #AD0000;">4</span>] <span class="co" style="color: #5E5E5E;"># show the logits for the first couple of samples</span></span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="20">
+<pre><code>tensor([[ 1.9269,  1.4873,  0.9007],
+        [-2.1055,  0.6784, -1.2345],
+        [-0.0431, -1.6047, -0.7521],
+        [ 1.6487, -0.3925, -1.4036]])</code></pre>
+</div>
+</div>
+<p>Each row of this tensor represents the unnormalized predictions for each of our samples in the batch. We can normalize these predictions by applying a softmax. The softmax function does two things:</p>
+<ol type="1">
+<li>make all our logits positive, by applying the exponential function, <a href="https://www.wolframalpha.com/input?i=exp%28x%29" target="_blank">wolfram alpha reference</a></li>
+<li>divide each value of the exponentiated logits by the sum over all the classes</li>
+</ol>
+<p>This makes sure that we can treat the output of this as probabilities, because:</p>
+<ol type="1">
+<li>all individual predictions will be between 0 and 1</li>
+<li>the predictions will sum to 1</li>
+</ol>
+<p>Specifically:</p>
+<div class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;"># Unnormalized predictions for our first sample (3 classes)</span></span>
+<span id="cb3-2">logits[<span class="dv" style="color: #AD0000;">0</span>]</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="21">
+<pre><code>tensor([1.9269, 1.4873, 0.9007])</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="co" style="color: #5E5E5E;"># Exponentiated predictions, making them all positive</span></span>
+<span id="cb5-2">exp_logits <span class="op" style="color: #5E5E5E;">=</span> logits[<span class="dv" style="color: #AD0000;">0</span>].exp()</span>
+<span id="cb5-3">exp_logits</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="22">
+<pre><code>tensor([6.8683, 4.4251, 2.4614])</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="co" style="color: #5E5E5E;"># Turn these values into probabilities by dividing by the sum</span></span>
+<span id="cb7-2">probs <span class="op" style="color: #5E5E5E;">=</span> exp_logits <span class="op" style="color: #5E5E5E;">/</span> exp_logits.<span class="bu" style="color: null;">sum</span>()</span>
+<span id="cb7-3"></span>
+<span id="cb7-4"><span class="co" style="color: #5E5E5E;"># verify that the sum of the probabilities sum to 1</span></span>
+<span id="cb7-5"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(probs.<span class="bu" style="color: null;">sum</span>(), torch.tensor(<span class="fl" style="color: #AD0000;">1.</span>))</span>
+<span id="cb7-6"></span>
+<span id="cb7-7">probs</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="25">
+<pre><code>tensor([0.4993, 0.3217, 0.1789])</code></pre>
+</div>
+</div>
+<p>So, let’s create a softmax function that does this for a whole batch:</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="kw" style="color: #003B4F;">def</span> softmax(logits):</span>
+<span id="cb9-2">    exp_logits <span class="op" style="color: #5E5E5E;">=</span> logits.exp() <span class="co" style="color: #5E5E5E;"># shape: [32, 3]</span></span>
+<span id="cb9-3">    exp_logits_sum <span class="op" style="color: #5E5E5E;">=</span> exp_logits.<span class="bu" style="color: null;">sum</span>(dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>, keepdim<span class="op" style="color: #5E5E5E;">=</span><span class="va" style="color: #111111;">True</span>) <span class="co" style="color: #5E5E5E;"># shape: [32, 1]</span></span>
+<span id="cb9-4">    </span>
+<span id="cb9-5">    <span class="co" style="color: #5E5E5E;"># Note: this get's correctly broadcasted, since the exp_logits_sum will </span></span>
+<span id="cb9-6">    <span class="co" style="color: #5E5E5E;"># expand to [32, 3], so each value in exp_logits gets divided by the sum over its row</span></span>
+<span id="cb9-7">    probs <span class="op" style="color: #5E5E5E;">=</span> exp_logits <span class="op" style="color: #5E5E5E;">/</span> exp_logits_sum <span class="co" style="color: #5E5E5E;"># shape: [32, 3]</span></span>
+<span id="cb9-8">    </span>
+<span id="cb9-9">    <span class="cf" style="color: #003B4F;">return</span> probs </span>
+<span id="cb9-10"></span>
+<span id="cb9-11">probs <span class="op" style="color: #5E5E5E;">=</span> softmax(logits)</span>
+<span id="cb9-12">probs[<span class="dv" style="color: #AD0000;">0</span>:<span class="dv" style="color: #AD0000;">4</span>]</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre><code>tensor([[0.4993, 0.3217, 0.1789],
+        [0.0511, 0.8268, 0.1221],
+        [0.5876, 0.1233, 0.2891],
+        [0.8495, 0.1103, 0.0401]])</code></pre>
+</div>
+</div>
+<p>Next, we want to compute the loss for which also need our <code>labels</code>. These labels represent the ground truth class for each of our samples in the batch. Since we have 3 classes they will be between 0 and 3 (e.g.&nbsp;either 0, 1 or 2)</p>
+<div class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">g <span class="op" style="color: #5E5E5E;">=</span> torch.manual_seed(<span class="dv" style="color: #AD0000;">42</span>) <span class="co" style="color: #5E5E5E;"># use a generator for reproducability</span></span>
+<span id="cb11-2"></span>
+<span id="cb11-3">labels <span class="op" style="color: #5E5E5E;">=</span> torch.randint(low<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">0</span>, high<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">3</span>, size<span class="op" style="color: #5E5E5E;">=</span>(<span class="dv" style="color: #AD0000;">32</span>,), generator<span class="op" style="color: #5E5E5E;">=</span>g)</span>
+<span id="cb11-4">labels</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="26">
+<pre><code>tensor([0, 2, 1, 1, 0, 2, 1, 2, 1, 2, 1, 1, 2, 0, 0, 1, 2, 1, 0, 1, 1, 2, 1, 2,
+        2, 1, 2, 0, 1, 1, 0, 0])</code></pre>
+</div>
+</div>
+<p>For classification we use the Negative Log Likelihood loss function, which is defined as such:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0ANLL%20=%20-%20%5Csum_%7Bi%7D%7Bq_i%20*%20log(p_i)%7D%0A"></p>
+<p>with <img src="https://latex.codecogs.com/png.latex?i"> being the index that moves along the classes (3 in our example) and <img src="https://latex.codecogs.com/png.latex?q_i"> being the probability that the ground truth label is class <img src="https://latex.codecogs.com/png.latex?i"> (this is a somewhat strange formulation, since this probability is either 1 (for the correct class) or 0 (for all the non-correct classes)). Finally, <img src="https://latex.codecogs.com/png.latex?p_i"> is the probability that the model associated to class <img src="https://latex.codecogs.com/png.latex?i">.</p>
+<p>For the very first row of our <code>probs</code> (<code>[0.4993, 0.3217, 0.1789]</code>) and our first label (<code>0</code>) we thus get:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%7D%0ANLL%20&amp;=%20-%20(%20(1%20%5Ccdot%20%5Clog(0.4993))%20+%20(0%20%5Ccdot%20%5Clog(0.3217))%20+%20(1%20%5Ccdot%20%5Clog(0.1789))%20)%20%5C%5C%0ANLL%20&amp;=%20-%20(%20(1%20%5Ccdot%20%5Clog(0.4993))%20)%20%5C%5C%0ANLL%20&amp;=%20-%20%5Clog(0.4993)%0A%5Cend%7Balign%7D"></p>
+<p>From which we see that it’s just the negative log of the probability associated with the ground truth class.</p>
+<p>Since this computes only the NLL per sample, we also need a way to combine the NLL across the samples in our batch. We can do this either by summing or averaging, averaging has the advantage that the size of the loss remains the same when we change the batch-size, so let’s use that:</p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><span class="kw" style="color: #003B4F;">def</span> nll(probs, labels):</span>
+<span id="cb13-2">    <span class="co" style="color: #5E5E5E;"># probs: shape [32, 3]</span></span>
+<span id="cb13-3">    <span class="co" style="color: #5E5E5E;"># labels: shape [32]</span></span>
+<span id="cb13-4">    </span>
+<span id="cb13-5">    <span class="co" style="color: #5E5E5E;"># this plucks out the probability of the ground truth label per sample, </span></span>
+<span id="cb13-6">    <span class="co" style="color: #5E5E5E;"># it uses "numpy's integer array indexing":</span></span>
+<span id="cb13-7">    <span class="co" style="color: #5E5E5E;"># https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing</span></span>
+<span id="cb13-8">    probs_ground_truth_class <span class="op" style="color: #5E5E5E;">=</span> probs[<span class="bu" style="color: null;">range</span>(<span class="bu" style="color: null;">len</span>(labels)), labels] <span class="co" style="color: #5E5E5E;"># shape: [32]</span></span>
+<span id="cb13-9">    </span>
+<span id="cb13-10">    nll <span class="op" style="color: #5E5E5E;">=</span> <span class="op" style="color: #5E5E5E;">-</span>torch.log(probs_ground_truth_class).mean() <span class="co" style="color: #5E5E5E;"># shape: []</span></span>
+<span id="cb13-11">    <span class="cf" style="color: #003B4F;">return</span> nll</span></code></pre></div>
+</div>
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">nll(probs, labels)</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>tensor(1.3465)</code></pre>
+</div>
+</div>
+<section id="using-pytorch" class="level2">
+<h2 class="anchored" data-anchor-id="using-pytorch">Using PyTorch</h2>
+<p>Instead of using our custom <code>softmax</code>, we can also use the build-in softmax function from PyTorch:</p>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">p <span class="op" style="color: #5E5E5E;">=</span> F.softmax(logits, dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>) <span class="co" style="color: #5E5E5E;"># dim=1 --&gt; compute the sum across the columns</span></span>
+<span id="cb16-2">nll(p, labels)</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>tensor(1.3465)</code></pre>
+</div>
+</div>
+<p>Instead of using our custom <code>nll</code> we can also use the build-in version from PyTorch. However, <code>nll_loss</code> expects the log of the softmax (for numerical stability) so instead of <code>softmax</code> we have to use <code>log_softmax</code>:</p>
+<div class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1">p <span class="op" style="color: #5E5E5E;">=</span> F.log_softmax(logits, dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>)</span>
+<span id="cb18-2"></span>
+<span id="cb18-3"><span class="co" style="color: #5E5E5E;"># Assert that indeed the log_softmax is just the softmax followed by a log</span></span>
+<span id="cb18-4"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(p, F.softmax(logits, dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>).log())</span>
+<span id="cb18-5"></span>
+<span id="cb18-6">torch.nn.functional.nll_loss(p, labels)</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<pre><code>tensor(1.3465)</code></pre>
+</div>
+</div>
+<p>The combination of <code>softmax</code> and <code>nll</code> is called cross entropy, so we can also use PyTorch’s build-in version of that:</p>
+<div class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1">F.cross_entropy(logits, labels)</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<pre><code>tensor(1.3465)</code></pre>
+</div>
+</div>
+<p>Instead of the methods in <code>nn.functional</code>, we can also use classes. For that, we first create an instance of the object, and then “call” the instance:</p>
+<div class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1">ce <span class="op" style="color: #5E5E5E;">=</span> torch.nn.CrossEntropyLoss() <span class="co" style="color: #5E5E5E;"># create a CrossEntropyLoss instance</span></span>
+<span id="cb22-2">ce(logits, labels) <span class="co" style="color: #5E5E5E;"># calling the instance with the arguments returns the cross entropy</span></span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<pre><code>tensor(1.3465)</code></pre>
+</div>
+</div>
+<p>Similarly, we can use classes for the <code>log_softmax</code> and <code>nll_loss</code> functions</p>
+<div class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1">ls <span class="op" style="color: #5E5E5E;">=</span> torch.nn.LogSoftmax(dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>)</span>
+<span id="cb24-2">nll <span class="op" style="color: #5E5E5E;">=</span> torch.nn.NLLLoss()</span>
+<span id="cb24-3"></span>
+<span id="cb24-4">p <span class="op" style="color: #5E5E5E;">=</span> ls(logits)</span>
+<span id="cb24-5">nll(p, labels)</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<pre><code>tensor(1.3465)</code></pre>
+</div>
+</div>
+<p>This is practical, if we want specify custom behavior of the loss function ahead of time of calling the actual loss function. For example, let’s say we want to compute the cross entropy loss based on ‘sums’ instead of ‘averages’. Then when using the method in <code>F</code> we would do:</p>
+<div class="cell" data-execution_count="36">
+<div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1">F.cross_entropy(logits, labels, reduction<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'sum'</span>)</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="36">
+<pre><code>tensor(43.0866)</code></pre>
+</div>
+</div>
+<p>So whenever we call the loss, we have to specify the additional <code>reduction</code> argument.</p>
+<p>Whereas when using the loss classes, we can instantiate the class with that <code>reduction</code> argument, and then call the instance as per usual without passing anything but the logits and the labels:</p>
+<div class="cell" data-execution_count="37">
+<div class="sourceCode cell-code" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><span class="co" style="color: #5E5E5E;"># instantiate </span></span>
+<span id="cb28-2">ce <span class="op" style="color: #5E5E5E;">=</span> torch.nn.CrossEntropyLoss(reduction<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'sum'</span>)</span>
+<span id="cb28-3"></span>
+<span id="cb28-4"><span class="co" style="color: #5E5E5E;"># at some other point in your code, compute the loss as per default</span></span>
+<span id="cb28-5">ce(logits, labels)</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="37">
+<pre><code>tensor(43.0866)</code></pre>
+</div>
+</div>
+<p>This is practical when the loss function is getting called by another object to which we don’t have easy access. So that we can’t easily change the arguments for that call. This is for example the case when using the FastAI <code>Learner</code> class, to which we pass the loss function which then get’s called by the <code>Learner</code> object with the default arguments (<code>logits</code> and <code>labels</code>). By using the classes, we can specify the reduction argument ahead of time and pass that instance to the <code>Learner</code> class.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>Loss functions</category>
+  <category>Softmax</category>
+  <category>NLL</category>
+  <category>Cross entropy</category>
+  <guid>https://lucasvw.github.io/posts/05_crossentropy/index.html</guid>
+  <pubDate>Wed, 15 Mar 2023 00:00:00 GMT</pubDate>
+  <media:content url="https://lucasvw.github.io/posts/05_crossentropy/image.png" medium="image" type="image/png" height="82" width="144"/>
+</item>
 <item>
   <title>Fast Matrix Multiplications</title>
   <dc:creator>Lucas van Walstijn</dc:creator>

@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/05_crossentropy/index.html",
       "/posts/04_matmul/index.html",
       "/posts/03_aiornot/index.html",
       "/posts/02_paperspace_setup/index.html",
