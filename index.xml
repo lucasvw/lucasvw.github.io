@@ -220,7 +220,7 @@
   <media:content url="https://lucasvw.github.io/posts/05_crossentropy/image.png" medium="image" type="image/png" height="82" width="144"/>
 </item>
 <item>
-  <title>Fast Matrix Multiplications</title>
+  <title>Fast matrix multiplications</title>
   <dc:creator>Lucas van Walstijn</dc:creator>
   <link>https://lucasvw.github.io/posts/04_matmul/index.html</link>
   <description><![CDATA[ 
