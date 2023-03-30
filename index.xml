@@ -10,7 +10,26 @@
 <atom:link href="https://lucasvw.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.2.475</generator>
-<lastBuildDate>Wed, 15 Mar 2023 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 18 Mar 2023 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Getting familiar with convolutions</title>
+  <dc:creator>Lucas van Walstijn</dc:creator>
+  <link>https://lucasvw.github.io/posts/06_convolutions/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+
+
+ ]]></description>
+  <category>Convolutions</category>
+  <category>CNN</category>
+  <guid>https://lucasvw.github.io/posts/06_convolutions/index.html</guid>
+  <pubDate>Sat, 18 Mar 2023 00:00:00 GMT</pubDate>
+  <media:content url="https://lucasvw.github.io/posts/06_convolutions/image.png" medium="image" type="image/png"/>
+</item>
 <item>
   <title>Cross entropy any which way</title>
   <dc:creator>Lucas van Walstijn</dc:creator>

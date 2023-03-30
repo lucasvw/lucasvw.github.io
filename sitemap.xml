@@ -2,30 +2,34 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://lucasvw.github.io/about.html</loc>
-    <lastmod>2023-03-29T13:38:07.458Z</lastmod>
+    <lastmod>2023-03-30T10:50:49.022Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/02_paperspace_setup/index.html</loc>
-    <lastmod>2023-03-29T13:38:08.290Z</lastmod>
+    <lastmod>2023-03-30T10:50:51.058Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/04_matmul/index.html</loc>
-    <lastmod>2023-03-29T13:38:08.762Z</lastmod>
+    <lastmod>2023-03-30T10:50:51.630Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/05_crossentropy/index.html</loc>
-    <lastmod>2023-03-29T13:38:09.174Z</lastmod>
+    <lastmod>2023-03-30T10:50:52.126Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/01_blog_setup/index.html</loc>
-    <lastmod>2023-03-29T13:38:10.106Z</lastmod>
+    <lastmod>2023-03-30T10:50:53.258Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/posts/06_convolutions/index.html</loc>
+    <lastmod>2023-03-30T10:50:54.002Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/03_aiornot/index.html</loc>
-    <lastmod>2023-03-29T13:38:10.758Z</lastmod>
+    <lastmod>2023-03-30T10:50:54.394Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/index.html</loc>
-    <lastmod>2023-03-29T13:38:11.490Z</lastmod>
+    <lastmod>2023-03-30T10:50:55.258Z</lastmod>
   </url>
 </urlset>
