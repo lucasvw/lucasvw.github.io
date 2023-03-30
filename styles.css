@@ -1,2 +1,23 @@
 /* css styles */
-text-align: justify;
+* {
+    text-align: justify;
+}
+
+.cell-output pre {
+    margin-left: 0.8rem;
+    margin-top: 0;
+    background: none;
+    border-left: 2px solid rgba(233,236,239,.65);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    font-size: 0.8em;
+}
+
+.cell-output .sourceCode {
+    background: none;
+    margin-top: 0;
+}
+  
+.cell > .sourceCode {
+    margin-bottom: 0;
+}
