@@ -2,7 +2,6 @@
   {
     "listing": "/index.html",
     "items": [
-      "/posts/06_convolutions/index.html",
       "/posts/05_crossentropy/index.html",
       "/posts/04_matmul/index.html",
       "/posts/03_aiornot/index.html",
