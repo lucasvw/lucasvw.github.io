@@ -113,10 +113,10 @@
 </div>
 </div>
 <p>For classification we use the Negative Log Likelihood loss function, which is defined as such:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0ANLL%20=%20-%20%5Csum_%7Bi%7D%7Bq_i%20*%20log(p_i)%7D%0A"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Ctextrm%7BNLL%7D%20=%20-%20%5Csum_%7Bi%7D%7Bq_i%20*%20%5Clog(p_i)%7D%0A"></p>
 <p>with <img src="https://latex.codecogs.com/png.latex?i"> being the index that moves along the classes (3 in our example) and <img src="https://latex.codecogs.com/png.latex?q_i"> being the probability that the ground truth label is class <img src="https://latex.codecogs.com/png.latex?i"> (this is a somewhat strange formulation, since this probability is either 1 (for the correct class) or 0 (for all the non-correct classes)). Finally, <img src="https://latex.codecogs.com/png.latex?p_i"> is the probability that the model associated to class <img src="https://latex.codecogs.com/png.latex?i">.</p>
 <p>For the very first row of our <code>probs</code> (<code>[0.4993, 0.3217, 0.1789]</code>) and our first label (<code>0</code>) we thus get:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%7D%0ANLL%20&amp;=%20-%20(%20(1%20%5Ccdot%20%5Clog(0.4993))%20+%20(0%20%5Ccdot%20%5Clog(0.3217))%20+%20(1%20%5Ccdot%20%5Clog(0.1789))%20)%20%5C%5C%0ANLL%20&amp;=%20-%20(%20(1%20%5Ccdot%20%5Clog(0.4993))%20)%20%5C%5C%0ANLL%20&amp;=%20-%20%5Clog(0.4993)%0A%5Cend%7Balign%7D"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%7D%0A%5Ctextrm%7BNLL%7D%20&amp;=%20-%20(%20(1%20%5Ccdot%20%5Clog(0.4993))%20+%20(0%20%5Ccdot%20%5Clog(0.3217))%20+%20(1%20%5Ccdot%20%5Clog(0.1789))%20)%20%5C%5C%0A%5Ctextrm%7BNLL%7D%20&amp;=%20-%20(%20(1%20%5Ccdot%20%5Clog(0.4993))%20)%20%5C%5C%0A%5Ctextrm%7BNLL%7D%20&amp;=%20-%20%5Clog(0.4993)%0A%5Cend%7Balign%7D"></p>
 <p>From which we see that it’s just the negative log of the probability associated with the ground truth class.</p>
 <p>Since this computes only the NLL per sample, we also need a way to combine the NLL across the samples in our batch. We can do this either by summing or averaging, averaging has the advantage that the size of the loss remains the same when we change the batch-size, so let’s use that:</p>
 <div class="cell" data-execution_count="9">
