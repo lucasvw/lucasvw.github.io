@@ -26,7 +26,7 @@
 <p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/image.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
-<p>And although this image isn’t perfect and can be improved by more detailed prompting, it’s pretty amazing that it took less then 30 seconds to create this image, and the depiction is a fairly accurate representation of the prompt: The algorithm “imagined” that people on the moon should be wearing space suits, a good idea indeed! All have gathered around a table an are sitting on some kind of chair, which is generally how people eat their lunch. Last but not least, the background looks pretty moonish. No bad at all!</p>
+<p>And although this image isn’t perfect and can be improved by more detailed prompting, it’s pretty amazing that it took less then 30 seconds to create this image, and the depiction is a fairly accurate representation of the prompt: The algorithm “imagined” that people on the moon should be wearing space suits, a good idea indeed! All have gathered around a table an are sitting on some kind of chair, which is generally how people eat their lunch. Last but not least, the background looks pretty moonish. Not bad at all!</p>
 <p>Now let’s look at the main components involved in creating this image, this follows largely the steps of <a href="https://course.fast.ai/Lessons/lesson9.html">Lesson 9 of Deep Learning for Coders</a></p>
 <section id="intuition" class="level2">
 <h2 class="anchored" data-anchor-id="intuition">Intuition</h2>
