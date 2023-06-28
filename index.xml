@@ -33,7 +33,7 @@
 <p>Consider some kind of black box system that takes an input, does “something” and then gives an output. Let’s say it takes an image of a handwritten digit as input, and outputs the probability that the image is indeed a hand written digit. Visually something like this:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/intuition.png" class="img-fluid figure-img"></p>
+<p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/intuition-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 <p>In statistics, we would call this a probability density function. It’s a function that takes data as input, and gives the probability that</p>
