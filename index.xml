@@ -9,8 +9,261 @@
 <link>https://lucasvw.github.io/index.html</link>
 <atom:link href="https://lucasvw.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
-<generator>quarto-1.2.475</generator>
-<lastBuildDate>Wed, 15 Mar 2023 00:00:00 GMT</lastBuildDate>
+<generator>quarto-1.3.433</generator>
+<lastBuildDate>Sat, 18 Mar 2023 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Introduction to Stable Diffusion - Concepts</title>
+  <dc:creator>Lucas van Walstijn</dc:creator>
+  <link>https://lucasvw.github.io/posts/06_stable_diffusion_basics/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Stable Diffusion, a generative deep learning algorithm developed in 2022, is capable of creating images from prompts. For example, when presented the prompt: <strong>A group of people having lunch on the moon</strong>, the algorithm creates the following image:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/image.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>And although this image isn’t perfect and can be improved by more detailed prompting, it’s pretty amazing that it took less then 30 seconds to create this image, and the depiction is a fairly accurate representation of the prompt: The algorithm “imagined” that people on the moon should be wearing space suits, a good idea indeed! All have gathered around a table an are sitting on some kind of chair, which is generally how people eat their lunch. Last but not least, the background looks pretty moonish. No bad at all!</p>
+<p>Now let’s look at the main components involved in creating this image, this follows largely the steps of <a href="https://course.fast.ai/Lessons/lesson9.html">Lesson 9 of Deep Learning for Coders</a></p>
+<section id="intuition" class="level2">
+<h2 class="anchored" data-anchor-id="intuition">Intuition</h2>
+<p>Consider some kind of black box system that takes an input, does “something” and then gives an output. Let’s say it takes an image of a handwritten digit as input, and outputs the probability that the image is indeed a hand written digit. Visually something like this:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/intuition.drawio.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>In statistics, we would call this a probability density function. It’s a function that takes data as input, and gives the probability that</p>
+<ul>
+<li>if the data is coming indeed from the distribution,</li>
+<li>then what’s the probability that we see this data</li>
+</ul>
+<p>Applied to our use-case: if the image is indeed from this distribution of images that represent images of hand written digits, what’s the probability that we observe the presented image?</p>
+<p>As seen from the figure above: with such a system, we could start with an image of pure noise and iteratively do:</p>
+<ol type="1">
+<li>get the probability <img src="https://latex.codecogs.com/png.latex?p_0"> of the image being a handwritten digit from the black box system</li>
+<li>change the value of one of the pixels at random</li>
+<li>get the new probability <img src="https://latex.codecogs.com/png.latex?p_1"> whether the image is a handwritten digit from the black box system</li>
+<li>when <img src="https://latex.codecogs.com/png.latex?p_1%20%3E%20p_0"> update the image with the changed pixel value</li>
+</ol>
+<p>If we follow this procedure long enough, we would gradually update all the pixel values and the image will start to resemble a handwritten digit.</p>
+<p>In principle, this is the simple intuition behind stable diffusion.</p>
+</section>
+<section id="the-main-component-unet" class="level2">
+<h2 class="anchored" data-anchor-id="the-main-component-unet">The main component: Unet</h2>
+<p>So how are we going to create this magic system which will give the probability that an image is depicting a handwritten digit? Let’s start with the training data, we need lots of images that depict handwritten digits. Something like this:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/mnist.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>Since these images represent actual hand-written digits, the system will need to output a near 1.0 probability for these images. But how do we get images that “somewhat” represent handwritten digits and will result in lower probability values? We somehow have to “crappify” these existing images. We can do by using the images we already found and sprinkle them with different amounts of noise. The more noise we add, the less the image will resemble a handwritten digit. Visually:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/intuition.drawio-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>Now we can train a network which we feed the <em>noisified images</em> as input and use the <em>noise image</em> as label. So instead of predicting the probability that an image depicts a handwritten digit, the model will predict the noise. By using a simple MSE loss on the actual noise (labels) and the predictions the model will learn how to predict the noise from looking at a noisified images.</p>
+<p>The idea behind this model is that once this model is trained, we could run inference on some random noise. The model will give us a prediction of all the noise in the image, which when removed from the input, renders an image of a digit.</p>
+<p>It turns out that this process works much better if, instead of removing all the noise that was predicted by the model at once, we just remove a little bit of the noise that was predicted. This way, we end up with an image which is just a bit less noisy then what we started with. We then feed this less noisy image again into our network, and thus iteratively remove more and more noise from the image, until after a certain amount of steps (50 for example) we end-up with an image that is free of noise.</p>
+<p>One model architecture that is takes images as input and also outputs images is called a Unet and forms the first component of our Stable Diffusion system:</p>
+<table class="table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th style="text-align: left;">Inputs</th>
+<th style="text-align: left;">Outputs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Unet</td>
+<td style="text-align: left;">Noisy images</td>
+<td style="text-align: left;">Noise</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="compression-variational-autoencoder" class="level2">
+<h2 class="anchored" data-anchor-id="compression-variational-autoencoder">Compression: Variational Autoencoder</h2>
+<p>When working with images in neural networks we often reduce the resolution of images or use smaller patches of the original image to make sure everything fits on the GPU. With stable diffusion, we naturally want to output images of high resolution, so we need either very large GPUs, or we can use a compression trick by making use of a Variational Autoencoder (VAE).</p>
+<p>A VAE is a network architecture having an encoder and a decoder. In the encoder the image input is being transformed through a series of convolutional layers into a compressed representation, the latent. In the decoder this compressed latent is passed through a series of layers that are trying to reconstruct the original image. Visually:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/intuition.drawio-3.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>This might look like a boring network architecture at first. But it’s actually a very neat way to compress things: We can feed this model all the different noisified images mentioned earlier, and use an MSE loss on the inputs and outputs. This will train the model to create compressed representations of our images (the latents) that can be used by the decoder to recreate the original image. This means that the latent representation carries close to the same amount of “information” as our full-size images.</p>
+<p>With this, we can now train the previously discussed Unet on all the latents instead of the full size images!</p>
+<p>During inference the combined architecture looks like this: we run any input first through the encoder returning a highly compressed version of our input (i.e.&nbsp;the latents). We then run it through the Unet, which will output a latent representation of the noise. If we (partly) subtract the noise latent from the noisy image latent, we end up with a latent representation of our image which is a bit less noisy then what we started with. Finally, to move from latent representation to full-size images, we can use the decoder of the VAE. Visually:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/intuition.drawio-4.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>To summarize:</p>
+<table class="table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th style="text-align: left;">Inputs</th>
+<th style="text-align: left;">Outputs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>VAE encoder</td>
+<td style="text-align: left;">Noisy image</td>
+<td style="text-align: left;">Noisy image latents</td>
+</tr>
+<tr class="even">
+<td>Unet</td>
+<td style="text-align: left;">Noisy image latents</td>
+<td style="text-align: left;">Noise latents</td>
+</tr>
+<tr class="odd">
+<td>VAE decoder</td>
+<td style="text-align: left;">Noise latents</td>
+<td style="text-align: left;">Noise</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="prompting-clip" class="level2">
+<h2 class="anchored" data-anchor-id="prompting-clip">Prompting: CLIP</h2>
+<p>So how can we create prompting? Let’s start simple and imagine we just want to specify which handwritten digit we would like to generate, so any number between 0 and 9. We could do this by training the Unet not only on the noisy image (input) and noise (output), but instead also give it a representation of the digit we sprinkled the noise on as input. The most generic way to do this, would be to create a one-hot encoded representation of the digit, visually:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/intuition.drawio-5.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>To create an image depicting the digit “three” from pure noise, we would then start with a random noise latent and feed it together with the one-hot encoded representation of the digit into the Unet. This way, the Unet is “guided” to create an image of digit “three” and not just any image, visually:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/intuition.drawio-5-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>To continue, how are we going to scale this for <em>any</em> text prompt besides our 10 digits? We can’t possibly create a one-hot encoding of any possible prompt, that would make our vector infinitely large. Instead, we want to compress the encoding in some finite, high dimensional space, e.g.&nbsp;we want to create an embedding encoding of our prompt.</p>
+<p>To create these embeddings, we first of all need again lots of data. For example by capturing a lot of images from the internet, these image generally have a textual description in the HTML tag.</p>
+<p>We can feed the text and images into two separate encoders. These encoders take the text and image respectively and output a vector. Next, we can align the vector representations in a matrix and take the dot-product between them. We want the text and image vectors of the same “object” to align, this means their dot-product should be large. Also, we want the vectors of different objects to not align, so their dot-product should be small. Visually:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/intuition.drawio-6.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>A loss function that does exactly this, is called the Contrastive Loss. And the model described here is called Contrastive Language Image Pre-training (CLIP).</p>
+<p>During inference, we can use the trained text-encoder and apply it to the prompt. The outputted embedding can then be used as the encoding we feed into our Unet in combination with the noisy image latent.</p>
+<p>To summarize:</p>
+<table class="table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th style="text-align: left;">Inputs</th>
+<th style="text-align: left;">Outputs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CLIP text encoder</td>
+<td style="text-align: left;">Prompt</td>
+<td style="text-align: left;">Embedding</td>
+</tr>
+<tr class="even">
+<td>VAE encoder</td>
+<td style="text-align: left;">Noisy image</td>
+<td style="text-align: left;">Noisy image latents</td>
+</tr>
+<tr class="odd">
+<td>Unet</td>
+<td style="text-align: left;">Noisy image latents + Prompt embedding</td>
+<td style="text-align: left;">Noise latents</td>
+</tr>
+<tr class="even">
+<td>VAE decoder</td>
+<td style="text-align: left;">Noise latents</td>
+<td style="text-align: left;">Noise</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="noise-scheduler" class="level2">
+<h2 class="anchored" data-anchor-id="noise-scheduler">Noise scheduler</h2>
+<p>Above it was stated, that “different” amounts of noise are sprinkled on our images during training, and during inference “some” amount of noise is being subtracted from the image. In the next post, which will be a “code” version of this post, we will see more how this exactly works, but let’s introduce one more concept here:</p>
+<p>To formalize the amounts of noise we will use something called a noise schedule, which maps an integer value (called the timestep <img src="https://latex.codecogs.com/png.latex?t">) to an amount of noise we will add to our image. This noise schedule is a monotonically decreasing function of <img src="https://latex.codecogs.com/png.latex?t">, so large values of <img src="https://latex.codecogs.com/png.latex?t"> will add a small amount of noise and small values of <img src="https://latex.codecogs.com/png.latex?t"> add a large amount of noise. A typical noise schedule looks something like this:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/noise-schedule.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>With this noise schedule, we can pick different amounts of noise during training and add it to the images in the batch. Additionally, we will feed the noise parameter to the Unet, so that it knows how much noise was added to the image. This sould make it easier for the model to reconstruct the noise.</p>
+<p>To summarize:</p>
+<table class="table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th style="text-align: left;">Inputs</th>
+<th style="text-align: left;">Outputs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CLIP text encoder</td>
+<td style="text-align: left;">Prompt</td>
+<td style="text-align: left;">Embedding</td>
+</tr>
+<tr class="even">
+<td>VAE encoder</td>
+<td style="text-align: left;">Noisy image</td>
+<td style="text-align: left;">Noisy image latents</td>
+</tr>
+<tr class="odd">
+<td>Unet</td>
+<td style="text-align: left;">Noisy image latents + Prompt embedding + Noise level</td>
+<td style="text-align: left;">Noise latents</td>
+</tr>
+<tr class="even">
+<td>VAE decoder</td>
+<td style="text-align: left;">Noise latents</td>
+<td style="text-align: left;">Noise</td>
+</tr>
+</tbody>
+</table>
+<p>That’s it for now! If you came this far, I hope you enjoyed it. For me, it helped a lot in my understanding by writing all this down. In the next blog post, we will have a look at how these concepts translate into code by making use of HuggingFace libraries such as <code>diffusers</code> and <code>transformers</code></p>
+
+
+</section>
+
+ ]]></description>
+  <category>Generative</category>
+  <category>Stable Diffusion</category>
+  <category>Diffusers</category>
+  <guid>https://lucasvw.github.io/posts/06_stable_diffusion_basics/index.html</guid>
+  <pubDate>Sat, 18 Mar 2023 00:00:00 GMT</pubDate>
+  <media:content url="https://lucasvw.github.io/posts/06_stable_diffusion_basics/image.png" medium="image" type="image/png" height="131" width="144"/>
+</item>
 <item>
   <title>Cross entropy any which way</title>
   <dc:creator>Lucas van Walstijn</dc:creator>
@@ -24,17 +277,55 @@
 <p>Consider a network that is build for image classification. During the forward pass, images are passed into the network and the network processes the data layer by layer, until evenually some final activations are being returned by the model. These final activations are called “logits” and represent the unnormalized predictions of our model.</p>
 <p>Since we generally use mini-batches during training, these logits are of shape <code>[bs, num_classes]</code></p>
 <div class="cell" data-execution_count="20">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;">import</span> torch</span>
-<span id="cb1-2"><span class="im" style="color: #00769E;">import</span> torch.nn.functional <span class="im" style="color: #00769E;">as</span> F</span>
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> torch</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> torch.nn.functional <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> F</span>
 <span id="cb1-3"></span>
-<span id="cb1-4">g <span class="op" style="color: #5E5E5E;">=</span> torch.manual_seed(<span class="dv" style="color: #AD0000;">42</span>) <span class="co" style="color: #5E5E5E;"># use a generator for reproducability</span></span>
+<span id="cb1-4">g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.manual_seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span>) <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># use a generator for reproducability</span></span>
 <span id="cb1-5"></span>
-<span id="cb1-6">bs <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">32</span> <span class="co" style="color: #5E5E5E;"># batch size of 32</span></span>
-<span id="cb1-7">num_classes <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">3</span> <span class="co" style="color: #5E5E5E;"># image classification with 3 different classes</span></span>
+<span id="cb1-6">bs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">32</span> <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># batch size of 32</span></span>
+<span id="cb1-7">num_classes <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span> <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># image classification with 3 different classes</span></span>
 <span id="cb1-8"></span>
-<span id="cb1-9">logits <span class="op" style="color: #5E5E5E;">=</span> torch.randn(size<span class="op" style="color: #5E5E5E;">=</span>(bs, num_classes), generator<span class="op" style="color: #5E5E5E;">=</span>g) <span class="co" style="color: #5E5E5E;"># size: [32,3]</span></span>
+<span id="cb1-9">logits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.randn(size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(bs, num_classes), generator<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>g) <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># size: [32,3]</span></span>
 <span id="cb1-10"></span>
-<span id="cb1-11">logits[<span class="dv" style="color: #AD0000;">0</span>:<span class="dv" style="color: #AD0000;">4</span>] <span class="co" style="color: #5E5E5E;"># show the logits for the first couple of samples</span></span></code></pre></div>
+<span id="cb1-11">logits[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>:<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>] <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># show the logits for the first couple of samples</span></span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="20">
 <pre><code>tensor([[ 1.9269,  1.4873,  0.9007],
         [-2.1055,  0.6784, -1.2345],
@@ -54,26 +345,52 @@
 </ol>
 <p>Specifically:</p>
 <div class="cell" data-execution_count="21">
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;"># Unnormalized predictions for our first sample (3 classes)</span></span>
-<span id="cb3-2">logits[<span class="dv" style="color: #AD0000;">0</span>]</span></code></pre></div>
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Unnormalized predictions for our first sample (3 classes)</span></span>
+<span id="cb3-2">logits[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="21">
 <pre><code>tensor([1.9269, 1.4873, 0.9007])</code></pre>
 </div>
 </div>
 <div class="cell" data-execution_count="22">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="co" style="color: #5E5E5E;"># Exponentiated predictions, making them all positive</span></span>
-<span id="cb5-2">exp_logits <span class="op" style="color: #5E5E5E;">=</span> logits[<span class="dv" style="color: #AD0000;">0</span>].exp()</span>
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Exponentiated predictions, making them all positive</span></span>
+<span id="cb5-2">exp_logits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> logits[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].exp()</span>
 <span id="cb5-3">exp_logits</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="22">
 <pre><code>tensor([6.8683, 4.4251, 2.4614])</code></pre>
 </div>
 </div>
 <div class="cell" data-execution_count="25">
-<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="co" style="color: #5E5E5E;"># Turn these values into probabilities by dividing by the sum</span></span>
-<span id="cb7-2">probs <span class="op" style="color: #5E5E5E;">=</span> exp_logits <span class="op" style="color: #5E5E5E;">/</span> exp_logits.<span class="bu" style="color: null;">sum</span>()</span>
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Turn these values into probabilities by dividing by the sum</span></span>
+<span id="cb7-2">probs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> exp_logits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> exp_logits.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>()</span>
 <span id="cb7-3"></span>
-<span id="cb7-4"><span class="co" style="color: #5E5E5E;"># verify that the sum of the probabilities sum to 1</span></span>
-<span id="cb7-5"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(probs.<span class="bu" style="color: null;">sum</span>(), torch.tensor(<span class="fl" style="color: #AD0000;">1.</span>))</span>
+<span id="cb7-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># verify that the sum of the probabilities sum to 1</span></span>
+<span id="cb7-5"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">assert</span> torch.allclose(probs.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(), torch.tensor(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.</span>))</span>
 <span id="cb7-6"></span>
 <span id="cb7-7">probs</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="25">
@@ -82,18 +399,56 @@
 </div>
 <p>So, let’s create a softmax function that does this for a whole batch:</p>
 <div class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="kw" style="color: #003B4F;">def</span> softmax(logits):</span>
-<span id="cb9-2">    exp_logits <span class="op" style="color: #5E5E5E;">=</span> logits.exp() <span class="co" style="color: #5E5E5E;"># shape: [32, 3]</span></span>
-<span id="cb9-3">    exp_logits_sum <span class="op" style="color: #5E5E5E;">=</span> exp_logits.<span class="bu" style="color: null;">sum</span>(dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>, keepdim<span class="op" style="color: #5E5E5E;">=</span><span class="va" style="color: #111111;">True</span>) <span class="co" style="color: #5E5E5E;"># shape: [32, 1]</span></span>
+<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> softmax(logits):</span>
+<span id="cb9-2">    exp_logits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> logits.exp() <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># shape: [32, 3]</span></span>
+<span id="cb9-3">    exp_logits_sum <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> exp_logits.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(dim<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, keepdim<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>) <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># shape: [32, 1]</span></span>
 <span id="cb9-4">    </span>
-<span id="cb9-5">    <span class="co" style="color: #5E5E5E;"># Note: this get's correctly broadcasted, since the exp_logits_sum will </span></span>
-<span id="cb9-6">    <span class="co" style="color: #5E5E5E;"># expand to [32, 3], so each value in exp_logits gets divided by the sum over its row</span></span>
-<span id="cb9-7">    probs <span class="op" style="color: #5E5E5E;">=</span> exp_logits <span class="op" style="color: #5E5E5E;">/</span> exp_logits_sum <span class="co" style="color: #5E5E5E;"># shape: [32, 3]</span></span>
+<span id="cb9-5">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Note: this get's correctly broadcasted, since the exp_logits_sum will </span></span>
+<span id="cb9-6">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># expand to [32, 3], so each value in exp_logits gets divided by the sum over its row</span></span>
+<span id="cb9-7">    probs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> exp_logits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> exp_logits_sum <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># shape: [32, 3]</span></span>
 <span id="cb9-8">    </span>
-<span id="cb9-9">    <span class="cf" style="color: #003B4F;">return</span> probs </span>
+<span id="cb9-9">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> probs </span>
 <span id="cb9-10"></span>
-<span id="cb9-11">probs <span class="op" style="color: #5E5E5E;">=</span> softmax(logits)</span>
-<span id="cb9-12">probs[<span class="dv" style="color: #AD0000;">0</span>:<span class="dv" style="color: #AD0000;">4</span>]</span></code></pre></div>
+<span id="cb9-11">probs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> softmax(logits)</span>
+<span id="cb9-12">probs[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>:<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>]</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>tensor([[0.4993, 0.3217, 0.1789],
         [0.0511, 0.8268, 0.1221],
@@ -103,9 +458,31 @@
 </div>
 <p>Next, we want to compute the loss for which also need our <code>labels</code>. These labels represent the ground truth class for each of our samples in the batch. Since we have 3 classes they will be between 0 and 3 (e.g.&nbsp;either 0, 1 or 2)</p>
 <div class="cell" data-execution_count="26">
-<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">g <span class="op" style="color: #5E5E5E;">=</span> torch.manual_seed(<span class="dv" style="color: #AD0000;">42</span>) <span class="co" style="color: #5E5E5E;"># use a generator for reproducability</span></span>
+<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.manual_seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span>) <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># use a generator for reproducability</span></span>
 <span id="cb11-2"></span>
-<span id="cb11-3">labels <span class="op" style="color: #5E5E5E;">=</span> torch.randint(low<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">0</span>, high<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">3</span>, size<span class="op" style="color: #5E5E5E;">=</span>(<span class="dv" style="color: #AD0000;">32</span>,), generator<span class="op" style="color: #5E5E5E;">=</span>g)</span>
+<span id="cb11-3">labels <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.randint(low<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, high<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">32</span>,), generator<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>g)</span>
 <span id="cb11-4">labels</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="26">
 <pre><code>tensor([0, 2, 1, 1, 0, 2, 1, 2, 1, 2, 1, 1, 2, 0, 0, 1, 2, 1, 0, 1, 1, 2, 1, 2,
@@ -120,17 +497,45 @@
 <p>From which we see that it’s just the negative log of the probability associated with the ground truth class.</p>
 <p>Since this computes only the NLL per sample, we also need a way to combine the NLL across the samples in our batch. We can do this either by summing or averaging, averaging has the advantage that the size of the loss remains the same when we change the batch-size, so let’s use that:</p>
 <div class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><span class="kw" style="color: #003B4F;">def</span> nll(probs, labels):</span>
-<span id="cb13-2">    <span class="co" style="color: #5E5E5E;"># probs: shape [32, 3]</span></span>
-<span id="cb13-3">    <span class="co" style="color: #5E5E5E;"># labels: shape [32]</span></span>
+<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> nll(probs, labels):</span>
+<span id="cb13-2">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># probs: shape [32, 3]</span></span>
+<span id="cb13-3">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># labels: shape [32]</span></span>
 <span id="cb13-4">    </span>
-<span id="cb13-5">    <span class="co" style="color: #5E5E5E;"># this plucks out the probability of the ground truth label per sample, </span></span>
-<span id="cb13-6">    <span class="co" style="color: #5E5E5E;"># it uses "numpy's integer array indexing":</span></span>
-<span id="cb13-7">    <span class="co" style="color: #5E5E5E;"># https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing</span></span>
-<span id="cb13-8">    probs_ground_truth_class <span class="op" style="color: #5E5E5E;">=</span> probs[<span class="bu" style="color: null;">range</span>(<span class="bu" style="color: null;">len</span>(labels)), labels] <span class="co" style="color: #5E5E5E;"># shape: [32]</span></span>
+<span id="cb13-5">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># this plucks out the probability of the ground truth label per sample, </span></span>
+<span id="cb13-6">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># it uses "numpy's integer array indexing":</span></span>
+<span id="cb13-7">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing</span></span>
+<span id="cb13-8">    probs_ground_truth_class <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> probs[<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(labels)), labels] <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># shape: [32]</span></span>
 <span id="cb13-9">    </span>
-<span id="cb13-10">    nll <span class="op" style="color: #5E5E5E;">=</span> <span class="op" style="color: #5E5E5E;">-</span>torch.log(probs_ground_truth_class).mean() <span class="co" style="color: #5E5E5E;"># shape: []</span></span>
-<span id="cb13-11">    <span class="cf" style="color: #003B4F;">return</span> nll</span></code></pre></div>
+<span id="cb13-10">    nll <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>torch.log(probs_ground_truth_class).mean() <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># shape: []</span></span>
+<span id="cb13-11">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> nll</span></code></pre></div>
 </div>
 <div class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">nll(probs, labels)</span></code></pre></div>
@@ -142,7 +547,15 @@
 <h2 class="anchored" data-anchor-id="using-pytorch">Using PyTorch</h2>
 <p>Instead of using our custom <code>softmax</code>, we can also use the build-in softmax function from PyTorch:</p>
 <div class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">p <span class="op" style="color: #5E5E5E;">=</span> F.softmax(logits, dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>) <span class="co" style="color: #5E5E5E;"># dim=1 --&gt; compute the sum across the columns</span></span>
+<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">p <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> F.softmax(logits, dim<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># dim=1 --&gt; compute the sum across the columns</span></span>
 <span id="cb16-2">nll(p, labels)</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>tensor(1.3465)</code></pre>
@@ -150,10 +563,24 @@
 </div>
 <p>Instead of using our custom <code>nll</code> we can also use the build-in version from PyTorch. However, <code>nll_loss</code> expects the log of the softmax (for numerical stability) so instead of <code>softmax</code> we have to use <code>log_softmax</code>:</p>
 <div class="cell" data-execution_count="16">
-<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1">p <span class="op" style="color: #5E5E5E;">=</span> F.log_softmax(logits, dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>)</span>
+<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1">p <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> F.log_softmax(logits, dim<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
 <span id="cb18-2"></span>
-<span id="cb18-3"><span class="co" style="color: #5E5E5E;"># Assert that indeed the log_softmax is just the softmax followed by a log</span></span>
-<span id="cb18-4"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(p, F.softmax(logits, dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>).log())</span>
+<span id="cb18-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Assert that indeed the log_softmax is just the softmax followed by a log</span></span>
+<span id="cb18-4"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">assert</span> torch.allclose(p, F.softmax(logits, dim<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>).log())</span>
 <span id="cb18-5"></span>
 <span id="cb18-6">torch.nn.functional.nll_loss(p, labels)</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="16">
@@ -169,18 +596,34 @@
 </div>
 <p>Instead of the methods in <code>nn.functional</code>, we can also use classes. For that, we first create an instance of the object, and then “call” the instance:</p>
 <div class="cell" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1">ce <span class="op" style="color: #5E5E5E;">=</span> torch.nn.CrossEntropyLoss() <span class="co" style="color: #5E5E5E;"># create a CrossEntropyLoss instance</span></span>
-<span id="cb22-2">ce(logits, labels) <span class="co" style="color: #5E5E5E;"># calling the instance with the arguments returns the cross entropy</span></span></code></pre></div>
+<div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1">ce <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.nn.CrossEntropyLoss() <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># create a CrossEntropyLoss instance</span></span>
+<span id="cb22-2">ce(logits, labels) <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># calling the instance with the arguments returns the cross entropy</span></span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="18">
 <pre><code>tensor(1.3465)</code></pre>
 </div>
 </div>
 <p>Similarly, we can use classes for the <code>log_softmax</code> and <code>nll_loss</code> functions</p>
 <div class="cell" data-execution_count="19">
-<div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1">ls <span class="op" style="color: #5E5E5E;">=</span> torch.nn.LogSoftmax(dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>)</span>
-<span id="cb24-2">nll <span class="op" style="color: #5E5E5E;">=</span> torch.nn.NLLLoss()</span>
+<div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1">ls <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.nn.LogSoftmax(dim<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb24-2">nll <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.nn.NLLLoss()</span>
 <span id="cb24-3"></span>
-<span id="cb24-4">p <span class="op" style="color: #5E5E5E;">=</span> ls(logits)</span>
+<span id="cb24-4">p <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> ls(logits)</span>
 <span id="cb24-5">nll(p, labels)</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="19">
 <pre><code>tensor(1.3465)</code></pre>
@@ -188,7 +631,11 @@
 </div>
 <p>This is practical, if we want specify custom behavior of the loss function ahead of time of calling the actual loss function. For example, let’s say we want to compute the cross entropy loss based on ‘sums’ instead of ‘averages’. Then when using the method in <code>F</code> we would do:</p>
 <div class="cell" data-execution_count="36">
-<div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1">F.cross_entropy(logits, labels, reduction<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'sum'</span>)</span></code></pre></div>
+<div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1">F.cross_entropy(logits, labels, reduction<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'sum'</span>)</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="36">
 <pre><code>tensor(43.0866)</code></pre>
 </div>
@@ -196,10 +643,20 @@
 <p>So whenever we call the loss, we have to specify the additional <code>reduction</code> argument.</p>
 <p>Whereas when using the loss classes, we can instantiate the class with that <code>reduction</code> argument, and then call the instance as per usual without passing anything but the logits and the labels:</p>
 <div class="cell" data-execution_count="37">
-<div class="sourceCode cell-code" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><span class="co" style="color: #5E5E5E;"># instantiate </span></span>
-<span id="cb28-2">ce <span class="op" style="color: #5E5E5E;">=</span> torch.nn.CrossEntropyLoss(reduction<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'sum'</span>)</span>
+<div class="sourceCode cell-code" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># instantiate </span></span>
+<span id="cb28-2">ce <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.nn.CrossEntropyLoss(reduction<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'sum'</span>)</span>
 <span id="cb28-3"></span>
-<span id="cb28-4"><span class="co" style="color: #5E5E5E;"># at some other point in your code, compute the loss as per default</span></span>
+<span id="cb28-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># at some other point in your code, compute the loss as per default</span></span>
 <span id="cb28-5">ce(logits, labels)</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="37">
 <pre><code>tensor(43.0866)</code></pre>
@@ -264,50 +721,174 @@
 </div>
 <p>Let’s do this in code and confirm what we have established above about the shapes of the matrices:</p>
 <div class="cell" data-execution_count="21">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;">import</span> torch</span>
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> torch</span>
 <span id="cb1-2"></span>
-<span id="cb1-3">a <span class="op" style="color: #5E5E5E;">=</span> torch.randn(<span class="dv" style="color: #AD0000;">4</span>,<span class="dv" style="color: #AD0000;">3</span>)</span>
-<span id="cb1-4">b <span class="op" style="color: #5E5E5E;">=</span> torch.randn(<span class="dv" style="color: #AD0000;">3</span>,<span class="dv" style="color: #AD0000;">2</span>)</span></code></pre></div>
+<span id="cb1-3">a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.randn(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>)</span>
+<span id="cb1-4">b <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.randn(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)</span></code></pre></div>
 </div>
 <div class="cell" data-execution_count="22">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;"># Confirm the shape of the output matrix</span></span>
-<span id="cb2-2">(a<span class="op" style="color: #5E5E5E;">@</span>b).shape</span></code></pre></div>
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Confirm the shape of the output matrix</span></span>
+<span id="cb2-2">(a<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span>b).shape</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="22">
 <pre><code>torch.Size([4, 2])</code></pre>
 </div>
 </div>
 <div class="cell" data-execution_count="153">
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="co" style="color: #5E5E5E;"># Confirm the value of one output cell (C00)</span></span>
-<span id="cb4-2">C00_manual <span class="op" style="color: #5E5E5E;">=</span> (a[<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">0</span>] <span class="op" style="color: #5E5E5E;">*</span> b[<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">0</span>]) <span class="op" style="color: #5E5E5E;">+</span> (a[<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">1</span>] <span class="op" style="color: #5E5E5E;">*</span> b[<span class="dv" style="color: #AD0000;">1</span>,<span class="dv" style="color: #AD0000;">0</span>]) <span class="op" style="color: #5E5E5E;">+</span> (a[<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">2</span>] <span class="op" style="color: #5E5E5E;">*</span> b[<span class="dv" style="color: #AD0000;">2</span>,<span class="dv" style="color: #AD0000;">0</span>])</span>
-<span id="cb4-3">C00_auto <span class="op" style="color: #5E5E5E;">=</span> (a<span class="op" style="color: #5E5E5E;">@</span>b)[<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">0</span>]</span>
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Confirm the value of one output cell (C00)</span></span>
+<span id="cb4-2">C00_manual <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (a[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> b[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> (a[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> b[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> (a[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> b[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>])</span>
+<span id="cb4-3">C00_auto <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (a<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span>b)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
 <span id="cb4-4"></span>
-<span id="cb4-5"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(C00_manual, C00_auto)</span></code></pre></div>
+<span id="cb4-5"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">assert</span> torch.allclose(C00_manual, C00_auto)</span></code></pre></div>
 </div>
 <p>With what we know, let’s create our own <code>matmul</code> function:</p>
 <div class="cell" data-execution_count="115">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="kw" style="color: #003B4F;">def</span> matmul(a, b):</span>
-<span id="cb5-2">    <span class="co" style="color: #5E5E5E;"># fill in the sizes of the dimensions</span></span>
-<span id="cb5-3">    ar, ac <span class="op" style="color: #5E5E5E;">=</span> a.shape</span>
-<span id="cb5-4">    br, bc <span class="op" style="color: #5E5E5E;">=</span> b.shape</span>
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> matmul(a, b):</span>
+<span id="cb5-2">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># fill in the sizes of the dimensions</span></span>
+<span id="cb5-3">    ar, ac <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> a.shape</span>
+<span id="cb5-4">    br, bc <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> b.shape</span>
 <span id="cb5-5"></span>
-<span id="cb5-6">    <span class="co" style="color: #5E5E5E;"># assert that our matrices can be multiplied </span></span>
-<span id="cb5-7">    <span class="cf" style="color: #003B4F;">assert</span> ac <span class="op" style="color: #5E5E5E;">==</span> br</span>
+<span id="cb5-6">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># assert that our matrices can be multiplied </span></span>
+<span id="cb5-7">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">assert</span> ac <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> br</span>
 <span id="cb5-8"></span>
-<span id="cb5-9">    <span class="co" style="color: #5E5E5E;"># create an output tensor of the expected size (ar x bc)</span></span>
-<span id="cb5-10">    out <span class="op" style="color: #5E5E5E;">=</span> torch.zeros(ar, bc)</span>
+<span id="cb5-9">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># create an output tensor of the expected size (ar x bc)</span></span>
+<span id="cb5-10">    out <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.zeros(ar, bc)</span>
 <span id="cb5-11"></span>
-<span id="cb5-12">    <span class="co" style="color: #5E5E5E;"># iterate over the rows of the output matrix (--&gt; length ar)</span></span>
-<span id="cb5-13">    <span class="cf" style="color: #003B4F;">for</span> i <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(out.shape[<span class="dv" style="color: #AD0000;">0</span>]):</span>
-<span id="cb5-14">        <span class="co" style="color: #5E5E5E;"># iterate over the columns of the output matrix (--&gt; length bc)</span></span>
-<span id="cb5-15">        <span class="cf" style="color: #003B4F;">for</span> j <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(out.shape[<span class="dv" style="color: #AD0000;">1</span>]):</span>
-<span id="cb5-16">            <span class="co" style="color: #5E5E5E;"># iterate over the "collapsed" dimension (--&gt; length ac and length br), </span></span>
-<span id="cb5-17">            <span class="cf" style="color: #003B4F;">for</span> k <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(ac):</span>
-<span id="cb5-18">                out[i, j] <span class="op" style="color: #5E5E5E;">+=</span> a[i, k] <span class="op" style="color: #5E5E5E;">*</span> b[k, j]</span>
+<span id="cb5-12">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># iterate over the rows of the output matrix (--&gt; length ar)</span></span>
+<span id="cb5-13">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(out.shape[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]):</span>
+<span id="cb5-14">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># iterate over the columns of the output matrix (--&gt; length bc)</span></span>
+<span id="cb5-15">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> j <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(out.shape[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]):</span>
+<span id="cb5-16">            <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># iterate over the "collapsed" dimension (--&gt; length ac and length br), </span></span>
+<span id="cb5-17">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> k <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(ac):</span>
+<span id="cb5-18">                out[i, j] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+=</span> a[i, k] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> b[k, j]</span>
 <span id="cb5-19">    </span>
-<span id="cb5-20">    <span class="cf" style="color: #003B4F;">return</span> out</span>
+<span id="cb5-20">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> out</span>
 <span id="cb5-21"></span>
-<span id="cb5-22"><span class="co" style="color: #5E5E5E;"># Confirm that the result is correct</span></span>
-<span id="cb5-23"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(matmul(a,b), a<span class="op" style="color: #5E5E5E;">@</span>b)</span></code></pre></div>
+<span id="cb5-22"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Confirm that the result is correct</span></span>
+<span id="cb5-23"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">assert</span> torch.allclose(matmul(a,b), a<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span>b)</span></code></pre></div>
 </div>
 <p>Although this is functionally correct, it’s not very efficient. In fact, to compute the value of one cell of the output matrix, we are doing three separate multiplications. In other words, for each cell <code>out[i,j]</code> we are calling three times (once for every value of <code>k</code>):</p>
 <pre><code>out[i, j] += a[i, k] * b[k, j]</code></pre>
@@ -317,22 +898,68 @@
 <h2 class="anchored" data-anchor-id="first-improvement">First improvement</h2>
 <p>To do so, we need to get rid of the loop over the “collapsible” dimension <code>k</code>. We can simply do this by replacing the <code>k</code> with a <code>:</code>, so that we select the whole dimension instead of just one element in that dimension. The multiplication (<code>*</code>) is doing an element wise multiplication, so we have to wrap the result with a <code>.sum()</code>.</p>
 <div class="cell" data-execution_count="114">
-<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="kw" style="color: #003B4F;">def</span> matmul2(a, b):</span>
-<span id="cb7-2">    ar, ac <span class="op" style="color: #5E5E5E;">=</span> a.shape</span>
-<span id="cb7-3">    br, bc <span class="op" style="color: #5E5E5E;">=</span> b.shape</span>
-<span id="cb7-4">    <span class="cf" style="color: #003B4F;">assert</span> ac <span class="op" style="color: #5E5E5E;">==</span> br</span>
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> matmul2(a, b):</span>
+<span id="cb7-2">    ar, ac <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> a.shape</span>
+<span id="cb7-3">    br, bc <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> b.shape</span>
+<span id="cb7-4">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">assert</span> ac <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> br</span>
 <span id="cb7-5"></span>
-<span id="cb7-6">    out <span class="op" style="color: #5E5E5E;">=</span> torch.zeros(ar,bc)</span>
-<span id="cb7-7">    <span class="co" style="color: #5E5E5E;"># iterate over the rows of the output matrix (i)</span></span>
-<span id="cb7-8">    <span class="cf" style="color: #003B4F;">for</span> i <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(out.shape[<span class="dv" style="color: #AD0000;">0</span>]):</span>
-<span id="cb7-9">        <span class="co" style="color: #5E5E5E;"># iterate over the columns of the output matrix (j)</span></span>
-<span id="cb7-10">        <span class="cf" style="color: #003B4F;">for</span> j <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(out.shape[<span class="dv" style="color: #AD0000;">1</span>]):</span>
-<span id="cb7-11">            out[i, j] <span class="op" style="color: #5E5E5E;">=</span> (a[i, :] <span class="op" style="color: #5E5E5E;">*</span> b[:, j]).<span class="bu" style="color: null;">sum</span>()</span>
+<span id="cb7-6">    out <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.zeros(ar,bc)</span>
+<span id="cb7-7">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># iterate over the rows of the output matrix (i)</span></span>
+<span id="cb7-8">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(out.shape[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]):</span>
+<span id="cb7-9">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># iterate over the columns of the output matrix (j)</span></span>
+<span id="cb7-10">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> j <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(out.shape[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]):</span>
+<span id="cb7-11">            out[i, j] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (a[i, :] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> b[:, j]).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>()</span>
 <span id="cb7-12">    </span>
-<span id="cb7-13">    <span class="cf" style="color: #003B4F;">return</span> out</span>
+<span id="cb7-13">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> out</span>
 <span id="cb7-14"></span>
-<span id="cb7-15"><span class="co" style="color: #5E5E5E;"># Confirm that the result is correct</span></span>
-<span id="cb7-16"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(matmul(a,b), a<span class="op" style="color: #5E5E5E;">@</span>b)</span></code></pre></div>
+<span id="cb7-15"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Confirm that the result is correct</span></span>
+<span id="cb7-16"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">assert</span> torch.allclose(matmul(a,b), a<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span>b)</span></code></pre></div>
 </div>
 </section>
 <section id="second-improvement" class="level2">
@@ -343,15 +970,85 @@
 <pre><code>out[i,:] = ...</code></pre>
 <p>We know that the value of cell <img src="https://latex.codecogs.com/png.latex?C_%7Bij%7D"> is the inner product between row <code>i</code> of A and column <code>j</code> of B. We also know that any row of matrix C will have two values. Let’s compute them manually:</p>
 <div class="cell" data-execution_count="99">
-<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">out_00 <span class="op" style="color: #5E5E5E;">=</span> (a[<span class="dv" style="color: #AD0000;">0</span>,:] <span class="op" style="color: #5E5E5E;">*</span> b[:,<span class="dv" style="color: #AD0000;">0</span>]).<span class="bu" style="color: null;">sum</span>()</span>
-<span id="cb10-2">out_01 <span class="op" style="color: #5E5E5E;">=</span> (a[<span class="dv" style="color: #AD0000;">0</span>,:] <span class="op" style="color: #5E5E5E;">*</span> b[:,<span class="dv" style="color: #AD0000;">1</span>]).<span class="bu" style="color: null;">sum</span>()</span>
+<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">out_00 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (a[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,:] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> b[:,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>()</span>
+<span id="cb10-2">out_01 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (a[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,:] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> b[:,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>()</span>
 <span id="cb10-3"></span>
-<span id="cb10-4">C0_manual <span class="op" style="color: #5E5E5E;">=</span> torch.stack([out_00, out_01])</span>
-<span id="cb10-5">C0_auto <span class="op" style="color: #5E5E5E;">=</span> (a<span class="op" style="color: #5E5E5E;">@</span>b)[<span class="dv" style="color: #AD0000;">0</span>]</span>
+<span id="cb10-4">C0_manual <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.stack([out_00, out_01])</span>
+<span id="cb10-5">C0_auto <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (a<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span>b)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
 <span id="cb10-6"></span>
-<span id="cb10-7"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(C0_manual, C0_auto)</span>
+<span id="cb10-7"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">assert</span> torch.allclose(C0_manual, C0_auto)</span>
 <span id="cb10-8"></span>
-<span id="cb10-9"><span class="bu" style="color: null;">print</span>(<span class="ss" style="color: #20794D;">f'</span><span class="sc" style="color: #5E5E5E;">{</span>out_00<span class="op" style="color: #5E5E5E;">=</span><span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">'</span>, <span class="ss" style="color: #20794D;">f'</span><span class="sc" style="color: #5E5E5E;">{</span>out_01<span class="op" style="color: #5E5E5E;">=</span><span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">'</span>, <span class="ss" style="color: #20794D;">f'</span><span class="sc" style="color: #5E5E5E;">{</span>C0_manual<span class="op" style="color: #5E5E5E;">=</span><span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">'</span>, sep<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'</span><span class="ch" style="color: #20794D;">\n</span><span class="st" style="color: #20794D;">'</span>)</span></code></pre></div>
+<span id="cb10-9"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>out_00<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>, <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>out_01<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>, <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>C0_manual<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>, sep<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>out_00=tensor(-0.0213)
 out_01=tensor(0.3668)
@@ -365,7 +1062,43 @@ C0_manual=tensor([-0.0213,  0.3668])</code></pre>
 </ul>
 <p>Let’s check the sizes of both and see whether we can use broadcasting:</p>
 <div class="cell" data-execution_count="100">
-<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><span class="bu" style="color: null;">print</span>(<span class="ss" style="color: #20794D;">f'</span><span class="sc" style="color: #5E5E5E;">{</span>a[<span class="dv" style="color: #AD0000;">0</span>,:]<span class="sc" style="color: #5E5E5E;">.</span>shape<span class="op" style="color: #5E5E5E;">=</span><span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">'</span>, <span class="ss" style="color: #20794D;">f'</span><span class="sc" style="color: #5E5E5E;">{</span>b<span class="sc" style="color: #5E5E5E;">.</span>shape<span class="op" style="color: #5E5E5E;">=</span><span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">'</span>, sep<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'</span><span class="ch" style="color: #20794D;">\n</span><span class="st" style="color: #20794D;">'</span>)</span></code></pre></div>
+<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>a[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,:]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>shape<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>, <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>b<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>shape<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>, sep<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>a[0,:].shape=torch.Size([3])
 b.shape=torch.Size([3, 2])</code></pre>
@@ -373,9 +1106,21 @@ b.shape=torch.Size([3, 2])</code></pre>
 </div>
 <p>Unfortunately, size <code>[3]</code> and <code>[3,2]</code> don’t broadcast. To make them broadcast, we have to add an empty dimension at the end of the row of the A matrix. Then, the shapes <code>[3, 1]</code> and <code>[3, 2]</code> can be broadcasted to another by duplicating the former in the column direction:</p>
 <div class="cell" data-execution_count="102">
-<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">t <span class="op" style="color: #5E5E5E;">=</span> a[<span class="dv" style="color: #AD0000;">0</span>,:].unsqueeze(<span class="op" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">1</span>) <span class="co" style="color: #5E5E5E;"># [3, 1]</span></span>
+<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">t <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> a[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,:].unsqueeze(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># [3, 1]</span></span>
 <span id="cb14-2"></span>
-<span id="cb14-3">t.broadcast_to(b.shape) <span class="co" style="color: #5E5E5E;"># [3, 2]</span></span></code></pre></div>
+<span id="cb14-3">t.broadcast_to(b.shape) <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># [3, 2]</span></span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="102">
 <pre><code>tensor([[ 0.9193,  0.9193],
         [-0.0426, -0.0426],
@@ -384,12 +1129,62 @@ b.shape=torch.Size([3, 2])</code></pre>
 </div>
 <p>Now that both object are the same size we can do an element-wise multiplication and then sum over the rows to arrive at an output of size <code>[1,2]</code>:</p>
 <div class="cell" data-execution_count="156">
-<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">C0_manual <span class="op" style="color: #5E5E5E;">=</span> (t<span class="op" style="color: #5E5E5E;">*</span>b).<span class="bu" style="color: null;">sum</span>(dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">0</span>)</span>
-<span id="cb16-2">C0_auto <span class="op" style="color: #5E5E5E;">=</span> (a<span class="op" style="color: #5E5E5E;">@</span>b)[<span class="dv" style="color: #AD0000;">0</span>,:]</span>
+<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">C0_manual <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (t<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>b).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(dim<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb16-2">C0_auto <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (a<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span>b)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,:]</span>
 <span id="cb16-3"></span>
-<span id="cb16-4"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(C0_manual, C0_auto)</span>
+<span id="cb16-4"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">assert</span> torch.allclose(C0_manual, C0_auto)</span>
 <span id="cb16-5"></span>
-<span id="cb16-6"><span class="bu" style="color: null;">print</span>(<span class="ss" style="color: #20794D;">f'</span><span class="sc" style="color: #5E5E5E;">{</span>C0_manual<span class="op" style="color: #5E5E5E;">=</span><span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">'</span>, <span class="ss" style="color: #20794D;">f'</span><span class="sc" style="color: #5E5E5E;">{</span>C0_manual<span class="sc" style="color: #5E5E5E;">.</span>shape<span class="op" style="color: #5E5E5E;">=</span><span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">'</span>, sep<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'</span><span class="ch" style="color: #20794D;">\n</span><span class="st" style="color: #20794D;">'</span>)</span></code></pre></div>
+<span id="cb16-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>C0_manual<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>, <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>C0_manual<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>shape<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>, sep<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>C0_manual=tensor([-0.0213,  0.3668])
 C0_manual.shape=torch.Size([2])</code></pre>
@@ -397,20 +1192,64 @@ C0_manual.shape=torch.Size([2])</code></pre>
 </div>
 <p>So let’s implement this:</p>
 <div class="cell" data-execution_count="116">
-<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><span class="kw" style="color: #003B4F;">def</span> matmul3(a, b):</span>
-<span id="cb18-2">    ar, ac <span class="op" style="color: #5E5E5E;">=</span> a.shape</span>
-<span id="cb18-3">    br, bc <span class="op" style="color: #5E5E5E;">=</span> b.shape</span>
-<span id="cb18-4">    <span class="cf" style="color: #003B4F;">assert</span> ac <span class="op" style="color: #5E5E5E;">==</span> br</span>
+<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> matmul3(a, b):</span>
+<span id="cb18-2">    ar, ac <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> a.shape</span>
+<span id="cb18-3">    br, bc <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> b.shape</span>
+<span id="cb18-4">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">assert</span> ac <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> br</span>
 <span id="cb18-5"></span>
-<span id="cb18-6">    out <span class="op" style="color: #5E5E5E;">=</span> torch.zeros(ar,bc)</span>
-<span id="cb18-7">    <span class="co" style="color: #5E5E5E;"># iterate over the rows of the output matrix (i)</span></span>
-<span id="cb18-8">    <span class="cf" style="color: #003B4F;">for</span> i <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(out.shape[<span class="dv" style="color: #AD0000;">0</span>]):</span>
-<span id="cb18-9">        out[i, :] <span class="op" style="color: #5E5E5E;">=</span> (a[i, :].unsqueeze(<span class="op" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">1</span>) <span class="op" style="color: #5E5E5E;">*</span> b).<span class="bu" style="color: null;">sum</span>(dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">0</span>)</span>
+<span id="cb18-6">    out <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.zeros(ar,bc)</span>
+<span id="cb18-7">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># iterate over the rows of the output matrix (i)</span></span>
+<span id="cb18-8">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(out.shape[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]):</span>
+<span id="cb18-9">        out[i, :] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (a[i, :].unsqueeze(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> b).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(dim<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
 <span id="cb18-10">    </span>
-<span id="cb18-11">    <span class="cf" style="color: #003B4F;">return</span> out</span>
+<span id="cb18-11">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> out</span>
 <span id="cb18-12"></span>
-<span id="cb18-13"><span class="co" style="color: #5E5E5E;"># Confirm that the result is correct</span></span>
-<span id="cb18-14"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(matmul(a,b), a<span class="op" style="color: #5E5E5E;">@</span>b)</span></code></pre></div>
+<span id="cb18-13"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Confirm that the result is correct</span></span>
+<span id="cb18-14"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">assert</span> torch.allclose(matmul(a,b), a<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span>b)</span></code></pre></div>
 </div>
 </section>
 <section id="third-improvement" class="level2">
@@ -441,31 +1280,73 @@ C0_manual.shape=torch.Size([2])</code></pre>
 <li>This means, that to arrive at the final result, we will have to collapse (sum) over the middle dimension!</li>
 </ol>
 <div class="cell" data-execution_count="154">
-<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><span class="kw" style="color: #003B4F;">def</span> matmul4(a, b):</span>
-<span id="cb19-2">    <span class="cf" style="color: #003B4F;">return</span> (a.unsqueeze(<span class="op" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">1</span>) <span class="op" style="color: #5E5E5E;">*</span> b).<span class="bu" style="color: null;">sum</span>(dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>)</span>
+<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> matmul4(a, b):</span>
+<span id="cb19-2">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> (a.unsqueeze(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> b).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(dim<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
 <span id="cb19-3"></span>
-<span id="cb19-4"><span class="co" style="color: #5E5E5E;"># Confirm that the result is correct</span></span>
-<span id="cb19-5"><span class="cf" style="color: #003B4F;">assert</span> torch.allclose(matmul(a,b), a<span class="op" style="color: #5E5E5E;">@</span>b)</span></code></pre></div>
+<span id="cb19-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Confirm that the result is correct</span></span>
+<span id="cb19-5"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">assert</span> torch.allclose(matmul(a,b), a<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span>b)</span></code></pre></div>
 </div>
 </section>
 <section id="timings" class="level2">
 <h2 class="anchored" data-anchor-id="timings">Timings</h2>
 <p>To see what kind of a speed-up we have achieved, let’s look at the timings of our first version with three loops and the timings of our optimized version:</p>
 <div class="cell" data-execution_count="147">
-<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><span class="op" style="color: #5E5E5E;">%</span>timeit <span class="op" style="color: #5E5E5E;">-</span>n <span class="dv" style="color: #AD0000;">1000</span> matmul(a,b)</span></code></pre></div>
+<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%</span>timeit <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>n <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span> matmul(a,b)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>318 µs ± 13.7 µs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)</code></pre>
 </div>
 </div>
 <div class="cell" data-execution_count="155">
-<div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><span class="op" style="color: #5E5E5E;">%</span>timeit <span class="op" style="color: #5E5E5E;">-</span>n <span class="dv" style="color: #AD0000;">1000</span> matmul4(a,b)</span></code></pre></div>
+<div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%</span>timeit <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>n <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span> matmul4(a,b)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>10.7 µs ± 1.46 µs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)</code></pre>
 </div>
 </div>
 <p>Nice, our optimized version is about 30 times faster then our un-optimized version with 3 loops! Additionally, let’s check the timings of doing the matrix multiplication with <code>einsum</code>:</p>
 <div class="cell" data-execution_count="151">
-<div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><span class="op" style="color: #5E5E5E;">%</span>timeit <span class="op" style="color: #5E5E5E;">-</span>n <span class="dv" style="color: #AD0000;">1000</span> torch.einsum(<span class="st" style="color: #20794D;">'ij,jk-&gt;ik'</span>, a, b)</span></code></pre></div>
+<div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%</span>timeit <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>n <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span> torch.einsum(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'ij,jk-&gt;ik'</span>, a, b)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>25.9 µs ± 3.78 µs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)</code></pre>
 </div>
@@ -473,7 +1354,15 @@ C0_manual.shape=torch.Size([2])</code></pre>
 <p>Surprisingly, our optimized version is twice as fast as <code>einsum</code>. This is certainly something I didn’t expect.</p>
 <p>Finally, let’s also check the timings of using the <code>@</code> operator:</p>
 <div class="cell" data-execution_count="152">
-<div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><span class="op" style="color: #5E5E5E;">%</span>timeit <span class="op" style="color: #5E5E5E;">-</span>n <span class="dv" style="color: #AD0000;">1000</span> a<span class="op" style="color: #5E5E5E;">@</span>b</span></code></pre></div>
+<div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%</span>timeit <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>n <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span> a<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span>b</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>3.29 µs ± 522 ns per loop (mean ± std. dev. of 7 runs, 1,000 loops each)</code></pre>
 </div>
@@ -530,7 +1419,7 @@ C0_manual.shape=torch.Size([2])</code></pre>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://lucasvw.github.io/posts/03_aiornot/ss2.png" class="img-fluid figure-img" width="500"></p>
-<p></p><figcaption class="figure-caption">Image for <a href="https://stablediffusionweb.com/#demo">Stable Diffusion</a> prompt: <em>“Sense of achievement when finishing my first ever machine learning competition”</em></figcaption><p></p>
+<figcaption class="figure-caption">Image for <a href="https://stablediffusionweb.com/#demo">Stable Diffusion</a> prompt: <em>“Sense of achievement when finishing my first ever machine learning competition”</em></figcaption>
 </figure>
 </div>
 
@@ -558,12 +1447,12 @@ C0_manual.shape=torch.Size([2])</code></pre>
 <p>I started using Paperspace because of a recommendation from Jeremy Howard in his <a href="https://www.youtube.com/playlist?list=PLfYUBJiXbdtSLBPJ1GMx-sQWf6iNhb8mM">Live Coding Videos</a>. If you haven’t seen these lectures, I can highly recommend them. They are a great resource on many things related to getting started with Deep Learning. Jeremy shows a lot of productivity hacks and practical tips on getting a good setup.</p>
 <p>However, the Paperspace setup explanations are a bit out-dated which can lead to confusion when following along with the video’s. Also, after the recording of the videos Jeremy created some nice scripts which simplify the setup. This blog will hopefully help others to navigate this and quickly set-up a remote GPU server. I would advice anybody who wants to try Paperspace, to first watch the videos from Jeremy to have a general idea of how it works, and then follow these steps to quickly get set-up.</p>
 <p>Once you have signed up to Paperspace, go to their Gradient service and create a new project. Paperspace has a free tier, as well as a pro- ($8/month) and growth-plan ($39/month). I personally signed up for the pro-plan, which has a very good value for money. You get 15Gb persistent storage and free Mid instance types. If available, I use the A4000, which is the fastest and comes with 16GB of GPU memory.</p>
-<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<div class="callout-caption-container flex-fill">
+<div class="callout-title-container flex-fill">
 Note
 </div>
 </div>
@@ -581,7 +1470,7 @@ Note
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://lucasvw.github.io/posts/02_paperspace_setup/screenshot.png" class="img-fluid figure-img" width="300"></p>
-<p></p><figcaption class="figure-caption">Click the JupyterLab icon to open up a JupyterLab environment for your GPU server</figcaption><p></p>
+<figcaption class="figure-caption">Click the JupyterLab icon to open up a JupyterLab environment for your GPU server</figcaption>
 </figure>
 </div>
 <section id="first-look-at-our-notebook-server" class="level2">
@@ -591,19 +1480,37 @@ Note
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
-<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="op" style="color: #5E5E5E;">&gt;</span> which <span class="ex" style="color: null;">python</span></span>
-<span id="cb1-2"><span class="ex" style="color: null;">/usr/local/bin/python</span></span>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> which <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">python</span></span>
+<span id="cb1-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">/usr/local/bin/python</span></span>
 <span id="cb1-3"></span>
-<span id="cb1-4"><span class="op" style="color: #5E5E5E;">&gt;</span> python <span class="ex" style="color: null;">--version</span></span>
-<span id="cb1-5"><span class="ex" style="color: null;">Python</span> 3.9.13</span></code></pre></div>
+<span id="cb1-4"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> python <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">--version</span></span>
+<span id="cb1-5"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">Python</span> 3.9.13</span></code></pre></div>
 </div>
 <p>And let’s also check the <code>PATH</code> variable:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
-<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="op" style="color: #5E5E5E;">&gt;</span> echo <span class="va" style="color: #111111;">$PATH</span></span>
-<span id="cb2-2"><span class="ex" style="color: null;">/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:</span> /usr/sbin:/usr/bin:/sbin:/bin:/root/mambaforge/bin</span></code></pre></div>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> echo <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$PATH</span></span>
+<span id="cb2-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:</span> /usr/sbin:/usr/bin:/sbin:/bin:/root/mambaforge/bin</span></code></pre></div>
 </div>
 <p>The <code>python</code> command is thus pointing to the system Python installation. However, on the <code>PATH</code> variable we are also seeing an entry at the end mentioning mambaforge.</p>
 <p>And indeed we can execute:</p>
@@ -611,14 +1518,34 @@ Note
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
-<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="op" style="color: #5E5E5E;">&gt;</span> mamba <span class="ex" style="color: null;">list</span> <span class="kw" style="color: #003B4F;">|</span> <span class="fu" style="color: #4758AB;">grep</span> python</span>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> mamba <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">list</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">|</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">grep</span> python</span>
 <span id="cb3-2"></span>
-<span id="cb3-3"><span class="ex" style="color: null;">ipython</span>                   8.5.0              pyh41d4057_1    conda-forge</span>
-<span id="cb3-4"><span class="ex" style="color: null;">ipython_genutils</span>          0.2.0                      py_1    conda-forge</span>
-<span id="cb3-5"><span class="ex" style="color: null;">python</span>                    3.10.6          h582c2e5_0_cpython    conda-forge</span>
-<span id="cb3-6"><span class="ex" style="color: null;">python-dateutil</span>           2.8.2              pyhd8ed1ab_0    conda-forge</span>
-<span id="cb3-7"><span class="ex" style="color: null;">python-fastjsonschema</span>     2.16.2             pyhd8ed1ab_0    conda-forge</span>
-<span id="cb3-8"><span class="ex" style="color: null;">python_abi</span>                3.10                    2_cp310    conda-forge</span></code></pre></div>
+<span id="cb3-3"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">ipython</span>                   8.5.0              pyh41d4057_1    conda-forge</span>
+<span id="cb3-4"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">ipython_genutils</span>          0.2.0                      py_1    conda-forge</span>
+<span id="cb3-5"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">python</span>                    3.10.6          h582c2e5_0_cpython    conda-forge</span>
+<span id="cb3-6"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">python-dateutil</span>           2.8.2              pyhd8ed1ab_0    conda-forge</span>
+<span id="cb3-7"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">python-fastjsonschema</span>     2.16.2             pyhd8ed1ab_0    conda-forge</span>
+<span id="cb3-8"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">python_abi</span>                3.10                    2_cp310    conda-forge</span></code></pre></div>
 </div>
 <p>So we are having both a <code>mamba</code> based Python 3.10.6 and a system installation of Python 3.9.13.</p>
 <p>Let’s open a Jupyter Notebook and see which Python version is running:</p>
@@ -626,16 +1553,20 @@ Note
 <div class="code-with-filename-file">
 <pre><strong>Untitled.ipynb</strong></pre>
 </div>
-<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;">import</span> sys</span>
-<span id="cb4-2"><span class="ex" style="color: null;">sys.version</span></span></code></pre></div>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">import</span> sys</span>
+<span id="cb4-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">sys.version</span></span></code></pre></div>
 </div>
 <p>Which returns: <code>'3.9.13 (main, May 23 2022, 22:01:06) \n[GCC 9.4.0]'</code>. Jupyter is thus running the system Python installation.</p>
-<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<div class="callout-caption-container flex-fill">
+<div class="callout-title-container flex-fill">
 Note
 </div>
 </div>
@@ -648,21 +1579,51 @@ Note
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
-<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><span class="op" style="color: #5E5E5E;">&gt;</span> pip <span class="ex" style="color: null;">list</span></span>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> pip <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">list</span></span>
 <span id="cb5-2"></span>
-<span id="cb5-3"><span class="ex" style="color: null;">...</span></span>
-<span id="cb5-4"><span class="ex" style="color: null;">fastai</span>                            2.7.10</span>
-<span id="cb5-5"><span class="ex" style="color: null;">fastapi</span>                           0.92.0</span>
-<span id="cb5-6"><span class="ex" style="color: null;">fastbook</span>                          0.0.28</span>
-<span id="cb5-7"><span class="ex" style="color: null;">fastcore</span>                          1.5.27</span>
-<span id="cb5-8"><span class="ex" style="color: null;">fastdownload</span>                      0.0.7</span>
-<span id="cb5-9"><span class="ex" style="color: null;">fastjsonschema</span>                    2.15.3</span>
-<span id="cb5-10"><span class="ex" style="color: null;">fastprogress</span>                      1.0.3</span>
-<span id="cb5-11"><span class="ex" style="color: null;">...</span></span>
-<span id="cb5-12"><span class="ex" style="color: null;">torch</span>                             1.12.0+cu116</span>
-<span id="cb5-13"><span class="ex" style="color: null;">torchaudio</span>                        0.12.0+cu116</span>
-<span id="cb5-14"><span class="ex" style="color: null;">torchvision</span>                       0.13.0+cu116</span>
-<span id="cb5-15"><span class="ex" style="color: null;">...</span></span></code></pre></div>
+<span id="cb5-3"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">...</span></span>
+<span id="cb5-4"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">fastai</span>                            2.7.10</span>
+<span id="cb5-5"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">fastapi</span>                           0.92.0</span>
+<span id="cb5-6"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">fastbook</span>                          0.0.28</span>
+<span id="cb5-7"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">fastcore</span>                          1.5.27</span>
+<span id="cb5-8"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">fastdownload</span>                      0.0.7</span>
+<span id="cb5-9"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">fastjsonschema</span>                    2.15.3</span>
+<span id="cb5-10"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">fastprogress</span>                      1.0.3</span>
+<span id="cb5-11"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">...</span></span>
+<span id="cb5-12"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">torch</span>                             1.12.0+cu116</span>
+<span id="cb5-13"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">torchaudio</span>                        0.12.0+cu116</span>
+<span id="cb5-14"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">torchvision</span>                       0.13.0+cu116</span>
+<span id="cb5-15"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">...</span></span></code></pre></div>
 </div>
 </section>
 <section id="persisted-storage-at-paperspace" class="level2">
@@ -677,21 +1638,41 @@ Note
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
-<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><span class="op" style="color: #5E5E5E;">&gt;</span> git <span class="ex" style="color: null;">clone</span> https://github.com/fastai/paperspace-setup.git</span>
-<span id="cb6-2"><span class="op" style="color: #5E5E5E;">&gt;</span> cd <span class="ex" style="color: null;">paperspace-setup</span></span>
-<span id="cb6-3"><span class="op" style="color: #5E5E5E;">&gt;</span> ./setup.sh</span></code></pre></div>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> git <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">clone</span> https://github.com/fastai/paperspace-setup.git</span>
+<span id="cb6-2"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> cd <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">paperspace-setup</span></span>
+<span id="cb6-3"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> ./setup.sh</span></code></pre></div>
 </div>
 <p>To understand what this does, let’s have a look at <code>setup.sh</code>:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>setup.py</strong></pre>
 </div>
-<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><span class="co" style="color: #5E5E5E;">#!/usr/bin/env bash</span></span>
+<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#!/usr/bin/env bash</span></span>
 <span id="cb7-2"></span>
-<span id="cb7-3"><span class="fu" style="color: #4758AB;">mkdir</span> /storage/cfg</span>
-<span id="cb7-4"><span class="fu" style="color: #4758AB;">cp</span> pre-run.sh /storage/</span>
-<span id="cb7-5"><span class="fu" style="color: #4758AB;">cp</span> .bash.local /storage/</span>
-<span id="cb7-6"><span class="bu" style="color: null;">echo</span> install complete. please start a new instance</span></code></pre></div>
+<span id="cb7-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mkdir</span> /storage/cfg</span>
+<span id="cb7-4"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">cp</span> pre-run.sh /storage/</span>
+<span id="cb7-5"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">cp</span> .bash.local /storage/</span>
+<span id="cb7-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">echo</span> install complete. please start a new instance</span></code></pre></div>
 </div>
 <p>First it’s creating a new directory inside of our <code>/storage</code> folder called <code>cfg</code>. As we will see, this is where we will store all our configuration files and folders.</p>
 <p>Next, the script copies 2 files to our storage folder. Let’s have a closer look at those</p>
@@ -703,14 +1684,56 @@ Note
 <div class="code-with-filename-file">
 <pre><strong>pre-run.sh (snippet)</strong></pre>
 </div>
-<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode numberSource bash code-overflow-wrap number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><span class="cf" style="color: #003B4F;">for</span> p <span class="kw" style="color: #003B4F;">in</span> .local .ssh .config .ipython .fastai .jupyter .conda .kaggle</span>
-<span id="cb8-2"><span class="cf" style="color: #003B4F;">do</span></span>
-<span id="cb8-3">        <span class="cf" style="color: #003B4F;">if</span> <span class="bu" style="color: null;">[</span> <span class="ot" style="color: #003B4F;">!</span> <span class="ot" style="color: #003B4F;">-e</span> /storage/cfg/<span class="va" style="color: #111111;">$p</span> <span class="bu" style="color: null;">]</span><span class="kw" style="color: #003B4F;">;</span> <span class="cf" style="color: #003B4F;">then</span></span>
-<span id="cb8-4">                <span class="fu" style="color: #4758AB;">mkdir</span> /storage/cfg/<span class="va" style="color: #111111;">$p</span></span>
-<span id="cb8-5">        <span class="cf" style="color: #003B4F;">fi</span></span>
-<span id="cb8-6">        <span class="fu" style="color: #4758AB;">rm</span> <span class="at" style="color: #657422;">-rf</span> ~/<span class="va" style="color: #111111;">$p</span></span>
-<span id="cb8-7">        <span class="fu" style="color: #4758AB;">ln</span> <span class="at" style="color: #657422;">-s</span> /storage/cfg/<span class="va" style="color: #111111;">$p</span> ~/</span>
-<span id="cb8-8"><span class="cf" style="color: #003B4F;">done</span></span></code></pre></div>
+<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode numberSource bash code-overflow-wrap number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> .local .ssh .config .ipython .fastai .jupyter .conda .kaggle</span>
+<span id="cb8-2"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">do</span></span>
+<span id="cb8-3">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">[</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">!</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">-e</span> /storage/cfg/<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$p</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">]</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">then</span></span>
+<span id="cb8-4">                <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mkdir</span> /storage/cfg/<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$p</span></span>
+<span id="cb8-5">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">fi</span></span>
+<span id="cb8-6">        <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rm</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-rf</span> ~/<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$p</span></span>
+<span id="cb8-7">        <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ln</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-s</span> /storage/cfg/<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$p</span> ~/</span>
+<span id="cb8-8"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">done</span></span></code></pre></div>
 </div>
 <p>So we are iterating through a list of folder names (<code>.local .ssh ...</code>) on line 1, and for each one we create a directory inside of <code>/storage/cfg</code> on line 4. We only do this if the directory doesn’t already exist on line 3. Next, each of these folders is symlinked to the home directory (<code>~/</code>) on line 7.</p>
 <p>This means that:</p>
@@ -740,14 +1763,56 @@ Note
 <div class="code-with-filename-file">
 <pre><strong>pre-run.sh (snippet)</strong></pre>
 </div>
-<div class="sourceCode" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><span class="cf" style="color: #003B4F;">for</span> p <span class="kw" style="color: #003B4F;">in</span> .git-credentials .gitconfig .bash_history</span>
-<span id="cb9-2"><span class="cf" style="color: #003B4F;">do</span></span>
-<span id="cb9-3">        <span class="cf" style="color: #003B4F;">if</span> <span class="bu" style="color: null;">[</span> <span class="ot" style="color: #003B4F;">!</span> <span class="ot" style="color: #003B4F;">-e</span> /storage/cfg/<span class="va" style="color: #111111;">$p</span> <span class="bu" style="color: null;">]</span><span class="kw" style="color: #003B4F;">;</span> <span class="cf" style="color: #003B4F;">then</span></span>
-<span id="cb9-4">                <span class="fu" style="color: #4758AB;">touch</span> /storage/cfg/<span class="va" style="color: #111111;">$p</span></span>
-<span id="cb9-5">        <span class="cf" style="color: #003B4F;">fi</span></span>
-<span id="cb9-6">        <span class="fu" style="color: #4758AB;">rm</span> <span class="at" style="color: #657422;">-rf</span> ~/<span class="va" style="color: #111111;">$p</span></span>
-<span id="cb9-7">        <span class="fu" style="color: #4758AB;">ln</span> <span class="at" style="color: #657422;">-s</span> /storage/cfg/<span class="va" style="color: #111111;">$p</span> ~/</span>
-<span id="cb9-8"><span class="cf" style="color: #003B4F;">done</span></span></code></pre></div>
+<div class="sourceCode" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> .git-credentials .gitconfig .bash_history</span>
+<span id="cb9-2"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">do</span></span>
+<span id="cb9-3">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">[</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">!</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">-e</span> /storage/cfg/<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$p</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">]</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">then</span></span>
+<span id="cb9-4">                <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">touch</span> /storage/cfg/<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$p</span></span>
+<span id="cb9-5">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">fi</span></span>
+<span id="cb9-6">        <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rm</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-rf</span> ~/<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$p</span></span>
+<span id="cb9-7">        <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ln</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-s</span> /storage/cfg/<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$p</span> ~/</span>
+<span id="cb9-8"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">done</span></span></code></pre></div>
 </div>
 <p>Now that we understand <code>pre-run.sh</code>, let’s have a look at the second file we store in our <code>/storage</code> folder:</p>
 </section>
@@ -758,12 +1823,30 @@ Note
 <div class="code-with-filename-file">
 <pre><strong>.bash.local</strong></pre>
 </div>
-<div class="sourceCode" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><span class="co" style="color: #5E5E5E;">#!/usr/bin/env bash</span></span>
+<div class="sourceCode" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#!/usr/bin/env bash</span></span>
 <span id="cb10-2"></span>
-<span id="cb10-3"><span class="bu" style="color: null;">alias</span> mambai=<span class="st" style="color: #20794D;">'mamba install -p ~/.conda '</span></span>
-<span id="cb10-4"><span class="bu" style="color: null;">alias</span> pipi=<span class="st" style="color: #20794D;">'pip install --user '</span></span>
+<span id="cb10-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">alias</span> mambai=<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'mamba install -p ~/.conda '</span></span>
+<span id="cb10-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">alias</span> pipi=<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'pip install --user '</span></span>
 <span id="cb10-5"></span>
-<span id="cb10-6"><span class="bu" style="color: null;">export</span> <span class="va" style="color: #111111;">PATH</span><span class="op" style="color: #5E5E5E;">=</span>~/.local/bin:~/.conda/bin/:<span class="va" style="color: #111111;">$PATH</span></span></code></pre></div>
+<span id="cb10-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">export</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">PATH</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>~/.local/bin:~/.conda/bin/:<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$PATH</span></span></code></pre></div>
 </div>
 <p>Paperspace runs this script whenever we open a terminal. As you can see it defines two aliases to easily install things persistently with either mamba (<code>mambai</code>) or pip (<code>pipi</code>).</p>
 <p>Any <strong>binaries</strong> that are installed this way, are installed in <code>~/.local/bin</code> (through <code>pip</code>) and to <code>~/.conda/bin/</code> (through <code>mamba</code>). We need to add these paths to the <code>PATH</code> variable, to make sure we can call them from the command line.</p>
@@ -815,7 +1898,11 @@ Note
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
-<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="ex" style="color: null;">quarto</span> <span class="at" style="color: #657422;">--help</span></span></code></pre></div>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">quarto</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--help</span></span></code></pre></div>
 </div>
 <p>This should render some outputs describing the different commands and options that are part of the Quarto CLI and shows that Quarto is installed successfully.</p>
 </section>
@@ -830,7 +1917,9 @@ Note
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
-<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="fu" style="color: #4758AB;">git</span> clone git@github.com:lucasvw/lucasvw.github.io.git</span></code></pre></div>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">git</span> clone git@github.com:lucasvw/lucasvw.github.io.git</span></code></pre></div>
 </div>
 </section>
 <section id="step-3-add-a-quarto-project-to-the-repo" class="level2">
@@ -840,7 +1929,11 @@ Note
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
-<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="ex" style="color: null;">quarto</span> create-project <span class="at" style="color: #657422;">--type</span> website:blog</span></code></pre></div>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">quarto</span> create-project <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--type</span> website:blog</span></code></pre></div>
 </div>
 <p>This will add a number of files to our repo, which represent the basic structure of our blog. Most importantly:</p>
 <ul>
@@ -849,12 +1942,12 @@ Note
 <li><code>about.qmd</code>: source code for the “about” page.</li>
 <li><code>index.qmd</code>: source code for the landing page.</li>
 </ul>
-<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<div class="callout-caption-container flex-fill">
+<div class="callout-title-container flex-fill">
 Note
 </div>
 </div>
@@ -867,7 +1960,9 @@ Note
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
-<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;">quarto</span> preview</span></code></pre></div>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">quarto</span> preview</span></code></pre></div>
 </div>
 <p>Alternatively, we can install the Quarto extension in VS Code, which will show a <code>render</code> button in the top right corner on any opened <code>qmd</code> file.</p>
 <p>To publish the current contents to GitHub pages, we can run:</p>
@@ -875,7 +1970,9 @@ Note
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
-<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><span class="ex" style="color: null;">quarto</span> publish gh-pages</span></code></pre></div>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">quarto</span> publish gh-pages</span></code></pre></div>
 </div>
 <p>When doing so, we get a message that we have to change the branch from which GitHub Pages builds the site. To do this, I go to <a href="https://github.com/lucasvw/lucasvw.github.io/settings/pages">https://github.com/lucasvw/lucasvw.github.io/settings/pages</a> and select <code>gh-pages</code> instead of the <code>main</code> branch.</p>
 <p>And voila, in a few moments our blog will be running live at <a href="https://lucasvw.github.io/">https://lucasvw.github.io/</a></p>
@@ -902,12 +1999,12 @@ Note
 <li>run the publish command to update the blog</li>
 </ul>
 <p>This is a bit annoying and it would be much better if we can just push to the main branch and GitHub would take care of building our website and updating it. This also allows us to create blog entries on any machine that has access to git, we don’t need to have quarto installed. This is particularly practical if we want to write blog entries from our deep learning server. So let’s use GitHub actions for this.</p>
-<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<div class="callout-caption-container flex-fill">
+<div class="callout-title-container flex-fill">
 Note
 </div>
 </div>
@@ -920,8 +2017,20 @@ Note
 <div class="code-with-filename-file">
 <pre><strong>_quarto.yml</strong></pre>
 </div>
-<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb7-1"><span class="fu" style="color: #4758AB;">execute</span><span class="kw" style="color: #003B4F;">:</span></span>
-<span id="cb7-2"><span class="at" style="color: #657422;">  </span><span class="fu" style="color: #4758AB;">freeze</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> auto</span></span></code></pre></div>
+<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb7-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">execute</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span></span>
+<span id="cb7-2"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">freeze</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> auto</span></span></code></pre></div>
 </div>
 <p>This will make sure that GitHub actions doesn’t execute any executable code, but will show the pre-rendered outputs it finds in the <code>_freeze</code> folder.</p>
 <p>Finally, create the file <code>.github/workflows/publish.yml</code> and populate it with the following code:</p>
@@ -929,31 +2038,187 @@ Note
 <div class="code-with-filename-file">
 <pre><strong>.github/workflows/publish.yml</strong></pre>
 </div>
-<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb8-1"><span class="fu" style="color: #4758AB;">on</span><span class="kw" style="color: #003B4F;">:</span></span>
-<span id="cb8-2"><span class="at" style="color: #657422;">  </span><span class="fu" style="color: #4758AB;">workflow_dispatch</span><span class="kw" style="color: #003B4F;">:</span></span>
-<span id="cb8-3"><span class="at" style="color: #657422;">  </span><span class="fu" style="color: #4758AB;">push</span><span class="kw" style="color: #003B4F;">:</span></span>
-<span id="cb8-4"><span class="at" style="color: #657422;">    </span><span class="fu" style="color: #4758AB;">branches</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> main</span></span>
+<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb8-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">on</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span></span>
+<span id="cb8-2"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">workflow_dispatch</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span></span>
+<span id="cb8-3"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">push</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span></span>
+<span id="cb8-4"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">branches</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> main</span></span>
 <span id="cb8-5"></span>
-<span id="cb8-6"><span class="fu" style="color: #4758AB;">name</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> Quarto Publish</span></span>
+<span id="cb8-6"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">name</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> Quarto Publish</span></span>
 <span id="cb8-7"></span>
-<span id="cb8-8"><span class="fu" style="color: #4758AB;">jobs</span><span class="kw" style="color: #003B4F;">:</span></span>
-<span id="cb8-9"><span class="at" style="color: #657422;">  </span><span class="fu" style="color: #4758AB;">build-deploy</span><span class="kw" style="color: #003B4F;">:</span></span>
-<span id="cb8-10"><span class="at" style="color: #657422;">    </span><span class="fu" style="color: #4758AB;">runs-on</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> ubuntu-latest</span></span>
-<span id="cb8-11"><span class="at" style="color: #657422;">    </span><span class="fu" style="color: #4758AB;">permissions</span><span class="kw" style="color: #003B4F;">:</span></span>
-<span id="cb8-12"><span class="at" style="color: #657422;">      </span><span class="fu" style="color: #4758AB;">contents</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> write</span></span>
-<span id="cb8-13"><span class="at" style="color: #657422;">    </span><span class="fu" style="color: #4758AB;">steps</span><span class="kw" style="color: #003B4F;">:</span></span>
-<span id="cb8-14"><span class="at" style="color: #657422;">      </span><span class="kw" style="color: #003B4F;">-</span><span class="at" style="color: #657422;"> </span><span class="fu" style="color: #4758AB;">name</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> Check out repository</span></span>
-<span id="cb8-15"><span class="at" style="color: #657422;">        </span><span class="fu" style="color: #4758AB;">uses</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> actions/checkout@v3</span></span>
+<span id="cb8-8"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">jobs</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span></span>
+<span id="cb8-9"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">build-deploy</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span></span>
+<span id="cb8-10"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">runs-on</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> ubuntu-latest</span></span>
+<span id="cb8-11"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">permissions</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span></span>
+<span id="cb8-12"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">contents</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> write</span></span>
+<span id="cb8-13"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">steps</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span></span>
+<span id="cb8-14"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">name</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> Check out repository</span></span>
+<span id="cb8-15"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">        </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">uses</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> actions/checkout@v3</span></span>
 <span id="cb8-16"></span>
-<span id="cb8-17"><span class="at" style="color: #657422;">      </span><span class="kw" style="color: #003B4F;">-</span><span class="at" style="color: #657422;"> </span><span class="fu" style="color: #4758AB;">name</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> Set up Quarto</span></span>
-<span id="cb8-18"><span class="at" style="color: #657422;">        </span><span class="fu" style="color: #4758AB;">uses</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> quarto-dev/quarto-actions/setup@v2</span></span>
+<span id="cb8-17"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">name</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> Set up Quarto</span></span>
+<span id="cb8-18"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">        </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">uses</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> quarto-dev/quarto-actions/setup@v2</span></span>
 <span id="cb8-19"></span>
-<span id="cb8-20"><span class="at" style="color: #657422;">      </span><span class="kw" style="color: #003B4F;">-</span><span class="at" style="color: #657422;"> </span><span class="fu" style="color: #4758AB;">name</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> Render and Publish</span></span>
-<span id="cb8-21"><span class="at" style="color: #657422;">        </span><span class="fu" style="color: #4758AB;">uses</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> quarto-dev/quarto-actions/publish@v2</span></span>
-<span id="cb8-22"><span class="at" style="color: #657422;">        </span><span class="fu" style="color: #4758AB;">with</span><span class="kw" style="color: #003B4F;">:</span></span>
-<span id="cb8-23"><span class="at" style="color: #657422;">          </span><span class="fu" style="color: #4758AB;">target</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> gh-pages</span></span>
-<span id="cb8-24"><span class="at" style="color: #657422;">        </span><span class="fu" style="color: #4758AB;">env</span><span class="kw" style="color: #003B4F;">:</span></span>
-<span id="cb8-25"><span class="at" style="color: #657422;">          </span><span class="fu" style="color: #4758AB;">GITHUB_TOKEN</span><span class="kw" style="color: #003B4F;">:</span><span class="at" style="color: #657422;"> ${{ secrets.GITHUB_TOKEN }}</span></span></code></pre></div>
+<span id="cb8-20"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">name</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> Render and Publish</span></span>
+<span id="cb8-21"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">        </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">uses</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> quarto-dev/quarto-actions/publish@v2</span></span>
+<span id="cb8-22"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">        </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">with</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span></span>
+<span id="cb8-23"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">          </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">target</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> gh-pages</span></span>
+<span id="cb8-24"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">        </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">env</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span></span>
+<span id="cb8-25"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">          </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">GITHUB_TOKEN</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> ${{ secrets.GITHUB_TOKEN }}</span></span></code></pre></div>
 </div>
 <p>Once we push these things to GitHub, we are good to go. Whenever we push anything to the <code>main</code> branch, this workflow will execute and take care of updating the <code>gh-pages</code> branch and updating the blog.</p>
 

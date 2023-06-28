@@ -1,31 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://lucasvw.github.io/about.html</loc>
-    <lastmod>2023-03-30T15:18:38.032Z</lastmod>
-  </url>
-  <url>
-    <loc>https://lucasvw.github.io/posts/02_paperspace_setup/index.html</loc>
-    <lastmod>2023-03-30T15:18:38.880Z</lastmod>
-  </url>
-  <url>
     <loc>https://lucasvw.github.io/posts/04_matmul/index.html</loc>
-    <lastmod>2023-03-30T15:18:39.364Z</lastmod>
+    <lastmod>2023-06-28T09:00:29.830Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/05_crossentropy/index.html</loc>
-    <lastmod>2023-03-30T15:18:39.784Z</lastmod>
+    <lastmod>2023-06-28T09:00:27.778Z</lastmod>
   </url>
   <url>
-    <loc>https://lucasvw.github.io/posts/01_blog_setup/index.html</loc>
-    <lastmod>2023-03-30T15:18:40.728Z</lastmod>
+    <loc>https://lucasvw.github.io/posts/02_paperspace_setup/index.html</loc>
+    <lastmod>2023-06-28T09:00:26.890Z</lastmod>
   </url>
   <url>
-    <loc>https://lucasvw.github.io/posts/03_aiornot/index.html</loc>
-    <lastmod>2023-03-30T15:18:41.380Z</lastmod>
+    <loc>https://lucasvw.github.io/about.html</loc>
+    <lastmod>2023-06-28T09:00:25.218Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/index.html</loc>
-    <lastmod>2023-03-30T15:18:42.128Z</lastmod>
+    <lastmod>2023-06-28T09:00:24.582Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/posts/06_stable_diffusion_basics/index.html</loc>
+    <lastmod>2023-06-28T09:00:26.234Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/posts/03_aiornot/index.html</loc>
+    <lastmod>2023-06-28T09:00:27.282Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/posts/01_blog_setup/index.html</loc>
+    <lastmod>2023-06-28T09:00:28.858Z</lastmod>
   </url>
 </urlset>
