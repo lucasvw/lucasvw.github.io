@@ -17,9 +17,11 @@ website:
         href: https://twitter.com/lvWal
       - icon: linkedin
         href: https://www.linkedin.com/in/lucasvanwalstijn/
+      - text: "{{< iconify fa6-brands kaggle >}}"
+        href: https://www.kaggle.com/lucasvw
       - icon: rss
         href: https://lucasvw.github.io/index.xml
 format:
   html:
-    theme: [cosmo, syles.scss]
+    theme: cosmo
     css: styles.css
