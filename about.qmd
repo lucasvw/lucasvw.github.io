@@ -13,6 +13,8 @@ about:
     - icon: github
       text: Github
       href: https://github.com/lucasvw
+    - text: "{{< iconify fa6-brands kaggle >}} Kaggle"
+      href: https://www.kaggle.com/lucasvw
 
 ---
 
