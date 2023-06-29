@@ -26,11 +26,11 @@
 <p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/image.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
-<p>And although this image isn’t perfect and can be improved by more detailed prompting, it’s pretty amazing that it took less then 30 seconds to create this image, and the depiction is a fairly accurate representation of the prompt: The algorithm “imagined” that people on the moon should be wearing space suits, a good idea indeed! All have gathered around a table an are sitting on some kind of chair, which is generally how people eat their lunch. Last but not least, the background looks pretty moonish. Not bad at all!</p>
-<p>Now let’s look at the main components involved in creating this image, this follows largely the steps of <a href="https://course.fast.ai/Lessons/lesson9.html">Lesson 9 of Deep Learning for Coders</a></p>
+<p>And although this image isn’t perfect, it’s pretty amazing that it took less then 30 seconds to create this image. The algorithm “imagined” that people on the moon should be wearing space suits, and that lunch is generally eaten in a sitting position and around a table. Also, the surroundings look indeed pretty moonish. Not bad at all!</p>
+<p>In this post, we will have a look at the main components involved in creating this image, and follows largely the steps of <a href="https://course.fast.ai/Lessons/lesson9.html">Lesson 9 of Deep Learning for Coders</a>.</p>
 <section id="intuition" class="level2">
 <h2 class="anchored" data-anchor-id="intuition">Intuition</h2>
-<p>Consider some kind of black box system that takes an input, does “something” and then gives an output. Let’s say it takes an image of a handwritten digit as input, and outputs the probability that the image is indeed a hand written digit. Visually something like this:</p>
+<p>Consider some kind of black box system that takes some input data, and based on it creates some output data. Let’s say, it takes an image of a handwritten digit as input, and outputs the probability that the image is indeed a hand written digit. Visually something like this:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/intuition-1.png" class="img-fluid figure-img"></p>
@@ -38,29 +38,29 @@
 </div>
 <p>In statistics, we would call this a probability density function. It’s a function that takes data as input, and gives the probability that</p>
 <ul>
-<li>if the data is coming indeed from the distribution,</li>
-<li>then what’s the probability that we see this data</li>
+<li>if the input data is coming indeed from the distribution,</li>
+<li>what’s the probability that we see this data?</li>
 </ul>
-<p>Applied to our use-case: if the image is indeed from this distribution of images that represent images of hand written digits, what’s the probability that we observe the presented image?</p>
-<p>As seen from the figure above: with such a system, we could start with an image of pure noise and iteratively do:</p>
+<p>Applied to our use-case: if the presented image is indeed from the distribution (of images) that represent hand written digits, what’s the probability that we observe the presented image?</p>
+<p>With such a system, we could start with an image made up of pure noise and iteratively do:</p>
 <ol type="1">
 <li>get the probability <img src="https://latex.codecogs.com/png.latex?p_0"> of the image being a handwritten digit from the black box system</li>
 <li>change the value of one of the pixels at random</li>
 <li>get the new probability <img src="https://latex.codecogs.com/png.latex?p_1"> whether the image is a handwritten digit from the black box system</li>
 <li>when <img src="https://latex.codecogs.com/png.latex?p_1%20%3E%20p_0"> update the image with the changed pixel value</li>
 </ol>
-<p>If we follow this procedure long enough, we would gradually update all the pixel values and the image will start to resemble a handwritten digit.</p>
+<p>When following this procedure long enough and thus updating pixel for pixel, we would gradually change all the values of our pixels of our image, until eventually it will start to resemble a handwritten digit.</p>
 <p>In principle, this is the simple intuition behind stable diffusion.</p>
 </section>
 <section id="the-main-component-unet" class="level2">
 <h2 class="anchored" data-anchor-id="the-main-component-unet">The main component: Unet</h2>
-<p>So how are we going to create this magic system which will give the probability that an image is depicting a handwritten digit? Let’s start with the training data, we need lots of images that depict handwritten digits. Something like this:</p>
+<p>So how are we going to create this system that will return the probability that an image is depicting a handwritten digit? Let’s try to create a model, that will do so. To get the training data, we need lots of images that depict handwritten digits. Something like this:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/mnist.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
-<p>Since these images represent actual hand-written digits, the system will need to output a near 1.0 probability for these images. But how do we get images that “somewhat” represent handwritten digits and will result in lower probability values? We somehow have to “crappify” these existing images. We can do by using the images we already found and sprinkle them with different amounts of noise. The more noise we add, the less the image will resemble a handwritten digit. Visually:</p>
+<p>Since these images represent actual hand-written digits, the system will need to output a probability close to 1 for these images. But how do we get images that “somewhat” or “rarely” represent handwritten digits and are associated with lower probability values? We somehow have to “crappify” these existing images. We can do this by using these same images and sprinkle them with different amounts of noise. The more noise we add, the less the image will resemble a handwritten digit. Visually:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://lucasvw.github.io/posts/06_stable_diffusion_basics/intuition-2.png" class="img-fluid figure-img"></p>
@@ -94,7 +94,7 @@
 </section>
 <section id="compression-variational-autoencoder" class="level2">
 <h2 class="anchored" data-anchor-id="compression-variational-autoencoder">Compression: Variational Autoencoder</h2>
-<p>When working with images in neural networks we often reduce the resolution of images or use smaller patches of the original image to make sure everything fits on the GPU. With stable diffusion, we naturally want to output images of high resolution, so we need either very large GPUs, or we can use a compression trick by making use of a Variational Autoencoder (VAE).</p>
+<p>When working with images in neural networks we often reduce the resolution of images or use smaller patches of the original image to make sure everything fits on the GPU. With stable diffusion, we naturally want to output images of high resolution, so we either need very large GPUs, or instead we use a compression trick by making use of a Variational Autoencoder (VAE).</p>
 <p>A VAE is a network architecture having an encoder and a decoder. In the encoder the image input is being transformed through a series of convolutional layers into a compressed representation, the latent. In the decoder this compressed latent is passed through a series of layers that are trying to reconstruct the original image. Visually:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
