@@ -2,38 +2,38 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://lucasvw.github.io/about.html</loc>
-    <lastmod>2023-07-05T08:53:22.447Z</lastmod>
-  </url>
-  <url>
-    <loc>https://lucasvw.github.io/posts/06_stable_diffusion_basics/index.html</loc>
-    <lastmod>2023-07-05T08:53:20.919Z</lastmod>
+    <lastmod>2023-07-05T10:29:52.412Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/02_paperspace_setup/index.html</loc>
-    <lastmod>2023-07-05T08:53:19.207Z</lastmod>
+    <lastmod>2023-07-05T10:29:50.356Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/03_aiornot/index.html</loc>
-    <lastmod>2023-07-05T08:53:15.731Z</lastmod>
-  </url>
-  <url>
-    <loc>https://lucasvw.github.io/index.html</loc>
-    <lastmod>2023-07-05T08:53:14.235Z</lastmod>
+    <lastmod>2023-07-05T10:29:48.568Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/05_crossentropy/index.html</loc>
-    <lastmod>2023-07-05T08:53:15.263Z</lastmod>
-  </url>
-  <url>
-    <loc>https://lucasvw.github.io/posts/01_blog_setup/index.html</loc>
-    <lastmod>2023-07-05T08:53:16.999Z</lastmod>
+    <lastmod>2023-07-05T10:29:47.136Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/07_stable_diffusion_code/index.html</loc>
-    <lastmod>2023-07-05T08:53:20.091Z</lastmod>
+    <lastmod>2023-07-05T10:29:44.492Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/posts/01_blog_setup/index.html</loc>
+    <lastmod>2023-07-05T10:29:45.996Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/04_matmul/index.html</loc>
-    <lastmod>2023-07-05T08:53:21.703Z</lastmod>
+    <lastmod>2023-07-05T10:29:48.060Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/posts/06_stable_diffusion_basics/index.html</loc>
+    <lastmod>2023-07-05T10:29:49.468Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/index.html</loc>
+    <lastmod>2023-07-05T10:29:52.036Z</lastmod>
   </url>
 </urlset>
