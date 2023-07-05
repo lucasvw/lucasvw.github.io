@@ -413,7 +413,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-12787"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-12787").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-29633"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-29633").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>
@@ -425,86 +425,88 @@ p &amp;= g p_{c} + (1 - g) p_{uc} \\
 \end{align}\]</span></p>
 <p>So with a guidance scale value larger than 1, the unconditional prediction <span class="math inline">\(p_{uc}\)</span> is being subtracted from the conditional prediction <span class="math inline">\(p_c\)</span>, which has the effect of removing the concept from the conditional image.</p>
 <p>An example of Homer Simpson eating lunch:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>cond_input <span class="op">=</span> tokenizer(<span class="st">"Homer Simpson eating lunch"</span>, padding<span class="op">=</span><span class="st">"max_length"</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span>) </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>cond_embeddings <span class="op">=</span> text_encoder(cond_input.input_ids.to(<span class="st">"cuda"</span>))[<span class="dv">0</span>]</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>uncond_input <span class="op">=</span> tokenizer(<span class="st">""</span>, padding<span class="op">=</span><span class="st">"max_length"</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span>) </span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>uncond_embeddings <span class="op">=</span> text_encoder(uncond_input.input_ids.to(<span class="st">"cuda"</span>))[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <div class="cell" data-execution_count="184">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">105</span>)</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>cond_input <span class="op">=</span> tokenizer(<span class="st">"Homer Simpson eating lunch"</span>, padding<span class="op">=</span><span class="st">"max_length"</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span>) </span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>cond_embeddings <span class="op">=</span> text_encoder(cond_input.input_ids.to(<span class="st">"cuda"</span>))[<span class="dv">0</span>]</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>uncond_input <span class="op">=</span> tokenizer(<span class="st">""</span>, padding<span class="op">=</span><span class="st">"max_length"</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span>) </span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>uncond_embeddings <span class="op">=</span> text_encoder(uncond_input.input_ids.to(<span class="st">"cuda"</span>))[<span class="dv">0</span>]</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> torch.cat([cond_embeddings, uncond_embeddings])</span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>guidance_scale <span class="op">=</span> <span class="fl">7.5</span></span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>latents <span class="op">=</span> torch.randn((batch_size, unet.config.in_channels, unet.config.sample_size, unet.config.sample_size)).to(<span class="st">"cuda"</span>)               </span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>latents <span class="op">=</span> latents <span class="op">*</span> scheduler.init_noise_sigma</span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, t <span class="kw">in</span> <span class="bu">enumerate</span>(scheduler.timesteps):</span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    inputs <span class="op">=</span> torch.cat([latents, latents]) <span class="co"># concatenate the latents</span></span>
-<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>    inputs <span class="op">=</span> scheduler.scale_model_input(inputs, t)</span>
-<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad(): </span>
-<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>        pred <span class="op">=</span> unet(inputs, t, encoder_hidden_states<span class="op">=</span>embeddings).sample</span>
-<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>    pred_cond, pred_uncond <span class="op">=</span> pred.chunk(<span class="dv">2</span>)</span>
-<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>    pred <span class="op">=</span> pred_uncond <span class="op">+</span> guidance_scale <span class="op">*</span> (pred_cond <span class="op">-</span> pred_uncond)</span>
-<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>    latents <span class="op">=</span> scheduler.step(pred, t, latents).prev_sample</span>
-<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad(): image <span class="op">=</span> vae.decode(<span class="dv">1</span> <span class="op">/</span> <span class="fl">0.18215</span> <span class="op">*</span> latents).sample</span>
-<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> image[<span class="dv">0</span>].detach().cpu().permute(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">0</span>).numpy()</span>
-<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> ((image <span class="op">/</span> <span class="dv">2</span> <span class="op">+</span> <span class="fl">0.5</span>).clip(<span class="dv">0</span>, <span class="dv">1</span>) <span class="op">*</span> <span class="dv">255</span>).<span class="bu">round</span>().astype(<span class="st">"uint8"</span>)</span>
-<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>Image.fromarray(image)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-display" data-execution_count="184">
-<p><img src="index_files/figure-html/cell-16-output-1.png" class="img-fluid"></p>
-</div>
-</div>
-<p>And removing the blue chair by using a negative prompt:</p>
-<div class="cell" data-execution_count="185">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">105</span>)</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>uncond_input <span class="op">=</span> tokenizer(<span class="st">"blue chair"</span>, padding<span class="op">=</span><span class="st">"max_length"</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span>) </span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>uncond_embeddings <span class="op">=</span> text_encoder(uncond_input.input_ids.to(<span class="st">"cuda"</span>))[<span class="dv">0</span>]</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> torch.cat([cond_embeddings, uncond_embeddings])</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>guidance_scale <span class="op">=</span> <span class="fl">7.5</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> torch.cat([cond_embeddings, uncond_embeddings])</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>guidance_scale <span class="op">=</span> <span class="fl">7.5</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>latents <span class="op">=</span> torch.randn((batch_size, unet.config.in_channels, unet.config.sample_size, unet.config.sample_size)).to(<span class="st">"cuda"</span>)               </span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>latents <span class="op">=</span> latents <span class="op">*</span> scheduler.init_noise_sigma</span>
 <span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>latents <span class="op">=</span> torch.randn((batch_size, unet.config.in_channels, unet.config.sample_size, unet.config.sample_size)).to(<span class="st">"cuda"</span>)               </span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>latents <span class="op">=</span> latents <span class="op">*</span> scheduler.init_noise_sigma</span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, t <span class="kw">in</span> <span class="bu">enumerate</span>(scheduler.timesteps):</span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    inputs <span class="op">=</span> torch.cat([latents, latents]) <span class="co"># concatenate the latents</span></span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>    inputs <span class="op">=</span> scheduler.scale_model_input(inputs, t)</span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad(): </span>
-<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>        pred <span class="op">=</span> unet(inputs, t, encoder_hidden_states<span class="op">=</span>embeddings).sample</span>
-<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>    pred_cond, pred_uncond <span class="op">=</span> pred.chunk(<span class="dv">2</span>)</span>
-<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>    pred <span class="op">=</span> pred_uncond <span class="op">+</span> guidance_scale <span class="op">*</span> (pred_cond <span class="op">-</span> pred_uncond)</span>
-<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>    latents <span class="op">=</span> scheduler.step(pred, t, latents).prev_sample</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, t <span class="kw">in</span> <span class="bu">enumerate</span>(scheduler.timesteps):</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    inputs <span class="op">=</span> torch.cat([latents, latents]) <span class="co"># concatenate the latents</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    inputs <span class="op">=</span> scheduler.scale_model_input(inputs, t)</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad(): </span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>        pred <span class="op">=</span> unet(inputs, t, encoder_hidden_states<span class="op">=</span>embeddings).sample</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    pred_cond, pred_uncond <span class="op">=</span> pred.chunk(<span class="dv">2</span>)</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>    pred <span class="op">=</span> pred_uncond <span class="op">+</span> guidance_scale <span class="op">*</span> (pred_cond <span class="op">-</span> pred_uncond)</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>    latents <span class="op">=</span> scheduler.step(pred, t, latents).prev_sample</span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad(): image <span class="op">=</span> vae.decode(<span class="dv">1</span> <span class="op">/</span> <span class="fl">0.18215</span> <span class="op">*</span> latents).sample</span>
 <span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad(): image <span class="op">=</span> vae.decode(<span class="dv">1</span> <span class="op">/</span> <span class="fl">0.18215</span> <span class="op">*</span> latents).sample</span>
-<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> image[<span class="dv">0</span>].detach().cpu().permute(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">0</span>).numpy()</span>
-<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> ((image <span class="op">/</span> <span class="dv">2</span> <span class="op">+</span> <span class="fl">0.5</span>).clip(<span class="dv">0</span>, <span class="dv">1</span>) <span class="op">*</span> <span class="dv">255</span>).<span class="bu">round</span>().astype(<span class="st">"uint8"</span>)</span>
-<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a>Image.fromarray(image)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> image[<span class="dv">0</span>].detach().cpu().permute(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">0</span>).numpy()</span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> ((image <span class="op">/</span> <span class="dv">2</span> <span class="op">+</span> <span class="fl">0.5</span>).clip(<span class="dv">0</span>, <span class="dv">1</span>) <span class="op">*</span> <span class="dv">255</span>).<span class="bu">round</span>().astype(<span class="st">"uint8"</span>)</span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a>Image.fromarray(image)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="184">
+<p><img src="index_files/figure-html/cell-17-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>And removing the blue chair by using a negative prompt:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>uncond_input <span class="op">=</span> tokenizer(<span class="st">"blue chair"</span>, padding<span class="op">=</span><span class="st">"max_length"</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span>) </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>uncond_embeddings <span class="op">=</span> text_encoder(uncond_input.input_ids.to(<span class="st">"cuda"</span>))[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="185">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">105</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> torch.cat([cond_embeddings, uncond_embeddings])</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>guidance_scale <span class="op">=</span> <span class="fl">7.5</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>latents <span class="op">=</span> torch.randn((batch_size, unet.config.in_channels, unet.config.sample_size, unet.config.sample_size)).to(<span class="st">"cuda"</span>)               </span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>latents <span class="op">=</span> latents <span class="op">*</span> scheduler.init_noise_sigma</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, t <span class="kw">in</span> <span class="bu">enumerate</span>(scheduler.timesteps):</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    inputs <span class="op">=</span> torch.cat([latents, latents]) <span class="co"># concatenate the latents</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    inputs <span class="op">=</span> scheduler.scale_model_input(inputs, t)</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad(): </span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>        pred <span class="op">=</span> unet(inputs, t, encoder_hidden_states<span class="op">=</span>embeddings).sample</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>    pred_cond, pred_uncond <span class="op">=</span> pred.chunk(<span class="dv">2</span>)</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>    pred <span class="op">=</span> pred_uncond <span class="op">+</span> guidance_scale <span class="op">*</span> (pred_cond <span class="op">-</span> pred_uncond)</span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>    latents <span class="op">=</span> scheduler.step(pred, t, latents).prev_sample</span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad(): image <span class="op">=</span> vae.decode(<span class="dv">1</span> <span class="op">/</span> <span class="fl">0.18215</span> <span class="op">*</span> latents).sample</span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> image[<span class="dv">0</span>].detach().cpu().permute(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">0</span>).numpy()</span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> ((image <span class="op">/</span> <span class="dv">2</span> <span class="op">+</span> <span class="fl">0.5</span>).clip(<span class="dv">0</span>, <span class="dv">1</span>) <span class="op">*</span> <span class="dv">255</span>).<span class="bu">round</span>().astype(<span class="st">"uint8"</span>)</span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>Image.fromarray(image)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="185">
-<p><img src="index_files/figure-html/cell-17-output-1.png" class="img-fluid"></p>
+<p><img src="index_files/figure-html/cell-19-output-1.png" class="img-fluid"></p>
 </div>
 </div>
 </section>
