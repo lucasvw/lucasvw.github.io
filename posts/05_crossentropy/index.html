@@ -301,7 +301,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>with <span class="math inline">\(i\)</span> being the index that moves along the classes (3 in our example) and <span class="math inline">\(q_i\)</span> being the probability that the ground truth label is class <span class="math inline">\(i\)</span> (this is a somewhat strange formulation, since this probability is either 1 (for the correct class) or 0 (for all the non-correct classes)). Finally, <span class="math inline">\(p_i\)</span> is the probability that the model associated to class <span class="math inline">\(i\)</span>.</p>
 <p>For the very first row of our <code>probs</code> (<code>[0.4993, 0.3217, 0.1789]</code>) and our first label (<code>0</code>) we thus get:</p>
 <p><span class="math display">\[\begin{align}
-\textrm{NLL} &amp;= - ( (1 \cdot \log(0.4993)) + (0 \cdot \log(0.3217)) + (1 \cdot \log(0.1789)) ) \\
+\textrm{NLL} &amp;= - ( (1 \cdot \log(0.4993)) + (0 \cdot \log(0.3217)) + (0 \cdot \log(0.1789)) ) \\
 \textrm{NLL} &amp;= - ( (1 \cdot \log(0.4993)) ) \\
 \textrm{NLL} &amp;= - \log(0.4993)
 \end{align}\]</span></p>
