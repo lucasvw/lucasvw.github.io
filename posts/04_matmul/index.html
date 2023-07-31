@@ -202,11 +202,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>Matrix multiplications are kind of boring, so why write a blog post about them? Well, matrix multiplications are the most basic computation that is being performed by neural networks. So it’s probably good to be familiar with them (although we never do them by hand). Also, we are going to focus on speeding them up by doing vectorization. Vectorization is something we often have to do, to make sure everything runs as quickly as possible, and it’s thus a good exercise to understand how to achieve this. Especially since it involves being very familiar with matrices, their shapes, broadcasting operations and the like.</p>
+<p>Matrix multiplications are kind of boring, so why write a blog post about them? Well, matrix multiplications are the most basic computation that is being performed by neural networks. So it’s probably good to be familiar with them, although we never do them by hand. Also, we are going to focus on speeding them up by doing vectorization. Vectorization is something we often have to do, to make sure everything runs as quickly as possible, and it’s thus a good exercise to understand how to achieve this. Especially since it involves being very familiar with matrices, their shapes, broadcasting operations and the like.</p>
 <p>This post follows the first lecture of Part 2 of the FastAI course (2019), I will provide some additional explanations, and present one other optimization that is not presented in the <a href="https://%20youtu.be/4u8FxNEDUeg?t=2392">lecture</a>.</p>
 <section id="definition" class="level2">
 <h2 class="anchored" data-anchor-id="definition">Definition</h2>
-<p>Matrix multiplication is not difficult, it basically goes like this:</p>
+<p>Matrix multiplication is not difficult, it goes like this:</p>
 <ul>
 <li>For matrix A of size <code>[ar x ac]</code> &nbsp; (<code>[4 x 3]</code> in the image below)</li>
 <li>and matrix B of size <code>[br x bc]</code> &nbsp; (<code>[3 x 2]</code> in the image below)</li>
@@ -236,7 +236,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><img src="image2.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
-<p>Let’s do this in code and confirm what we have established above about the shapes of the matrices:</p>
+<p>Let’s do this in code, to confirm these statements:</p>
 <div class="cell" data-execution_count="21">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -257,7 +257,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> torch.allclose(C00_manual, C00_auto)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>With what we know, let’s create our own <code>matmul</code> function:</p>
+<p>Now, let’s create our own matrix multiplication function:</p>
 <div class="cell" data-execution_count="115">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> matmul(a, b):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># fill in the sizes of the dimensions</span></span>
