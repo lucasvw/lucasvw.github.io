@@ -284,6 +284,6 @@
     "href": "posts/08_nntrain_setup/index.html#end",
     "title": "nntrain: preliminaries (0/n)",
     "section": "End",
-    "text": "End\nWe have come a long way, and covered a lot of ground. We have seen many of the fundamental components of training a neural network: the data, a simple model, training loops and optimizers. We have seen why things like nn.Module exist, and understand it’s behavior. Furthermore, we have seen that the need for nn.Module and torch.optim comes out of the need for simplifying things.\nIn the next post, we will get to datasets and dataloaders, and we will start adding our first things into the nntrain library 🕺."
+    "text": "End\nWe have come a long way, and covered a lot of ground. We have seen many of the fundamental components of training a neural network: the data, a simple model, training loops and optimizers. We have seen why things like nn.Module exist, and understand it’s behavior. Furthermore, we have seen that the need for nn.Module and torch.optim comes out of the need for simplifying things in the training loop.\nIn the next post, we will get to datasets and dataloaders, and we will start adding our first things into the nntrain library 🕺."
   }
 ]
