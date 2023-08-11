@@ -9,14 +9,2350 @@
 <link>https://lucasvw.github.io/index.html</link>
 <atom:link href="https://lucasvw.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
-<generator>quarto-1.3.433</generator>
-<lastBuildDate>Mon, 03 Jul 2023 00:00:00 GMT</lastBuildDate>
+<generator>quarto-1.3.450</generator>
+<lastBuildDate>Wed, 09 Aug 2023 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>nntrain: preliminaries (0/n)</title>
+  <dc:creator>Lucas van Walstijn</dc:creator>
+  <link>https://lucasvw.github.io/posts/08_nntrain_setup/index.html</link>
+  <description><![CDATA[ 
+
+
+
+<p>In this series, I want to discuss the creation of a small library for training neural networks: <code>nntrain</code>. It’s based off the excellent <a href="https://course.fast.ai/">part 2</a> of Practical Deep Learning for Coders by Jeremy Howard, in which from lessons 13 to 18 (roughly) the development of the <code>miniai</code> library is discussed.</p>
+<p>The library will build upon PyTorch. However, we’ll create things as much as possible from scratch to understand how it all works. Once the main functionality of components are implemented and verified, we can use PyTorch’s version, mainly for performance reasons and interoperability. This is similar to how things are done in the course. I explicitly want to state here that it’s not just a “copy / paste” of the course. On many occasions I take a different route, and most of the code is my own.</p>
+<p>As we’ll see, the library will be built using <a href="https://nbdev.fast.ai/"><code>nb_dev</code></a>, another great project from the fastai community. With this software, it becomes very straight forward to create python libraries which are exported from jupyter notebooks. This may sound a bit weird, but it has the advantage that we can create the sourcecode for our library in the very same environment in which we want to experiment and interact with our methods, objects and structure <strong>while we are building the library</strong>. For more details on why this is a good idea, see <a href="https://www.fast.ai/posts/2022-07-28-nbdev2.html">here</a>.</p>
+<p>So without further ado, let’s start with some data!</p>
+<section id="data" class="level2">
+<h2 class="anchored" data-anchor-id="data">Data</h2>
+<p>To keep things simple, let’s use the fashion-mnist dataset. We can get the data from the huggingface datasets library:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> datasets <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> load_dataset,load_dataset_builder</span>
+<span id="cb1-2"></span>
+<span id="cb1-3">name <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"fashion_mnist"</span></span>
+<span id="cb1-4">ds_builder <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> load_dataset_builder(name)</span>
+<span id="cb1-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(ds_builder.info.description)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Fashion-MNIST is a dataset of Zalando's article images—consisting of a training set of
+60,000 examples and a test set of 10,000 examples. Each example is a 28x28 grayscale image,
+associated with a label from 10 classes. We intend Fashion-MNIST to serve as a direct drop-in
+replacement for the original MNIST dataset for benchmarking machine learning algorithms.
+It shares the same image size and structure of training and testing splits.
+</code></pre>
+</div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">ds <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> load_dataset(name, split<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'train'</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Reusing dataset fashion_mnist (/root/.cache/huggingface/datasets/fashion_mnist/fashion_mnist/1.0.0/8d6c32399aa01613d96e2cbc9b13638f359ef62bb33612b077b4c247f6ef99c1)</code></pre>
+</div>
+</div>
+<p><code>ds</code> is a <code>Dataset</code> object. These kind of objects appear in many Deep Learning libraries and have two main functionalities: you can index into them and they have a length:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">ds[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span></code></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'image': &lt;PIL.PngImagePlugin.PngImageFile image mode=L size=28x28&gt;,
+ 'label': 9}</code></pre>
+</div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(ds)</span></code></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>60000</code></pre>
+</div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">ds</span></code></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>Dataset({
+    features: ['image', 'label'],
+    num_rows: 60000
+})</code></pre>
+</div>
+</div>
+<p>Hugginface datasets (as opposed to PyTorch datasets) also have some properties, in this case <code>num_rows</code>, which is the length of the dataset (60000) and <code>features</code>, a dictionary giving metadata on what is returned when we index into the dataset:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">ds.features</span></code></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'image': Image(decode=True, id=None),
+ 'label': ClassLabel(num_classes=10, names=['T - shirt / top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot'], id=None)}</code></pre>
+</div>
+</div>
+<p>Let’s visualize one single item:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb13-2"></span>
+<span id="cb13-3">image <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> ds[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>][<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'image'</span>]</span>
+<span id="cb13-4">label <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> ds[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>][<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'label'</span>]</span>
+<span id="cb13-5"></span>
+<span id="cb13-6">figure, axs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots()</span>
+<span id="cb13-7"></span>
+<span id="cb13-8">axs.imshow(ds[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>][<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'image'</span>], cmap<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Greys'</span>)</span>
+<span id="cb13-9">axs.set_title(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'Image of the first item in the dataset: label=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>label<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> -&gt; "</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>ds<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>features[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"label"</span>]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>int2str(label)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"'</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb13-10">axs.axis(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'off'</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span></code></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="https://lucasvw.github.io/posts/08_nntrain_setup/index_files/figure-html/cell-8-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Since we want to start simple, and only later get to Datsets and Dataloaders: let’s pull out the data into a tensor so we can build simple linear layers.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> torchvision.transforms.functional <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> TF   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># to transform from PIL to tensor</span></span>
+<span id="cb14-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> torch</span>
+<span id="cb14-3"></span>
+<span id="cb14-4">x_train <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [TF.to_tensor(i).view(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> ds[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'image'</span>]]</span>
+<span id="cb14-5">y_train <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [torch.tensor(i) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> ds[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'label'</span>]]</span>
+<span id="cb14-6"></span>
+<span id="cb14-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(x_train), <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(y_train), <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(x_train[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>])</span></code></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>(60000, 60000, 784)</code></pre>
+</div>
+</div>
+<p>So <code>x_train</code> and <code>y_train</code> are both lists of length 60000, and an element in <code>x_train</code> has length 784 (28x28 pixels).</p>
+</section>
+<section id="linear-layers" class="level2">
+<h2 class="anchored" data-anchor-id="linear-layers">Linear layers</h2>
+<p>Now that we have the data, let’s create our very first network operation: a linear layer which takes the 784 long flattened out image vector, and maps it to an output vector of length 10</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> torch</span>
+<span id="cb16-2"></span>
+<span id="cb16-3"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> lin(x, a, b):</span>
+<span id="cb16-4">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> x<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span>a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> b</span>
+<span id="cb16-5"></span>
+<span id="cb16-6">a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.randn(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">784</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>)</span>
+<span id="cb16-7">b <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.randn(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>)</span>
+<span id="cb16-8"></span>
+<span id="cb16-9">out <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> lin(x_train[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], a, b)</span>
+<span id="cb16-10">out.shape</span></code></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>torch.Size([10])</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For details on matrix multiplications, check out this <a href="https://lucasvw.github.io/posts/04_matmul/">post</a> I wrote earlier.</p>
+</div>
+</div>
+<p>Let’s do the same for all our training data at once:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1">x_train <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.stack(x_train)</span>
+<span id="cb18-2">out <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> lin(x_train, a,b)</span>
+<span id="cb18-3">out.shape</span></code></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>torch.Size([60000, 10])</code></pre>
+</div>
+</div>
+<p>Nice, that’s basically a forward pass through our model on all our training data!</p>
+<p>Now if we want to increase the depth of our network by adding an additional layer, we need to add a non-linearity in the middle. Why? See for example the first paragraphs of this <a href="https://stats.stackexchange.com/a/335972">answer</a>.</p>
+<p>Let’s add a ReLu nonlinearity:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> relu(x):</span>
+<span id="cb20-2">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> x.clamp_min(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.0</span>)</span></code></pre></div>
+</div>
+<p>And let’s combine these into our first “model”, consisting of two linear layers and a relu nonlinearity in the middle:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1">n_in <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">784</span> <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># number of input units (28x28)</span></span>
+<span id="cb21-2">n_h <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># number of hidden units</span></span>
+<span id="cb21-3">n_out <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span> <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># number of output units</span></span>
+<span id="cb21-4"></span>
+<span id="cb21-5">w1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.randn(n_in, n_h)</span>
+<span id="cb21-6">b1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.zeros(n_h)</span>
+<span id="cb21-7">w2 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.randn(n_h, n_out)</span>
+<span id="cb21-8">b2 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.zeros(n_out)</span>
+<span id="cb21-9"></span>
+<span id="cb21-10"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> model(x):</span>
+<span id="cb21-11">    a1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> lin(x, w1, b1)</span>
+<span id="cb21-12">    z1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> relu(a1)</span>
+<span id="cb21-13">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> lin(z1, w2, b2)</span></code></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1">out <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model(x_train)</span></code></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1">out.shape</span></code></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>torch.Size([60000, 10])</code></pre>
+</div>
+</div>
+<p>Our “model” currently only does a forward pass through the network. And as a matter of fact, it’s doing a forward pass with random weights. When training a neural network, we want to change these parameters in a way that the outputs of the network align with the outputs (<code>y_train</code>). I will not go into the details of this, but here is a great <a href="https://youtu.be/VMj-3S1tku0">video</a> by Andrej Karpathy which in my opinion gives one of the best explanations into how this works.</p>
+<p>Before doing a backward pass, we first have to calculate the loss. Since the outputs represent any of the 10 classes the image corresponds with, cross entropy is a straight forward loss function. Some details about cross entropy loss can be found in a <a href="https://lucasvw.github.io/posts/05_crossentropy/">post</a> I wrote earlier. However, since we want to add the backpropagation ourselves and I don’t know how to backpropagate through cross entropy (and I don’t feel like spending a lot of time on it), let’s use a much easier loss function for now: mean squared error (MSE). This obviously doesn’t make any sense in the context of our data, but mathematically it’s possible. We just have to end up with a single activation of our model instead of 10:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1">n_out <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># number of output units changed to 1</span></span>
+<span id="cb25-2"></span>
+<span id="cb25-3">w2 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.randn(n_h, n_out)</span>
+<span id="cb25-4">b2 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.zeros(n_out)</span>
+<span id="cb25-5"></span>
+<span id="cb25-6"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> model(x):</span>
+<span id="cb25-7">    a1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> lin(x, w1, b1)</span>
+<span id="cb25-8">    z1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> relu(a1)</span>
+<span id="cb25-9">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> lin(z1, w2, b2)</span>
+<span id="cb25-10"></span>
+<span id="cb25-11">out <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model(x_train)</span></code></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1">out.shape</span></code></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>torch.Size([60000, 1])</code></pre>
+</div>
+</div>
+<p>From which we see that the outputs have an empty trailing dimension. <code>y_train</code> doesn’t have this, so we have to squeeze out this empty dimension when computing the MSE:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> mse(pred, targ): </span>
+<span id="cb28-2">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> (pred.squeeze(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>targ).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">pow</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>).mean() </span>
+<span id="cb28-3"></span>
+<span id="cb28-4">y_train <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.stack(y_train)</span>
+<span id="cb28-5">mse(out, y_train)</span></code></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor(757.6417)</code></pre>
+</div>
+</div>
+<p>The next step will be to add the backward pass. But let’s refactor our code to put things into classes, that way the backward pass can be added more easily:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> Linear():</span>
+<span id="cb30-2">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, n_in, n_out):</span>
+<span id="cb30-3">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.w <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.randn(n_in, n_out)</span>
+<span id="cb30-4">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.b <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.zeros(n_out)</span>
+<span id="cb30-5">    </span>
+<span id="cb30-6">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__call__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, x):</span>
+<span id="cb30-7">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.inp <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x                      <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># storing this for the backward pass</span></span>
+<span id="cb30-8">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.out <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span>self.w <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.b      <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># storing this for the backward pass</span></span>
+<span id="cb30-9">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.out</span>
+<span id="cb30-10">    </span>
+<span id="cb30-11"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> Relu():</span>
+<span id="cb30-12">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__call__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, x):</span>
+<span id="cb30-13">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.inp <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x                      <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># storing this for the backward pass</span></span>
+<span id="cb30-14">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.out <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x.clamp_min(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.</span>)        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># storing this for the backward pass</span></span>
+<span id="cb30-15">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.out</span>
+<span id="cb30-16">    </span>
+<span id="cb30-17"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> MSE():</span>
+<span id="cb30-18">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__call__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, pred, targ):</span>
+<span id="cb30-19">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.pred <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pred                   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># storing this for the backward pass</span></span>
+<span id="cb30-20">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.targ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> targ                   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># storing this for the backward pass</span></span>
+<span id="cb30-21">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.out <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (pred.squeeze(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>targ).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">pow</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>).mean()</span>
+<span id="cb30-22">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.out</span>
+<span id="cb30-23">    </span>
+<span id="cb30-24"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> Model():</span>
+<span id="cb30-25">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, n_in, n_h, n_out):</span>
+<span id="cb30-26">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.layers <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [Linear(n_in, n_h), Relu(), Linear(n_h, n_out)]</span>
+<span id="cb30-27">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.loss <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> MSE()</span>
+<span id="cb30-28">        </span>
+<span id="cb30-29">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__call__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, x, y):</span>
+<span id="cb30-30">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> l <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.layers: x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> l(x)</span>
+<span id="cb30-31">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.loss(x, y)</span></code></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb31" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1">x_train.shape</span></code></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>torch.Size([60000, 784])</code></pre>
+</div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1">m <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Model(n_in, n_h, n_out)</span>
+<span id="cb33-2">l <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> m(x_train, y_train)</span></code></pre></div>
+</div>
+<p>To add in the functionality for the backward pass, redefining the whole class is a nuisance. So instead we’ll <code>patch</code> the classes. We can do this very easily by using the <code>fastcore</code> library. Let’s see a small example:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> fastcore.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">all</span> <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> fc</span>
+<span id="cb34-2"></span>
+<span id="cb34-3"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> A():</span>
+<span id="cb34-4">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> hi(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>): <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'hello 😎'</span>)</span>
+<span id="cb34-5">    </span>
+<span id="cb34-6">a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> A()</span>
+<span id="cb34-7">a.hi()</span>
+<span id="cb34-8"></span>
+<span id="cb34-9"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@fc.patch</span></span>
+<span id="cb34-10"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> hi(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>:A): <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'howdy 🤠'</span>)</span>
+<span id="cb34-11"></span>
+<span id="cb34-12">a.hi()</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>hello 😎
+howdy 🤠</code></pre>
+</div>
+</div>
+<p>So with <code>fc.patch</code> we can extend or change the behavior of Classes that have been defined elsewhere, even on instances of the objects that are already created. Nice!</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb36" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@fc.patch</span></span>
+<span id="cb36-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>: Linear):</span>
+<span id="cb36-3">    <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.inp.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.out.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.w.t()</span>
+<span id="cb36-4">    <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.w.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.inp.t() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.out.g</span>
+<span id="cb36-5">    <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.b.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.out.g.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb36-6">    </span>
+<span id="cb36-7"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@fc.patch</span></span>
+<span id="cb36-8"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>: Relu):</span>
+<span id="cb36-9">    <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.inp.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.inp<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.out.g</span>
+<span id="cb36-10">    </span>
+<span id="cb36-11"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@fc.patch</span></span>
+<span id="cb36-12"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>: MSE):</span>
+<span id="cb36-13">    <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.pred.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.pred.squeeze() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.targ).unsqueeze(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.targ.shape[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb36-14">    </span>
+<span id="cb36-15"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@fc.patch</span></span>
+<span id="cb36-16"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>: Model):</span>
+<span id="cb36-17">    <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.loss.backward()</span>
+<span id="cb36-18">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> l <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">reversed</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.layers): l.backward()</span></code></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb37" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1">m <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Model(n_in, n_h, n_out)</span>
+<span id="cb37-2">l <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> m(x_train, y_train)</span>
+<span id="cb37-3">m.backward()</span></code></pre></div>
+</div>
+<p>Now the actual operations in the backward methods you will just have to take for granted as I am not going to derive them. If you want, you can have some fun (?) to try and derive it yourself. What I think is most important about these formulas:</p>
+<ol type="1">
+<li>Notice that each layer has a reference to it’s inputs and it’s outputs</li>
+<li>During the backward pass, each layer uses the gradient from the <em>outputs</em> and uses it to set the gradient on the <em>inputs</em></li>
+<li>The inputs from layer <img src="https://latex.codecogs.com/png.latex?n"> are the outputs from layer <img src="https://latex.codecogs.com/png.latex?n-1">, so when the gradients are being set on the inputs from layer <img src="https://latex.codecogs.com/png.latex?n">, this means that layer <img src="https://latex.codecogs.com/png.latex?n-1"> it’s outputs are being set at the same time</li>
+<li>This is the fundamental point about backpropagation of the gradient: in reverse order, layer by layer the gradients are being <em>propagated back</em> through the network using the chain rule</li>
+<li>Although we don’t derive the operations, we can see that that there <em>exist</em> operations that do this. These operations are not magical, they are just the result of calculus: not very different from the fact that if <img src="https://latex.codecogs.com/png.latex?f(x)%20=%20x%5E2"> then <img src="https://latex.codecogs.com/png.latex?f'(x)%20=%202x"> and if <img src="https://latex.codecogs.com/png.latex?h(x)%20=%20f(g(x))"> then <img src="https://latex.codecogs.com/png.latex?h'(x)%20=%20f'(g(x))%20*%20g'(x)"></li>
+</ol>
+</section>
+<section id="first-refactor-module-baseclass-and-training-loop" class="level2">
+<h2 class="anchored" data-anchor-id="first-refactor-module-baseclass-and-training-loop">First refactor: <code>Module</code> baseclass and training loop</h2>
+<p>Now let’s see how we can make this a little better. One thing that seems a bit silly is that in each of the <code>Linear</code>, <code>MSE</code> and <code>Relu</code> classes, we are storing explicitly the inputs and outputs when doing a forward call. As mentioned, we need this to backpropagate the gradients. However, we rather not store that explicitly all the time when creating a new layer.</p>
+<p>So let’s create a base class that takes care of this:</p>
+<ul>
+<li>Pack the forward functionality of each layer in a dedicated <code>forward</code> method</li>
+<li>let the storing of inputs and ouputs be done in the <code>__call__</code> method of the baseclass, and call the <code>self.forward</code> method in between.</li>
+</ul>
+<p>This works, but there is one caveat: most layers just have one input when they are called (<code>x</code>), but the loss has 2 (<code>pred</code> and <code>targ</code>). To make this storing of the inputs generic we can store them as an array on the base class, and also pass them as positional arguments to <code>_backward</code>. This way, <code>forward</code> and <code>_backward</code> have the same arguments.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb38" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> Module():</span>
+<span id="cb38-2">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__call__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>args):</span>
+<span id="cb38-3">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.args <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> args</span>
+<span id="cb38-4">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.out <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.forward(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>args)</span>
+<span id="cb38-5">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.out</span>
+<span id="cb38-6">    </span>
+<span id="cb38-7">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>): <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._backward(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.args)</span>
+<span id="cb38-8"></span>
+<span id="cb38-9">    </span>
+<span id="cb38-10"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> Linear(Module):</span>
+<span id="cb38-11">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, n_in, n_out):</span>
+<span id="cb38-12">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.w <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.randn(n_in, n_out)</span>
+<span id="cb38-13">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.b <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.zeros(n_out)</span>
+<span id="cb38-14">    </span>
+<span id="cb38-15">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, x):</span>
+<span id="cb38-16">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> x<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span>self.w <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.b</span>
+<span id="cb38-17">    </span>
+<span id="cb38-18">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> _backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, inp):</span>
+<span id="cb38-19">        inp.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.out.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.w.t()</span>
+<span id="cb38-20">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.w.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> inp.t() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.out.g</span>
+<span id="cb38-21">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.b.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.out.g.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb38-22">    </span>
+<span id="cb38-23">    </span>
+<span id="cb38-24"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> Relu(Module):</span>
+<span id="cb38-25">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, x):</span>
+<span id="cb38-26">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> x.clamp_min(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.</span>)</span>
+<span id="cb38-27">    </span>
+<span id="cb38-28">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> _backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, inp):</span>
+<span id="cb38-29">        inp.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (inp<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.out.g</span>
+<span id="cb38-30"></span>
+<span id="cb38-31">    </span>
+<span id="cb38-32"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> MSE(Module):</span>
+<span id="cb38-33">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, pred, targ):</span>
+<span id="cb38-34">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> (pred.squeeze(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>targ).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">pow</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>).mean()</span>
+<span id="cb38-35">    </span>
+<span id="cb38-36">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> _backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, pred, targ):</span>
+<span id="cb38-37">        pred.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (pred.squeeze() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> targ).unsqueeze(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> targ.shape[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb38-38">    </span>
+<span id="cb38-39">    </span>
+<span id="cb38-40"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> Model(Module):</span>
+<span id="cb38-41">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, n_in, n_h, n_out):</span>
+<span id="cb38-42">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.layers <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [Linear(n_in, n_h), Relu(), Linear(n_h, n_out)]</span>
+<span id="cb38-43">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.loss <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> MSE()</span>
+<span id="cb38-44">        </span>
+<span id="cb38-45">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, x, y):</span>
+<span id="cb38-46">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> l <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.layers: x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> l(x)</span>
+<span id="cb38-47">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.loss(x, y)</span>
+<span id="cb38-48">    </span>
+<span id="cb38-49">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb38-50">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.loss.backward()</span>
+<span id="cb38-51">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> l <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">reversed</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.layers): l.backward()</span></code></pre></div>
+</div>
+<p>With these objects, let’s create our first training loop:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb39" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1">epochs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>                              <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># train for nr of epochs</span></span>
+<span id="cb39-2">bs     <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1024</span>                           <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># batch-size</span></span>
+<span id="cb39-3">lr     <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.01</span>                           <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># learning rate</span></span>
+<span id="cb39-4">m <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Model(n_in, n_h, n_out)             <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># instantiate our model</span></span>
+<span id="cb39-5"></span>
+<span id="cb39-6"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> epoch <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(epochs):             <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># iterate through epochs</span></span>
+<span id="cb39-7">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(x_train), bs): <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># iterate through the batches</span></span>
+<span id="cb39-8">        xb <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x_train[i:i<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span>bs]            <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># get minibatch </span></span>
+<span id="cb39-9">        yb <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> y_train[i:i<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span>bs]</span>
+<span id="cb39-10">        </span>
+<span id="cb39-11">        loss <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> m(xb, yb)                <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># forward pass</span></span>
+<span id="cb39-12">        m.backward()                    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># backward pass</span></span>
+<span id="cb39-13">        </span>
+<span id="cb39-14">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> l <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> m.layers:              <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># iterate through the layers</span></span>
+<span id="cb39-15">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">isinstance</span>(l, Linear):   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># only update the linear layers</span></span>
+<span id="cb39-16">                l.w <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+=</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> lr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> l.w.g     <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># update the weights</span></span>
+<span id="cb39-17">                l.b <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+=</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> lr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> l.b.g     <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># update the bias</span></span>
+<span id="cb39-18"></span>
+<span id="cb39-19">                l.w.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>            <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># reset the gradients</span></span>
+<span id="cb39-20">                l.b.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span></span>
+<span id="cb39-21">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>epoch<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> | </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>loss<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.1f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>epoch=0 | loss=106694101172224.0
+epoch=1 | loss=9835971084288.0
+epoch=2 | loss=906763501568.0
+epoch=3 | loss=83593175040.0
+epoch=4 | loss=7706321408.0</code></pre>
+</div>
+</div>
+<p>Awesome, the loss is decreasing i.e.&nbsp;the model is training!</p>
+</section>
+<section id="second-refactor-simplify-the-weight-update" class="level2">
+<h2 class="anchored" data-anchor-id="second-refactor-simplify-the-weight-update">Second refactor: simplify the weight update</h2>
+<p>Let’s try to simplify our training loop, and make it more generic. By adding functionality to our Module class so that it has a reference to it’s trainable parameters, we can update the weights as shown below.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb41" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> fit(epochs):</span>
+<span id="cb41-2">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> epoch <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(epochs):</span>
+<span id="cb41-3">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(x_train), bs):</span>
+<span id="cb41-4">            xb <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x_train[i:i<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span>bs]</span>
+<span id="cb41-5">            yb <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> y_train[i:i<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span>bs]</span>
+<span id="cb41-6"></span>
+<span id="cb41-7">            loss <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> m(xb, yb)</span>
+<span id="cb41-8">            m.backward()</span>
+<span id="cb41-9"></span>
+<span id="cb41-10">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> m.parameters():    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># model has a reference to the trainable parameters</span></span>
+<span id="cb41-11">                p <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-=</span> lr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> p.g           </span>
+<span id="cb41-12">            m.zero_grad()               <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># model can reset the gradients</span></span>
+<span id="cb41-13">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>epoch<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> | </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>loss<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.1f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>)</span></code></pre></div>
+</div>
+<p>To do so, we will create a new baseclass (<code>NNModule</code>), from which our model and all the layers will inherit. We have the following conditions and properties:</p>
+<ol type="1">
+<li>The class will hold a dictionary <code>_named_args</code>, in which all the named arguments are stored that are set on the Module.</li>
+<li>This is done by defining a <code>__setattr__</code> method, which stores any named argument that doesn’t start with an <code>_</code> in this dictionary</li>
+<li>For the <code>Linear</code>, these named arguments will be the parameters <code>w</code> and <code>b</code></li>
+<li>For the <code>Model</code>, these named arguments will be <code>layers</code> (an array containing the layer objects) and <code>loss</code> containing the <code>MSE</code> object.</li>
+<li>Because we want to get the parameters directly out of a layer, as well as out of the model, we need to implement some logic in <code>_parameters()</code> to iterate through the lowest “level” and get the actual parameters out</li>
+<li>Last but not least we have to implement a <code>zero_grad()</code> method to zero the gradients on the parameters</li>
+</ol>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb42" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> NNModule:</span>
+<span id="cb42-2">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb42-3">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._named_args <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {}                           <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># [1]</span></span>
+<span id="cb42-4">        </span>
+<span id="cb42-5">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__setattr__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, name, value):                 <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># [2]</span></span>
+<span id="cb42-6">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">not</span> name.startswith(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"_"</span>): <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._named_args[name] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> value</span>
+<span id="cb42-7">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">super</span>().<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__setattr__</span>(name, value)</span>
+<span id="cb42-8">        </span>
+<span id="cb42-9">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> _parameters(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, obj):                         <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># [5]</span></span>
+<span id="cb42-10">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> obj:</span>
+<span id="cb42-11">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">isinstance</span>(i, torch.Tensor): <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">yield</span> i</span>
+<span id="cb42-12">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">isinstance</span>(i, NNModule):</span>
+<span id="cb42-13">                <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">yield</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">from</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">iter</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._parameters(i._named_args.values()))</span>
+<span id="cb42-14">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">isinstance</span>(i, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>):</span>
+<span id="cb42-15">                <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">yield</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">from</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">iter</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._parameters(i))</span>
+<span id="cb42-16">        </span>
+<span id="cb42-17">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> parameters(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb42-18">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._parameters(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._named_args.values()))</span>
+<span id="cb42-19">    </span>
+<span id="cb42-20">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> zero_grad(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb42-21">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.parameters():</span>
+<span id="cb42-22">            p.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>                                   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># [6]</span></span>
+<span id="cb42-23">        </span>
+<span id="cb42-24">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__call__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>args):</span>
+<span id="cb42-25">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._args <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> args                                <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># NOT stored under _named_args as \</span></span>
+<span id="cb42-26">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._out <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.forward(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>args)                  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># it starts with "_"</span></span>
+<span id="cb42-27">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._out</span>
+<span id="cb42-28">    </span>
+<span id="cb42-29">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>): <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._backward(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._args)</span></code></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb43" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> Linear(NNModule):</span>
+<span id="cb43-2">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, n_in, n_out):</span>
+<span id="cb43-3">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">super</span>().<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>()</span>
+<span id="cb43-4">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.w <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.randn(n_in, n_out)               <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># [3] stored under _named_args </span></span>
+<span id="cb43-5">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.b <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.zeros(n_out)                     <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># [3] stored under _named_args</span></span>
+<span id="cb43-6">    </span>
+<span id="cb43-7">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, x):</span>
+<span id="cb43-8">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> x<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span>self.w <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.b</span>
+<span id="cb43-9">    </span>
+<span id="cb43-10">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> _backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, inp):</span>
+<span id="cb43-11">        inp.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._out.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.w.t()</span>
+<span id="cb43-12">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.w.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> inp.t() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._out.g</span>
+<span id="cb43-13">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.b.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._out.g.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb43-14">        </span>
+<span id="cb43-15">        </span>
+<span id="cb43-16"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> Relu(NNModule):</span>
+<span id="cb43-17">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, x):</span>
+<span id="cb43-18">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> x.clamp_min(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.</span>)</span>
+<span id="cb43-19">    </span>
+<span id="cb43-20">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> _backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, inp):</span>
+<span id="cb43-21">        inp.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (inp<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._out.g</span>
+<span id="cb43-22"></span>
+<span id="cb43-23">    </span>
+<span id="cb43-24"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> MSE(NNModule):</span>
+<span id="cb43-25">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, pred, targ):</span>
+<span id="cb43-26">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> (pred.squeeze(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>targ).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">pow</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>).mean()</span>
+<span id="cb43-27">    </span>
+<span id="cb43-28">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> _backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, pred, targ):</span>
+<span id="cb43-29">        pred.g <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (pred.squeeze() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> targ).unsqueeze(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> targ.shape[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb43-30">        </span>
+<span id="cb43-31">        </span>
+<span id="cb43-32"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> Model(NNModule):</span>
+<span id="cb43-33">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, n_in, n_h, n_out):</span>
+<span id="cb43-34">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">super</span>().<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>()</span>
+<span id="cb43-35">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.layers <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [Linear(n_in, n_h), Relu(), Linear(n_h, n_out)]</span>
+<span id="cb43-36">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.loss <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> MSE()                              <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># [4] &lt; and ^ are stored under _named_args</span></span>
+<span id="cb43-37">        </span>
+<span id="cb43-38">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, x, y):</span>
+<span id="cb43-39">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> l <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.layers: x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> l(x)</span>
+<span id="cb43-40">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.loss(x, y)</span>
+<span id="cb43-41">    </span>
+<span id="cb43-42">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb43-43">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.loss.backward()</span>
+<span id="cb43-44">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> l <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">reversed</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.layers): l.backward()</span></code></pre></div>
+</div>
+<p>And now we can indeed call <code>parameters</code> on both the model as well as on individual layers:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb44" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1">m <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Model(n_in, n_h, n_out)</span>
+<span id="cb44-2">[p.shape <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> m.parameters()]</span></code></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>[torch.Size([784, 50]), torch.Size([50]), torch.Size([50, 1]), torch.Size([1])]</code></pre>
+</div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb46" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1">[p.shape <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> Linear(n_in, n_h).parameters()]</span></code></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>[torch.Size([784, 50]), torch.Size([50])]</code></pre>
+</div>
+</div>
+<p>Let’s fit with our new training loop:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb48" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1">fit(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>epoch=0 | loss=346.2
+epoch=1 | loss=39.9
+epoch=2 | loss=11.3
+epoch=3 | loss=8.6
+epoch=4 | loss=8.3</code></pre>
+</div>
+</div>
+</section>
+<section id="third-refactor-use-nn.module" class="level2">
+<h2 class="anchored" data-anchor-id="third-refactor-use-nn.module">Third refactor: use <code>nn.Module</code></h2>
+<p>Finally we are in a position to use PyTorch’s <code>nn.Module</code>, since we understand all of it’s behavior! We can simplify:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb50" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> torch.nn <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> nn</span>
+<span id="cb50-2"></span>
+<span id="cb50-3"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> Model(nn.Module):</span>
+<span id="cb50-4">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, n_in, n_h, n_out):</span>
+<span id="cb50-5">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">super</span>().<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>()</span>
+<span id="cb50-6">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.layers <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [nn.Linear(n_in, n_h), nn.ReLU(), nn.Linear(n_h, n_out)]</span>
+<span id="cb50-7">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> i,l <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">enumerate</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.layers):               <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># ^ we use the nn.Linear and nn.ReLU from PyTorch</span></span>
+<span id="cb50-8">            <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.add_module(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'layer_</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>i<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>, l)             <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># we need to register the modules explicitly</span></span>
+<span id="cb50-9">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.loss <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> nn.MSELoss()                         <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># we use the MSELoss from PyTorch</span></span>
+<span id="cb50-10">        </span>
+<span id="cb50-11">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, x, y):</span>
+<span id="cb50-12">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> l <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.layers: x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> l(x)</span>
+<span id="cb50-13">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.loss(x.squeeze(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>), y)</span></code></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb51" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Autograd needs all tensors to be float</span></span>
+<span id="cb51-2">x_train <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x_train.to(torch.float32)</span>
+<span id="cb51-3">y_train <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> y_train.to(torch.float32)</span>
+<span id="cb51-4">m <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Model(n_in, n_h, n_out)</span></code></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb52" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> fit(epochs):</span>
+<span id="cb52-2">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> epoch <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(epochs):</span>
+<span id="cb52-3">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(x_train), bs):</span>
+<span id="cb52-4">            xb <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x_train[i:i<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span>bs]</span>
+<span id="cb52-5">            yb <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> y_train[i:i<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span>bs]</span>
+<span id="cb52-6"></span>
+<span id="cb52-7">            loss <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> m(xb, yb)</span>
+<span id="cb52-8">            loss.backward()</span>
+<span id="cb52-9"></span>
+<span id="cb52-10">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">with</span> torch.no_grad():</span>
+<span id="cb52-11">                <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> m.parameters():</span>
+<span id="cb52-12">                    p <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-=</span> lr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> p.grad</span>
+<span id="cb52-13">                m.zero_grad()</span>
+<span id="cb52-14">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>epoch<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> | </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>loss<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.1f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>)</span></code></pre></div>
+</div>
+</section>
+<section id="fourth-refactor-nn.modulelist-and-nn.sequential" class="level2">
+<h2 class="anchored" data-anchor-id="fourth-refactor-nn.modulelist-and-nn.sequential">Fourth refactor: <code>nn.ModuleList</code> and <code>nn.Sequential</code></h2>
+<p>To simplify the storing of the layers array and the registration of the modules, we can use <code>nn.ModuleList</code>. Let’s also take out the loss out of the model itself, and put that in the <code>fit</code> function:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb53" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> Model(nn.Module):</span>
+<span id="cb53-2">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, n_in, n_h, n_out):</span>
+<span id="cb53-3">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">super</span>().<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>()</span>
+<span id="cb53-4">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.layers <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> nn.ModuleList([nn.Linear(n_in, n_h), nn.ReLU(), nn.Linear(n_h, n_out)])</span>
+<span id="cb53-5">        </span>
+<span id="cb53-6">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, x, y):</span>
+<span id="cb53-7">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> l <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.layers: x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> l(x)</span>
+<span id="cb53-8">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> x</span></code></pre></div>
+</div>
+<p>This turns out to be such an elementary operation, that PyTorch has a module for it: <code>nn.Sequential</code>.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb54" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> torch.nn.functional <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> F</span>
+<span id="cb54-2"></span>
+<span id="cb54-3">layers <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [nn.Linear(n_in,n_h), nn.ReLU(), nn.Linear(n_h, n_out)]</span>
+<span id="cb54-4">model <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> nn.Sequential(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>layers)</span></code></pre></div>
+</div>
+<p>And let’s update our training loop as we mentioned:</p>
+<ul>
+<li>The loss needs to be computed separately, since we took it out of the model</li>
+<li>Let’s use cross entropy instead of MSE</li>
+<li>For that we will switch back to using 10 outputs conforming with the 10 categories</li>
+</ul>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb55" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1">n_out <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span></span>
+<span id="cb55-2">layers <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [nn.Linear(n_in,n_h), nn.ReLU(), nn.Linear(n_h, n_out)]</span>
+<span id="cb55-3">model <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> nn.Sequential(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>layers)</span>
+<span id="cb55-4"></span>
+<span id="cb55-5">loss_func <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> F.cross_entropy</span>
+<span id="cb55-6">y_train <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> y_train.to(torch.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">long</span>)</span>
+<span id="cb55-7"></span>
+<span id="cb55-8"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> epoch <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(epochs):</span>
+<span id="cb55-9">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(x_train), bs):</span>
+<span id="cb55-10">        xb <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x_train[i:i<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span>bs]</span>
+<span id="cb55-11">        yb <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> y_train[i:i<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span>bs]</span>
+<span id="cb55-12"></span>
+<span id="cb55-13">        preds <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model(xb)</span>
+<span id="cb55-14">        loss <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> loss_func(preds, yb)</span>
+<span id="cb55-15">        loss.backward()</span>
+<span id="cb55-16"></span>
+<span id="cb55-17">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">with</span> torch.no_grad():</span>
+<span id="cb55-18">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> model.parameters():</span>
+<span id="cb55-19">                p <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-=</span> lr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> p.grad</span>
+<span id="cb55-20">            model.zero_grad()</span>
+<span id="cb55-21">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>epoch<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> | </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>loss<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>epoch=0 | loss=1.702
+epoch=1 | loss=1.182
+epoch=2 | loss=1.068
+epoch=3 | loss=1.003
+epoch=4 | loss=0.864</code></pre>
+</div>
+</div>
+</section>
+<section id="fifth-refactor-add-an-optimizer" class="level2">
+<h2 class="anchored" data-anchor-id="fifth-refactor-add-an-optimizer">Fifth refactor: add an Optimizer</h2>
+<p>We can further refactor the model by adding an Optimizer, this is an object that will have access to the <code>parameters</code> and does the updating of the weights (<code>step</code>) and zeroing the gradient. Most notably, we want to go from:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb57" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1">...</span>
+<span id="cb57-2"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">with</span> torch.no_grad():</span>
+<span id="cb57-3">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> model.parameters():</span>
+<span id="cb57-4">        p <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-=</span> lr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> p.grad</span>
+<span id="cb57-5">    model.zero_grad()</span>
+<span id="cb57-6">...</span></code></pre></div>
+</div>
+<p>to:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb58" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1">opt.step()</span>
+<span id="cb58-2">opt.zero_grad()</span></code></pre></div>
+</div>
+<p>So that the training loop becomes:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb59" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> fit(epochs):</span>
+<span id="cb59-2">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> epoch <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(epochs):</span>
+<span id="cb59-3">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(x_train), bs):</span>
+<span id="cb59-4">            xb <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x_train[i:i<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span>bs]</span>
+<span id="cb59-5">            yb <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> y_train[i:i<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span>bs]</span>
+<span id="cb59-6"></span>
+<span id="cb59-7">            preds <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model(xb)</span>
+<span id="cb59-8">            loss <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> loss_func(preds, yb)</span>
+<span id="cb59-9">            loss.backward()</span>
+<span id="cb59-10"></span>
+<span id="cb59-11">            opt.step()                 </span>
+<span id="cb59-12">            opt.zero_grad()</span>
+<span id="cb59-13">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>epoch<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> | </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>loss<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>)</span></code></pre></div>
+</div>
+<p>So we introduce the Optimizer, which has exactly these two methods:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb60" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> Optimizer():</span>
+<span id="cb60-2">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, params, lr<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>):</span>
+<span id="cb60-3">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.params <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>(params)</span>
+<span id="cb60-4">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.lr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> lr</span>
+<span id="cb60-5">        </span>
+<span id="cb60-6">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> step(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb60-7">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">with</span> torch.no_grad():</span>
+<span id="cb60-8">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.params: p <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.lr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> p.grad</span>
+<span id="cb60-9">        </span>
+<span id="cb60-10">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> zero_grad(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb60-11">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">with</span> torch.no_grad():</span>
+<span id="cb60-12">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.params: p.grad.zero_()</span></code></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb61" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1">layers <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [nn.Linear(n_in,n_h), nn.ReLU(), nn.Linear(n_h, n_out)]</span>
+<span id="cb61-2">model <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> nn.Sequential(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>layers)</span>
+<span id="cb61-3">opt <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Optimizer(model.parameters(), lr)</span></code></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb62" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1"></span>
+<span id="cb62-2">fit(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>epoch=0 | loss=0.666
+epoch=1 | loss=0.595
+epoch=2 | loss=0.493
+epoch=3 | loss=0.484
+epoch=4 | loss=0.427</code></pre>
+</div>
+</div>
+<p>The optimizer we just created is basically the <code>SGD</code> optimizer from PyTorch so let’s use that:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb64" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb64-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> get_model():</span>
+<span id="cb64-2">    layers <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [nn.Linear(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">784</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>), nn.ReLU(), nn.Linear(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>)]</span>
+<span id="cb64-3">    model <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> nn.Sequential(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>layers)</span>
+<span id="cb64-4">    </span>
+<span id="cb64-5">    opt <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.optim.SGD(model.parameters(), <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>)</span>
+<span id="cb64-6">    </span>
+<span id="cb64-7">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> model, opt</span>
+<span id="cb64-8"></span>
+<span id="cb64-9">model, opt <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> get_model()</span>
+<span id="cb64-10">fit(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>epoch=0 | loss=0.979
+epoch=1 | loss=0.672
+epoch=2 | loss=0.499
+epoch=3 | loss=0.499
+epoch=4 | loss=0.432</code></pre>
+</div>
+</div>
+</section>
+<section id="end" class="level2">
+<h2 class="anchored" data-anchor-id="end">End</h2>
+<p>We have come a long way, and covered a lot of ground. We have seen many of the fundamental components of training a neural network: the data, a simple model, training loops and optimizers. We have seen why things like <code>nn.Module</code> exist, and understand it’s behavior. Furthermore, we have seen that the need for <code>nn.Module</code> and <code>torch.optim</code> comes out of the need for simplifying things.</p>
+<p>In the next post, we will get to datasets and dataloaders, and we will start adding our first things into the <code>nntrain</code> library 🕺.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>Code</category>
+  <category>Neural Network</category>
+  <category>Deep Learning</category>
+  <guid>https://lucasvw.github.io/posts/08_nntrain_setup/index.html</guid>
+  <pubDate>Wed, 09 Aug 2023 00:00:00 GMT</pubDate>
+  <media:content url="https://lucasvw.github.io/posts/08_nntrain_setup/image.jpeg" medium="image" type="image/jpeg"/>
+</item>
 <item>
   <title>Introduction to Stable Diffusion - Code</title>
   <dc:creator>Lucas van Walstijn</dc:creator>
   <link>https://lucasvw.github.io/posts/07_stable_diffusion_code/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -694,7 +3030,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-31081"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-31081").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-69822"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-69822").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>
@@ -1108,7 +3444,6 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 
 
 
-
 <p>Stable Diffusion, a generative deep learning algorithm developed in 2022, is capable of creating images from prompts. For example, when presented the prompt: <strong>A group of people having lunch on the moon</strong>, the algorithm creates the following image:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -1359,7 +3694,6 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
   <dc:creator>Lucas van Walstijn</dc:creator>
   <link>https://lucasvw.github.io/posts/05_crossentropy/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -1772,7 +4106,6 @@ font-style: inherit;"># at some other point in your code, compute the loss as pe
   <dc:creator>Lucas van Walstijn</dc:creator>
   <link>https://lucasvw.github.io/posts/04_matmul/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -2481,7 +4814,6 @@ font-style: inherit;">@</span>b</span></code></pre></div>
 
 
 
-
 <p>In the past couple of weeks I have participated in the first ever Hugging Face competition: <a href="https://huggingface.co/spaces/competitions/aiornot" target="_blank">aiornot</a>. And as a matter of fact, it was also my first competition to participate in! The competition consisted of 62060 images (18618 train and 43442 test images) which were either created by an AI or not (binary image classification).</p>
 <p>Today, the competition has finished and the private leaderboard has been made public. I’m super happy (and proud 😇) that I finished in <strong>15th place</strong> (98 participants):</p>
 <p><img src="https://lucasvw.github.io/posts/03_aiornot/screenshot.png" class="img-fluid"></p>
@@ -2531,7 +4863,6 @@ font-style: inherit;">@</span>b</span></code></pre></div>
   <dc:creator>Lucas van Walstijn</dc:creator>
   <link>https://lucasvw.github.io/posts/02_paperspace_setup/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -2971,7 +5302,6 @@ font-style: inherit;">$PATH</span></span></code></pre></div>
   <dc:creator>Lucas van Walstijn</dc:creator>
   <link>https://lucasvw.github.io/posts/01_blog_setup/index.html</link>
   <description><![CDATA[ 
-
 
 
 

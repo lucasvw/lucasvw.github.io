@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-1.3.450">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -104,7 +104,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -157,50 +157,60 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </nav>
 </header>
 <!-- content -->
-<header id="title-block-header" class="quarto-title-block default page-columns page-full">
-  <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-body">
-      <h1 class="title">Fast matrix multiplications</h1>
-                                <div class="quarto-categories">
-                <div class="quarto-category">Foundations</div>
-                <div class="quarto-category">Maths</div>
-                <div class="quarto-category">Vectorization</div>
-                <div class="quarto-category">Linear Algebra</div>
-                <div class="quarto-category">Code</div>
-              </div>
-                  </div>
-  </div>
-    
-  
-  <div class="quarto-title-meta">
-
-      <div>
-      <div class="quarto-title-meta-heading">Author</div>
-      <div class="quarto-title-meta-contents">
-               <p>Lucas van Walstijn </p>
-            </div>
-    </div>
-      
-      <div>
-      <div class="quarto-title-meta-heading">Published</div>
-      <div class="quarto-title-meta-contents">
-        <p class="date">March 7, 2023</p>
-      </div>
-    </div>
-    
-      
-    </div>
-    
-  
-  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#definition" id="toc-definition" class="nav-link active" data-scroll-target="#definition">Definition</a></li>
+  <li><a href="#first-improvement" id="toc-first-improvement" class="nav-link" data-scroll-target="#first-improvement">First improvement</a></li>
+  <li><a href="#second-improvement" id="toc-second-improvement" class="nav-link" data-scroll-target="#second-improvement">Second improvement</a></li>
+  <li><a href="#third-improvement" id="toc-third-improvement" class="nav-link" data-scroll-target="#third-improvement">Third improvement</a></li>
+  <li><a href="#timings" id="toc-timings" class="nav-link" data-scroll-target="#timings">Timings</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
-<main class="content quarto-banner-title-block" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Fast matrix multiplications</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Foundations</div>
+    <div class="quarto-category">Maths</div>
+    <div class="quarto-category">Vectorization</div>
+    <div class="quarto-category">Linear Algebra</div>
+    <div class="quarto-category">Code</div>
+  </div>
+  </div>
 
 
 
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Lucas van Walstijn </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 7, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
 
 <p>Matrix multiplications are kind of boring, so why write a blog post about them? Well, matrix multiplications are the most basic computation that is being performed by neural networks. So it’s probably good to be familiar with them, although we never do them by hand. Also, we are going to focus on speeding them up by doing vectorization. Vectorization is something we often have to do, to make sure everything runs as quickly as possible, and it’s thus a good exercise to understand how to achieve this. Especially since it involves being very familiar with matrices, their shapes, broadcasting operations and the like.</p>
 <p>This post follows the first lecture of Part 2 of the FastAI course (2019), I will provide some additional explanations, and present one other optimization that is not presented in the <a href="https://%20youtu.be/4u8FxNEDUeg?t=2392">lecture</a>.</p>

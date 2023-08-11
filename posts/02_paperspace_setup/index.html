@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-1.3.450">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -102,7 +102,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -155,50 +155,62 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </nav>
 </header>
 <!-- content -->
-<header id="title-block-header" class="quarto-title-block default page-columns page-full">
-  <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-body">
-      <h1 class="title">Paperspace setup</h1>
-                                <div class="quarto-categories">
-                <div class="quarto-category">setup</div>
-                <div class="quarto-category">paperspace</div>
-                <div class="quarto-category">GPU</div>
-                <div class="quarto-category">how-to</div>
-                <div class="quarto-category">MLOps</div>
-              </div>
-                  </div>
-  </div>
-    
-  
-  <div class="quarto-title-meta">
-
-      <div>
-      <div class="quarto-title-meta-heading">Author</div>
-      <div class="quarto-title-meta-contents">
-               <p>Lucas van Walstijn </p>
-            </div>
-    </div>
-      
-      <div>
-      <div class="quarto-title-meta-heading">Published</div>
-      <div class="quarto-title-meta-contents">
-        <p class="date">February 26, 2023</p>
-      </div>
-    </div>
-    
-      
-    </div>
-    
-  
-  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#first-look-at-our-notebook-server" id="toc-first-look-at-our-notebook-server" class="nav-link active" data-scroll-target="#first-look-at-our-notebook-server">First look at our Notebook Server</a></li>
+  <li><a href="#persisted-storage-at-paperspace" id="toc-persisted-storage-at-paperspace" class="nav-link" data-scroll-target="#persisted-storage-at-paperspace">Persisted Storage at Paperspace</a></li>
+  <li><a href="#set-up" id="toc-set-up" class="nav-link" data-scroll-target="#set-up">Set up</a>
+  <ul class="collapse">
+  <li><a href="#note-on-mamba" id="toc-note-on-mamba" class="nav-link" data-scroll-target="#note-on-mamba">Note on Mamba</a></li>
+  <li><a href="#final-words" id="toc-final-words" class="nav-link" data-scroll-target="#final-words">Final words</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
-<main class="content quarto-banner-title-block" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Paperspace setup</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">setup</div>
+    <div class="quarto-category">paperspace</div>
+    <div class="quarto-category">GPU</div>
+    <div class="quarto-category">how-to</div>
+    <div class="quarto-category">MLOps</div>
+  </div>
+  </div>
 
 
 
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Lucas van Walstijn </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 26, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
 
 <p>Most people don’t have a GPU installed in their working machine that is suited for Deep Learning, and in fact you don’t need to. It’s quite easy to setup a remote GPU server nowadays, and in this blog I will explain how to do so with <a href="https://www.paperspace.com/gradient">Paperspace Gradient</a>.</p>
 <p>I started using Paperspace because of a recommendation from Jeremy Howard in his <a href="https://www.youtube.com/playlist?list=PLfYUBJiXbdtSLBPJ1GMx-sQWf6iNhb8mM">Live Coding Videos</a>. If you haven’t seen these lectures, I can highly recommend them. They are a great resource on many things related to getting started with Deep Learning. Jeremy shows a lot of productivity hacks and practical tips on getting a good setup.</p>

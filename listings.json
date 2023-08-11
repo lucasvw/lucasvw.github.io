@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/08_nntrain_setup/index.html",
       "/posts/07_stable_diffusion_code/index.html",
       "/posts/06_stable_diffusion_basics/index.html",
       "/posts/05_crossentropy/index.html",
