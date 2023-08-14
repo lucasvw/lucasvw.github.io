@@ -20,7 +20,7 @@
 
 
 <p>In this series, I want to discuss the creation of a small library for training neural networks: <code>nntrain</code>. It’s based off the excellent <a href="https://course.fast.ai/">part 2</a> of Practical Deep Learning for Coders by Jeremy Howard, in which from lessons 13 to 18 (roughly) the development of the <code>miniai</code> library is discussed.</p>
-<p>The library will build upon PyTorch. However, we’ll create things as much as possible from scratch to understand how it all works. Once the main functionality of components are implemented and verified, we can use PyTorch’s version, mainly for performance reasons and interoperability. This is similar to how things are done in the course. I explicitly want to state here that it’s not just a “copy / paste” of the course. On many occasions I take a different route, and most of the code is my own.</p>
+<p>The library will build upon PyTorch. However, we’ll try as much as possible to build from scratch mainly to understand how it all works. Once the main functionality of components are implemented and verified, we can switch over to PyTorch’s version. This is similar to how things are done in the course. However, this is not just a “copy / paste” of the course: on many occasions I take a different route, and most of the code is my own. In my not so humble opinion the narrative presented here is slightly better 🤷‍♂️😱.</p>
 <p>As we’ll see, the library will be built using <a href="https://nbdev.fast.ai/"><code>nb_dev</code></a>, another great project from the fastai community. With this software, it becomes very straight forward to create python libraries which are exported from jupyter notebooks. This may sound a bit weird, but it has the advantage that we can create the sourcecode for our library in the very same environment in which we want to experiment and interact with our methods, objects and structure <strong>while we are building the library</strong>. For more details on why this is a good idea, see <a href="https://www.fast.ai/posts/2022-07-28-nbdev2.html">here</a>.</p>
 <p>So without further ado, let’s start with some data!</p>
 <section id="data" class="level2">
@@ -46,12 +46,12 @@ background-color: null;
 font-style: inherit;">print</span>(ds_builder.info.description)</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"d4b83c7eca74479db0191cb02d6b06ea","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"c5560f33795d4f909a836d1f45406647","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"9b6e8bbec59045a4b78c81da47b9bf09","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"c83cbfb7d8c94ec0aea4b283cfe45bbd","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 <div class="cell-output cell-output-stdout">
@@ -77,32 +77,32 @@ Dataset fashion_mnist downloaded and prepared to /root/.cache/huggingface/datase
 </div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"ec9ede1622814daaadd7227ec2a98d6f","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"96135b6e859f40feb917a91d2d632d3d","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"f1803b1932f241caa555069391b51b50","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"ceb12d93da8d47338206756873c30a38","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"6946eefde4ab4b9e96961fb72b0c1986","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"5f3f6ddcc7f44c8dbe1b3b24222a1a7a","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"641a15d40f564ac7a3ca49e9acf2c8c4","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"8a23bbe688274c5ba8260579c9899aea","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"21f06df3c40f462bbebffa1149cd0e9a","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"bf2b57bcc16b402aa7d0ba9132af4aa4","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"239717463984432cb6394960ad16ef6a","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"1ac53f4aa94c4a988d373db11c1d127f","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 <div class="cell-output cell-output-display">
@@ -477,7 +477,7 @@ background-color: null;
 font-style: inherit;">=</span> torch.stack(y_train)</span>
 <span id="cb28-5">mse(out, y_train)</span></code></pre></div>
 <div class="cell-output cell-output-display">
-<pre><code>tensor(2277.3018)</code></pre>
+<pre><code>tensor(3015.2351)</code></pre>
 </div>
 </div>
 <p>The next step will be to add the backward pass. But let’s refactor our code to put things into classes, that way the backward pass can be added more easily:</p>
@@ -1266,11 +1266,11 @@ font-style: inherit;">:.1f}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'</span>)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>epoch=0 | loss=2451.3
-epoch=1 | loss=234.8
-epoch=2 | loss=29.5
-epoch=3 | loss=10.3
-epoch=4 | loss=8.5</code></pre>
+<pre><code>epoch=0 | loss=14242.1
+epoch=1 | loss=1329.6
+epoch=2 | loss=135.2
+epoch=3 | loss=21.2
+epoch=4 | loss=9.7</code></pre>
 </div>
 </div>
 <p>Awesome, the loss is decreasing i.e.&nbsp;the model is training!</p>
@@ -1795,11 +1795,11 @@ font-style: inherit;">in</span> Linear(n_in, n_h).parameters()]</span></code></p
 background-color: null;
 font-style: inherit;">5</span>)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>epoch=0 | loss=35894.4
-epoch=1 | loss=3311.1
-epoch=2 | loss=311.1
-epoch=3 | loss=35.7
-epoch=4 | loss=10.6</code></pre>
+<pre><code>epoch=0 | loss=2118316928.0
+epoch=1 | loss=195283376.0
+epoch=2 | loss=18002500.0
+epoch=3 | loss=1659511.5
+epoch=4 | loss=152958.9</code></pre>
 </div>
 </div>
 </section>
@@ -1980,7 +1980,7 @@ font-style: inherit;">'</span>)</span></code></pre></div>
 </section>
 <section id="fourth-refactor-nn.modulelist-and-nn.sequential" class="level2">
 <h2 class="anchored" data-anchor-id="fourth-refactor-nn.modulelist-and-nn.sequential">Fourth refactor: <code>nn.ModuleList</code> and <code>nn.Sequential</code></h2>
-<p>To simplify the storing of the layers array and the registration of the modules, we can use <code>nn.ModuleList</code>. Let’s also take out the loss out of the model itself, and put that in the <code>fit</code> function:</p>
+<p>To simplify the storing of the layers array and the registration of the modules, we can use <code>nn.ModuleList</code>. Up till now, we compute the loss as part of the forward pass of the model, let’s change that and let the model return the predictions. With these predictions we can now also compute a metric: accuracy, which will represent the percentage of images correctly classified by the model.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb53" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><span class="kw" style="color: #003B4F;
 background-color: null;
@@ -2029,10 +2029,11 @@ font-style: inherit;">import</span> torch.nn.functional <span class="im" style="
 background-color: null;
 font-style: inherit;">as</span> F</span>
 <span id="cb54-2"></span>
-<span id="cb54-3">layers <span class="op" style="color: #5E5E5E;
+<span id="cb54-3"></span>
+<span id="cb54-4">layers <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> [nn.Linear(n_in,n_h), nn.ReLU(), nn.Linear(n_h, n_out)]</span>
-<span id="cb54-4">model <span class="op" style="color: #5E5E5E;
+<span id="cb54-5">model <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> nn.Sequential(<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -2041,8 +2042,8 @@ font-style: inherit;">*</span>layers)</span></code></pre></div>
 <p>And let’s update our training loop as we mentioned:</p>
 <ul>
 <li>The loss needs to be computed separately, since we took it out of the model</li>
-<li>Let’s use cross entropy instead of MSE</li>
-<li>For that we will switch back to using 10 outputs conforming with the 10 categories</li>
+<li>Let’s now also use a loss function that actually makes sense: cross entropy loss instead of MSE</li>
+<li>We then need to switch back to using 10 output activations conforming with the 10 categories</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb55" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1">n_out <span class="op" style="color: #5E5E5E;
@@ -2050,32 +2051,137 @@ background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">10</span></span>
-<span id="cb55-2">layers <span class="op" style="color: #5E5E5E;
+<span id="cb55-2"></span>
+<span id="cb55-3">layers <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> [nn.Linear(n_in,n_h), nn.ReLU(), nn.Linear(n_h, n_out)]</span>
-<span id="cb55-3">model <span class="op" style="color: #5E5E5E;
+<span id="cb55-4">model <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> nn.Sequential(<span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">*</span>layers)</span>
-<span id="cb55-4"></span>
-<span id="cb55-5">loss_func <span class="op" style="color: #5E5E5E;
+font-style: inherit;">*</span>layers)</span></code></pre></div>
+</div>
+<p>Let’s also add a metric: accuracy, to see how our model is doing. For this, we need to find the class that our model predicts. However, the model is outputting not a single class, it outputs <em>logits</em>: the unweighted predictions for any of the 10 classes. When applying a softmax to these logits, we turn them into 10 probabilities: the probability that our model assigns to each class.</p>
+<p>When computing the accuracy, we don’t actually just use the logits instead of the probabilities, since the softmax is a monotonically increasing we largest logit, will also have the largest probability.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb56" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1">x0 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x_train[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb56-2">logits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model(x0)</span>
+<span id="cb56-3"></span>
+<span id="cb56-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>logits<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>)                           <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Logit output of the model</span></span>
+<span id="cb56-5"></span>
+<span id="cb56-6">probs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> logits.softmax(dim<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb56-7"></span>
+<span id="cb56-8"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>probs<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>)                            <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># class probabilites</span></span>
+<span id="cb56-9"></span>
+<span id="cb56-10"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">assert</span> torch.allclose(probs.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(),            <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># probabilities sum to 1</span></span>
+<span id="cb56-11">                      torch.tensor(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.0</span>))      </span>
+<span id="cb56-12"></span>
+<span id="cb56-13"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">assert</span> torch.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">all</span>(probs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)                   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># no negative probabilities</span></span>
+<span id="cb56-14"></span>
+<span id="cb56-15"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">assert</span> (logits.argmax() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> probs.argmax())</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>logits=tensor([-0.1345,  0.1549, -0.0635,  0.0619,  0.0516, -0.0358,  0.1625, -0.0322,
+        -0.0614,  0.1931], grad_fn=&lt;AddBackward0&gt;)
+probs=tensor([0.0844, 0.1127, 0.0906, 0.1027, 0.1016, 0.0931, 0.1136, 0.0935, 0.0908,
+        0.1171], grad_fn=&lt;SoftmaxBackward0&gt;)</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> accuracy(preds, targs):</span>
+<span id="cb58-2">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> (preds.argmax(dim<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> targs).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>().mean()</span></code></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1">loss_func <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> F.cross_entropy</span>
-<span id="cb55-6">y_train <span class="op" style="color: #5E5E5E;
+<span id="cb59-2">y_train <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> y_train.to(torch.<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">long</span>)</span>
-<span id="cb55-7"></span>
-<span id="cb55-8"><span class="cf" style="color: #003B4F;
+<span id="cb59-3"></span>
+<span id="cb59-4"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> epoch <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">range</span>(epochs):</span>
-<span id="cb55-9">    <span class="cf" style="color: #003B4F;
+<span id="cb59-5">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
 background-color: null;
@@ -2086,40 +2192,43 @@ background-color: null;
 font-style: inherit;">0</span>,<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">len</span>(x_train), bs):</span>
-<span id="cb55-10">        xb <span class="op" style="color: #5E5E5E;
+<span id="cb59-6">        xb <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> x_train[i:i<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span>bs]</span>
-<span id="cb55-11">        yb <span class="op" style="color: #5E5E5E;
+<span id="cb59-7">        yb <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> y_train[i:i<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span>bs]</span>
-<span id="cb55-12"></span>
-<span id="cb55-13">        preds <span class="op" style="color: #5E5E5E;
+<span id="cb59-8"></span>
+<span id="cb59-9">        preds <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> model(xb)</span>
-<span id="cb55-14">        loss <span class="op" style="color: #5E5E5E;
+<span id="cb59-10">        acc <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> accuracy(preds, yb)</span>
+<span id="cb59-11">        loss <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> loss_func(preds, yb)</span>
-<span id="cb55-15">        loss.backward()</span>
-<span id="cb55-16"></span>
-<span id="cb55-17">        <span class="cf" style="color: #003B4F;
+<span id="cb59-12">        loss.backward()</span>
+<span id="cb59-13"></span>
+<span id="cb59-14">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">with</span> torch.no_grad():</span>
-<span id="cb55-18">            <span class="cf" style="color: #003B4F;
+<span id="cb59-15">            <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> model.parameters():</span>
-<span id="cb55-19">                p <span class="op" style="color: #5E5E5E;
+<span id="cb59-16">                p <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-=</span> lr <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span> p.grad</span>
-<span id="cb55-20">            model.zero_grad()</span>
-<span id="cb55-21">    <span class="bu" style="color: null;
+<span id="cb59-17">            model.zero_grad()</span>
+<span id="cb59-18">    <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
 background-color: null;
@@ -2139,13 +2248,21 @@ font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
 background-color: null;
+font-style: inherit;"> | </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>acc<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
 font-style: inherit;">'</span>)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>epoch=0 | loss=2.091
-epoch=1 | loss=1.831
-epoch=2 | loss=1.568
-epoch=3 | loss=1.361
-epoch=4 | loss=1.210</code></pre>
+<pre><code>epoch=0 | loss=1.071 | acc=0.684
+epoch=1 | loss=0.992 | acc=0.681
+epoch=2 | loss=0.934 | acc=0.688
+epoch=3 | loss=0.889 | acc=0.697
+epoch=4 | loss=0.853 | acc=0.706</code></pre>
 </div>
 </div>
 </section>
@@ -2153,50 +2270,47 @@ epoch=4 | loss=1.210</code></pre>
 <h2 class="anchored" data-anchor-id="fifth-refactor-add-an-optimizer">Fifth refactor: add an Optimizer</h2>
 <p>We can further refactor the model by adding an Optimizer, this is an object that will have access to the <code>parameters</code> and does the updating of the weights (<code>step</code>) and zeroing the gradient. Most notably, we want to go from:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb57" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><span class="co" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb61" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># ...</span></span>
-<span id="cb57-2"><span class="co" style="color: #5E5E5E;
+<span id="cb61-2"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># with torch.no_grad():</span></span>
-<span id="cb57-3"><span class="co" style="color: #5E5E5E;
+<span id="cb61-3"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#     for p in model.parameters():</span></span>
-<span id="cb57-4"><span class="co" style="color: #5E5E5E;
+<span id="cb61-4"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#         p -= lr * p.grad</span></span>
-<span id="cb57-5"><span class="co" style="color: #5E5E5E;
+<span id="cb61-5"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#     model.zero_grad()</span></span>
-<span id="cb57-6"><span class="co" style="color: #5E5E5E;
+<span id="cb61-6"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># ...</span></span></code></pre></div>
-<div class="cell-output cell-output-display">
-<pre><code>Ellipsis</code></pre>
-</div>
 </div>
 <p>to:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb59" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><span class="co" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb62" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># opt.step()</span></span>
-<span id="cb59-2"><span class="co" style="color: #5E5E5E;
+<span id="cb62-2"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># opt.zero_grad()</span></span></code></pre></div>
 </div>
 <p>So that the training loop becomes:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb60" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><span class="kw" style="color: #003B4F;
+<div class="sourceCode cell-code" id="cb63" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> fit(epochs):</span>
-<span id="cb60-2">    <span class="cf" style="color: #003B4F;
+<span id="cb63-2">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> epoch <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">range</span>(epochs):</span>
-<span id="cb60-3">        <span class="cf" style="color: #003B4F;
+<span id="cb63-3">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
 background-color: null;
@@ -2207,28 +2321,35 @@ background-color: null;
 font-style: inherit;">0</span>,<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">len</span>(x_train), bs):</span>
-<span id="cb60-4">            xb <span class="op" style="color: #5E5E5E;
+<span id="cb63-4">            xb <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> x_train[i:i<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span>bs]</span>
-<span id="cb60-5">            yb <span class="op" style="color: #5E5E5E;
+<span id="cb63-5">            yb <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> y_train[i:i<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span>bs]</span>
-<span id="cb60-6"></span>
-<span id="cb60-7">            preds <span class="op" style="color: #5E5E5E;
+<span id="cb63-6"></span>
+<span id="cb63-7">            preds <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> model(xb)</span>
-<span id="cb60-8">            loss <span class="op" style="color: #5E5E5E;
+<span id="cb63-8">            acc <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> accuracy(preds, yb)</span>
+<span id="cb63-9">            loss <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> loss_func(preds, yb)</span>
-<span id="cb60-9">            loss.backward()</span>
-<span id="cb60-10"></span>
-<span id="cb60-11">            opt.step()                 </span>
-<span id="cb60-12">            opt.zero_grad()</span>
-<span id="cb60-13">        <span class="bu" style="color: null;
+<span id="cb63-10">            loss.backward()</span>
+<span id="cb63-11"></span>
+<span id="cb63-12">            opt.step()                       <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># optimizer takes care of the weight update</span></span>
+<span id="cb63-13">            opt.zero_grad()                  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># as well as zeroing the grad</span></span>
+<span id="cb63-14">        <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
 background-color: null;
@@ -2243,6 +2364,14 @@ background-color: null;
 font-style: inherit;"> | </span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">{</span>loss<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> | </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>acc<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -2252,10 +2381,10 @@ font-style: inherit;">'</span>)</span></code></pre></div>
 </div>
 <p>So we introduce the Optimizer, which has exactly these two methods:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb61" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><span class="kw" style="color: #003B4F;
+<div class="sourceCode cell-code" id="cb64" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb64-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> Optimizer():</span>
-<span id="cb61-2">    <span class="kw" style="color: #003B4F;
+<span id="cb64-2">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -2266,28 +2395,28 @@ background-color: null;
 font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.5</span>):</span>
-<span id="cb61-3">        <span class="va" style="color: #111111;
+<span id="cb64-3">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.params <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">list</span>(params)</span>
-<span id="cb61-4">        <span class="va" style="color: #111111;
+<span id="cb64-4">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.lr <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> lr</span>
-<span id="cb61-5">        </span>
-<span id="cb61-6">    <span class="kw" style="color: #003B4F;
+<span id="cb64-5">        </span>
+<span id="cb64-6">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> step(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>):</span>
-<span id="cb61-7">        <span class="cf" style="color: #003B4F;
+<span id="cb64-7">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">with</span> torch.no_grad():</span>
-<span id="cb61-8">            <span class="cf" style="color: #003B4F;
+<span id="cb64-8">            <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
 background-color: null;
@@ -2300,16 +2429,16 @@ background-color: null;
 font-style: inherit;">self</span>.lr <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span> p.grad</span>
-<span id="cb61-9">        </span>
-<span id="cb61-10">    <span class="kw" style="color: #003B4F;
+<span id="cb64-9">        </span>
+<span id="cb64-10">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> zero_grad(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>):</span>
-<span id="cb61-11">        <span class="cf" style="color: #003B4F;
+<span id="cb64-11">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">with</span> torch.no_grad():</span>
-<span id="cb61-12">            <span class="cf" style="color: #003B4F;
+<span id="cb64-12">            <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
 background-color: null;
@@ -2318,81 +2447,73 @@ background-color: null;
 font-style: inherit;">self</span>.params: p.grad.zero_()</span></code></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb62" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1">layers <span class="op" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb65" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb65-1">layers <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> [nn.Linear(n_in,n_h), nn.ReLU(), nn.Linear(n_h, n_out)]</span>
-<span id="cb62-2">model <span class="op" style="color: #5E5E5E;
+<span id="cb65-2">model <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> model <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> nn.Sequential(<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span>layers)</span>
-<span id="cb62-3">opt <span class="op" style="color: #5E5E5E;
+<span id="cb65-3">opt <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Optimizer(model.parameters(), lr)</span></code></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb63" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1">fit(<span class="dv" style="color: #AD0000;
+<div class="sourceCode cell-code" id="cb66" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb66-1">fit(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span>)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>epoch=0 | loss=2.132
-epoch=1 | loss=1.914
-epoch=2 | loss=1.660
-epoch=3 | loss=1.435
-epoch=4 | loss=1.265</code></pre>
+<pre><code>epoch=0 | loss=2.074 | acc=0.447
+epoch=1 | loss=1.832 | acc=0.582
+epoch=2 | loss=1.571 | acc=0.653
+epoch=3 | loss=1.354 | acc=0.676
+epoch=4 | loss=1.195 | acc=0.673</code></pre>
 </div>
 </div>
 <p>The optimizer we just created is basically the <code>SGD</code> optimizer from PyTorch so let’s use that:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb65" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb65-1"><span class="kw" style="color: #003B4F;
+<div class="sourceCode cell-code" id="cb68" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb68-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> get_model():</span>
-<span id="cb65-2">    layers <span class="op" style="color: #5E5E5E;
+<span id="cb68-2">    layers <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> [nn.Linear(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">784</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>), nn.ReLU(), nn.Linear(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>)]</span>
-<span id="cb65-3">    model <span class="op" style="color: #5E5E5E;
+font-style: inherit;">=</span> [nn.Linear(n_in, n_h), nn.ReLU(), nn.Linear(n_h, n_out)]</span>
+<span id="cb68-3">    model <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> nn.Sequential(<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span>layers)</span>
-<span id="cb65-4">    </span>
-<span id="cb65-5">    opt <span class="op" style="color: #5E5E5E;
+<span id="cb68-4">    </span>
+<span id="cb68-5">    opt <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.optim.SGD(model.parameters(), lr)</span>
-<span id="cb65-6">    </span>
-<span id="cb65-7">    <span class="cf" style="color: #003B4F;
+<span id="cb68-6">    </span>
+<span id="cb68-7">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> model, opt</span>
-<span id="cb65-8"></span>
-<span id="cb65-9">model, opt <span class="op" style="color: #5E5E5E;
+<span id="cb68-8"></span>
+<span id="cb68-9">model, opt <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> get_model()</span>
-<span id="cb65-10">fit(<span class="dv" style="color: #AD0000;
+<span id="cb68-10">fit(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span>)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>epoch=0 | loss=2.030
-epoch=1 | loss=1.747
-epoch=2 | loss=1.494
-epoch=3 | loss=1.305
-epoch=4 | loss=1.166</code></pre>
+<pre><code>epoch=0 | loss=2.026 | acc=0.456
+epoch=1 | loss=1.751 | acc=0.559
+epoch=2 | loss=1.502 | acc=0.605
+epoch=3 | loss=1.314 | acc=0.630
+epoch=4 | loss=1.179 | acc=0.635</code></pre>
 </div>
 </div>
 </section>
 <section id="end" class="level2">
 <h2 class="anchored" data-anchor-id="end">End</h2>
-<p>We have come a long way, and covered a lot of ground. We have seen many of the fundamental components of training a neural network: the data, a simple model, training loops and optimizers. We have seen why things like <code>nn.Module</code> exist, and understand it’s behavior. Furthermore, we have seen that the need for <code>nn.Module</code> and <code>torch.optim</code> comes out of the need for simplifying things in the training loop.</p>
-<p>In the next post, we will get to datasets and dataloaders, and we will start adding our first things into the <code>nntrain</code> library 🕺.</p>
+<p>We have come a long way, and covered a lot of ground. We have seen many of the fundamental components of training a neural network: the data, a simple model, training loops, loss functions, metrics and optimizers. We have seen why things like <code>nn.Module</code> exist, and understand it’s behavior. Furthermore, we have seen that the need for <code>nn.Module</code> and <code>torch.optim</code> comes out of the need for simplifying things in the training loop.</p>
+<p>In the next post, we will get to datasets and dataloaders as a way to further improve the training loop, and we will start adding our first things into the <code>nntrain</code> library 🕺.</p>
 
 
 </section>
@@ -3087,7 +3208,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-38243"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-38243").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-79982"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-79982").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>
