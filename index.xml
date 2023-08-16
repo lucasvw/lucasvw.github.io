@@ -4446,7 +4446,7 @@ epoch=4 | loss=1.179 | acc=0.635</code></pre>
 
 
 <p>In the previous blog <a href="https://lucasvw.github.io/posts/06_stable_diffusion_basics/">post</a>, the main components and some intuition behind Stable Diffusion were introduced. Now, let’s see how we can use the HuggingFace diffusers library to generate images. The content of this blog post is based on <a href="https://course.fast.ai/Lessons/lesson9.html">Lesson 9</a> and <a href="https://course.fast.ai/Lessons/lesson10.html">Lesson 10</a> of Deep Learning for Coders. The end-to-end pipeline is very practical and easy to use, it’s basically a one-liner. We create a diffusion pipeline by downloading pre-trained models from a repo in the HuggingFace hub. Then, we can call this <code>pipe</code> object with a certain prompt:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># pip install diffusers==0.12.1</span></span>
@@ -4517,7 +4517,7 @@ font-style: inherit;">"Homer from the Simpsons on his roadbike climbing a mounta
 <pre><code>The config attributes {'scaling_factor': 0.18215} were passed to AutoencoderKL, but are not expected and will be ignored. Please verify your config.json configuration file.</code></pre>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">torch.manual_seed(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">114</span>)</span>
@@ -4540,7 +4540,7 @@ font-style: inherit;">0</span>]</span></code></pre></div>
 </div>
 </div>
 <p>Not bad, but not great either. Let’s dive one layer deeper, and create the components described in the previous <a href="https://lucasvw.github.io/posts/06_stable_diffusion_basics/">post</a>: the Unet, the autoencoder, text encoder and noise scheduler:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> diffusers <span class="im" style="color: #00769E;
@@ -4628,7 +4628,7 @@ font-style: inherit;">1000</span>)</span>
 </div>
 </div>
 <p>To use these components, we have to first tokenize the prompt. Tokenization is nothing more then transforming each word of the prompt into it’s associated integer according to a “vocabulary”. The “vocabulary” is the mapping of words to integers and is thus generally quite large.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">text_input <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> tokenizer(prompt,               <span class="co" style="color: #5E5E5E;
@@ -4661,7 +4661,7 @@ font-style: inherit;"># return PyTorch tensors</span></span>
 </div>
 </div>
 <p>Above we see the integers that are associated with each word in our prompt. We can decode the integers back into words and see if it matches our prompt. Let’s have a look at the first 5 tokens:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">[tokenizer.decode(token) <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> token <span class="kw" style="color: #003B4F;
@@ -4676,7 +4676,7 @@ font-style: inherit;">5</span>]</span></code></pre></div>
 </div>
 </div>
 <p>We see that all capital letters have been removed by the tokenization, and a special token is inserted at the beginning of the prompt. Also, we see the integer <code>49407</code> is being used to pad our input to the maximum length:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">tokenizer.decode(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">49407</span>)</span></code></pre></div>
@@ -4685,7 +4685,7 @@ font-style: inherit;">49407</span>)</span></code></pre></div>
 </div>
 </div>
 <p>Next, we will pass these tokens through the text-encoder to turn each token into an embedding vector. Since we have 77 tokens and the embeddings are of size 768, this will be a tensor of shape <code>[77, 768]</code>.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">text_embeddings <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> text_encoder(text_input.input_ids.to(<span class="st" style="color: #20794D;
@@ -4699,7 +4699,7 @@ font-style: inherit;">0</span>]</span>
 </div>
 </div>
 <p>When generating a completely new image, we start with a fully random noisy latent, so let’s create one:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">torch.manual_seed(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1024</span>)</span>
@@ -4737,7 +4737,7 @@ font-style: inherit;"># scale the noise</span></span>
 </div>
 </div>
 <p>The latents thus carry 4 channels and are of size 64 by 64. Let’s pass this latent iteratively through the Unet, each time subtracting partly the amount of predicted noise (the output of the Unet)</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> i, t <span class="kw" style="color: #003B4F;
@@ -4772,7 +4772,7 @@ background-color: null;
 font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</span></code></pre></div>
 </div>
 <p>Let’s visualize the four channels of this latent representation in grey-scale:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1">fig, axs <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
@@ -4807,7 +4807,7 @@ font-style: inherit;">'Greys'</span>)</span></code></pre></div>
 </div>
 </div>
 <p>To transform the latent representation to full-size images, we can use the decoder of the VAE. Note that when we do that, we move from a tensor of shape <code>[4, 64, 64]</code> to <code>[3, 512, 512]</code>:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(latents.shape, vae.decode(latents).sample.shape)</span></code></pre></div>
@@ -4816,7 +4816,7 @@ font-style: inherit;">print</span>(latents.shape, vae.decode(latents).sample.sha
 </div>
 </div>
 <p>And let’s visualize the result:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#scale back according to the VAE paper</span></span>
@@ -4880,7 +4880,7 @@ font-style: inherit;">"uint8"</span>)</span>
 </div>
 </div>
 <p>Unfortunately, the result looks very bad and especially much worse then our one-liner. The main reason for this, is that the <code>StableDiffusionPipeline</code> is using something called Classifier Free Diffusion Guidance. So let’s have a look at that. But before we do, let’s add two code snippets to transfrom from the latent representation to the full size image representation and back. We will do this a couple of times, so it helps to keep the code a bit cleaner:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> latents_to_image(latent):</span>
@@ -4979,7 +4979,7 @@ font-style: inherit;">*</span> (latent).latent_dist.sample()</span></code></pre>
 <section id="classifier-free-diffusion-guidance" class="level2">
 <h2 class="anchored" data-anchor-id="classifier-free-diffusion-guidance">Classifier Free Diffusion Guidance</h2>
 <p>Classifier Free Guidance refers to a technique in which two images are being constructed at the same time from the same latent. One of the images is being reconstructed based on the specified prompt (conditional generation), the other image is being generated by an empty prompt (unconditional generation). By mixing the two images in the process according to a parameter (called the guidance-scale) the generated image for the prompt is going to look much better:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1">torch.manual_seed(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">3016</span>)</span>
@@ -5119,7 +5119,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-77688"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-77688").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-18324"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-18324").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>
@@ -5128,7 +5128,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 <p><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%7D%0Ap%20&amp;=%20p_%7Buc%7D%20+%20g%20(p_%7Bc%7D%20-%20p_%7Buc%7D)%20%5C%5C%0Ap%20&amp;=%20g%20p_%7Bc%7D%20+%20(1%20-%20g)%20p_%7Buc%7D%20%5C%5C%0A%5Cend%7Balign%7D"></p>
 <p>So with a guidance scale value larger than 1, the unconditional prediction <img src="https://latex.codecogs.com/png.latex?p_%7Buc%7D"> is being subtracted from the conditional prediction <img src="https://latex.codecogs.com/png.latex?p_c">, which has the effect of removing the concept from the conditional image.</p>
 <p>An example of Homer Simpson eating lunch:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1">cond_input <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> tokenizer(<span class="st" style="color: #20794D;
@@ -5171,7 +5171,7 @@ font-style: inherit;">"cuda"</span>))[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>]</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1">torch.manual_seed(<span class="dv" style="color: #AD0000;
@@ -5251,7 +5251,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>And removing the blue chair by using a negative prompt:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1">uncond_input <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> tokenizer(<span class="st" style="color: #20794D;
@@ -5273,7 +5273,7 @@ font-style: inherit;">"cuda"</span>))[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>]</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1">torch.manual_seed(<span class="dv" style="color: #AD0000;
@@ -5362,7 +5362,7 @@ font-style: inherit;">=</span> latents_to_image(latents)</span>
 <p>Image-to-image generation is another super interesting process, in which we use both a prompt and an image to guide the generation process. This comes in handy, if for example we want to create a variant of an image we already have. Let’s say we have an awesome image of Homer eating a burger, and we want to have a similar image but instead we want Marge to eat the burger, or we want Homer to eat a slice of pizza instead. We can then feed both the correct promt as well as the already existing image to guide the image generation process even more.</p>
 <p>The way this works, is by not starting with a completely random latent, but instead build a noisy latent of our existing image.</p>
 <p>Let’s start with the image above and add some noise to it, for example by adding the noise for level 15 (we have 50 noise levels in total, so level 15 means that we still have 35 denoising steps to go):</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1">latent <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> image_to_latent(image)</span>
@@ -5389,7 +5389,7 @@ font-style: inherit;">0</span>]</span></code></pre></div>
 </div>
 </div>
 <p>If you squint with your eyes you can already see some structure, in the middle there is some yellow blob sitting around (eating lunch..). Let’s take this noisy latent, and do the remaining 35 denoising steps with a different prompt:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1">torch.manual_seed(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">105</span>)</span>
@@ -5789,7 +5789,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 <p>Cross entropy is one of the most commonly used loss functions. In this post, we will have a look at how it works, and compute it in a couple of different ways.</p>
 <p>Consider a network that is build for image classification. During the forward pass, images are passed into the network and the network processes the data layer by layer, until evenually some final activations are being returned by the model. These final activations are called “logits” and represent the unnormalized predictions of our model.</p>
 <p>Since we generally use mini-batches during training, these logits are of shape <code>[bs, num_classes]</code></p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> torch</span>
@@ -5857,7 +5857,7 @@ font-style: inherit;"># show the logits for the first couple of samples</span></
 <li>the predictions will sum to 1</li>
 </ol>
 <p>Specifically:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Unnormalized predictions for our first sample (3 classes)</span></span>
@@ -5868,7 +5868,7 @@ font-style: inherit;">0</span>]</span></code></pre></div>
 <pre><code>tensor([1.9269, 1.4873, 0.9007])</code></pre>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Exponentiated predictions, making them all positive</span></span>
@@ -5882,7 +5882,7 @@ font-style: inherit;">0</span>].exp()</span>
 <pre><code>tensor([6.8683, 4.4251, 2.4614])</code></pre>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Turn these values into probabilities by dividing by the sum</span></span>
@@ -5911,7 +5911,7 @@ font-style: inherit;">1.</span>))</span>
 </div>
 </div>
 <p>So, let’s create a softmax function that does this for a whole batch:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> softmax(logits):</span>
@@ -5970,7 +5970,7 @@ font-style: inherit;">4</span>]</span></code></pre></div>
 </div>
 </div>
 <p>Next, we want to compute the loss for which also need our <code>labels</code>. These labels represent the ground truth class for each of our samples in the batch. Since we have 3 classes they will be between 0 and 3 (e.g.&nbsp;either 0, 1 or 2)</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">g <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.manual_seed(<span class="dv" style="color: #AD0000;
@@ -6009,7 +6009,7 @@ font-style: inherit;">=</span>g)</span>
 <p><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%7D%0A%5Ctextrm%7BNLL%7D%20&amp;=%20-%20(%20(1%20%5Ccdot%20%5Clog(0.4993))%20+%20(0%20%5Ccdot%20%5Clog(0.3217))%20+%20(0%20%5Ccdot%20%5Clog(0.1789))%20)%20%5C%5C%0A%5Ctextrm%7BNLL%7D%20&amp;=%20-%20(%20(1%20%5Ccdot%20%5Clog(0.4993))%20)%20%5C%5C%0A%5Ctextrm%7BNLL%7D%20&amp;=%20-%20%5Clog(0.4993)%0A%5Cend%7Balign%7D"></p>
 <p>From which we see that it’s just the negative log of the probability associated with the ground truth class.</p>
 <p>Since this computes only the NLL per sample, we also need a way to combine the NLL across the samples in our batch. We can do this either by summing or averaging, averaging has the advantage that the size of the loss remains the same when we change the batch-size, so let’s use that:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> nll(probs, labels):</span>
@@ -6050,7 +6050,7 @@ font-style: inherit;"># shape: []</span></span>
 background-color: null;
 font-style: inherit;">return</span> nll</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">nll(probs, labels)</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>tensor(1.3465)</code></pre>
@@ -6059,7 +6059,7 @@ font-style: inherit;">return</span> nll</span></code></pre></div>
 <section id="using-pytorch" class="level2">
 <h2 class="anchored" data-anchor-id="using-pytorch">Using PyTorch</h2>
 <p>Instead of using our custom <code>softmax</code>, we can also use the build-in softmax function from PyTorch:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">p <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> F.softmax(logits, dim<span class="op" style="color: #5E5E5E;
@@ -6075,7 +6075,7 @@ font-style: inherit;"># dim=1 --&gt; compute the sum across the columns</span></
 </div>
 </div>
 <p>Instead of using our custom <code>nll</code> we can also use the build-in version from PyTorch. However, <code>nll_loss</code> expects the log of the softmax (for numerical stability) so instead of <code>softmax</code> we have to use <code>log_softmax</code>:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1">p <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> F.log_softmax(logits, dim<span class="op" style="color: #5E5E5E;
@@ -6101,14 +6101,14 @@ font-style: inherit;">1</span>).log())</span>
 </div>
 </div>
 <p>The combination of <code>softmax</code> and <code>nll</code> is called cross entropy, so we can also use PyTorch’s build-in version of that:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1">F.cross_entropy(logits, labels)</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>tensor(1.3465)</code></pre>
 </div>
 </div>
 <p>Instead of the methods in <code>nn.functional</code>, we can also use classes. For that, we first create an instance of the object, and then “call” the instance:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1">ce <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.nn.CrossEntropyLoss() <span class="co" style="color: #5E5E5E;
@@ -6122,7 +6122,7 @@ font-style: inherit;"># calling the instance with the arguments returns the cros
 </div>
 </div>
 <p>Similarly, we can use classes for the <code>log_softmax</code> and <code>nll_loss</code> functions</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1">ls <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.nn.LogSoftmax(dim<span class="op" style="color: #5E5E5E;
@@ -6143,7 +6143,7 @@ font-style: inherit;">=</span> ls(logits)</span>
 </div>
 </div>
 <p>This is practical, if we want specify custom behavior of the loss function ahead of time of calling the actual loss function. For example, let’s say we want to compute the cross entropy loss based on ‘sums’ instead of ‘averages’. Then when using the method in <code>F</code> we would do:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1">F.cross_entropy(logits, labels, reduction<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
@@ -6155,7 +6155,7 @@ font-style: inherit;">'sum'</span>)</span></code></pre></div>
 </div>
 <p>So whenever we call the loss, we have to specify the additional <code>reduction</code> argument.</p>
 <p>Whereas when using the loss classes, we can instantiate the class with that <code>reduction</code> argument, and then call the instance as per usual without passing anything but the logits and the labels:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># instantiate </span></span>
