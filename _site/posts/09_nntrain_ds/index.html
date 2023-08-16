@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Lucas van Walstijn">
+<meta name="dcterms.date" content="2023-08-14">
+
+<title>Lucas van Walstijn - nntrain: Datasets and Dataloaders (1/n)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../profile.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-contrib/iconify-1.0.0-beta.2/iconify-icon.min.js"></script>
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+<script src="https://unpkg.com/@jupyter-widgets/html-manager@*/dist/embed-amd.js" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Lucas van Walstijn</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/lucasvw"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/lvWal"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/lucasvanwalstijn/"><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://www.kaggle.com/lucasvw">
+ <span class="menu-text"><iconify-icon inline="" icon="fa6-brands:kaggle"></iconify-icon></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://lucasvw.github.io/index.xml"><i class="bi bi-rss" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#end-of-last-post" id="toc-end-of-last-post" class="nav-link active" data-scroll-target="#end-of-last-post">End of last post:</a></li>
+  <li><a href="#datasets" id="toc-datasets" class="nav-link" data-scroll-target="#datasets">Datasets:</a></li>
+  <li><a href="#next-up-shuffling-the-data" id="toc-next-up-shuffling-the-data" class="nav-link" data-scroll-target="#next-up-shuffling-the-data">Next up: shuffling the data</a></li>
+  <li><a href="#collation" id="toc-collation" class="nav-link" data-scroll-target="#collation">Collation</a></li>
+  <li><a href="#validation-set" id="toc-validation-set" class="nav-link" data-scroll-target="#validation-set">Validation set</a></li>
+  <li><a href="#first-exports" id="toc-first-exports" class="nav-link" data-scroll-target="#first-exports">First exports</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><code>nntrain</code>: Datasets and Dataloaders (1/n)</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">code</div>
+    <div class="quarto-category">neural network</div>
+    <div class="quarto-category">deep learning</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Lucas van Walstijn </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 14, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<p>In this series, I want to discuss the creation of a small library for training neural networks: <code>nntrain</code>. It’s based off the excellent <a href="https://course.fast.ai/">part 2</a> of Practical Deep Learning for Coders by Jeremy Howard, in which from lessons 13 to 18 (roughly) the development of the <code>miniai</code> library is discussed.</p>
+<p>The library will build upon PyTorch. We’ll try as much as possible to build from scratch to understand how it all works. Once the main functionality of components are implemented and verified, we can switch over to PyTorch’s version. This is similar to how things are done in the course. However, this is not just a “copy / paste” of the course: on many occasions I take a different route, and most of the code is my own. That is not to say that all of this is meant to be extremely innovative, instead I had the following goals:</p>
+<ul>
+<li>Deeply understand the training of neural networks with a focus on PyTorch</li>
+<li>Try to create an even better narrative then what’s presented in FastAI 🙉🤷‍♂️🙈</li>
+<li>Get hands-on experience with creating a library with <a href="https://nbdev.fast.ai/"><code>nb_dev</code></a></li>
+</ul>
+<p><code>nb_dev</code> is another great project from the fastai community, which allows python libraries to be written in jupyter notebooks. This may sound a bit weird since the mainstream paradigm is to only do experimental work in notebooks. It has the advantage though that we can create the source code for our library in the very same environment in which we want to experiment and interact with our methods, objects and structure <strong>while we are building the library</strong>. For more details on why this is a good idea and other nice features of <code>nb_dev</code>, see <a href="https://www.fast.ai/posts/2022-07-28-nbdev2.html">here</a>.</p>
+<p>So without further ado, let’s start with where we left off in the previous <a href="https://lucasvw.github.io/posts/08_nntrain_setup/">post</a>:</p>
+<section id="end-of-last-post" class="level2">
+<h2 class="anchored" data-anchor-id="end-of-last-post">End of last post:</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset,load_dataset_builder</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="im">import</span> torchvision.transforms.functional <span class="im">as</span> TF</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="im">import</span> torch</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb1-6"><a href="#cb1-6"></a></span>
+<span id="cb1-7"><a href="#cb1-7"></a>name <span class="op">=</span> <span class="st">"fashion_mnist"</span></span>
+<span id="cb1-8"><a href="#cb1-8"></a>ds_builder <span class="op">=</span> load_dataset_builder(name)</span>
+<span id="cb1-9"><a href="#cb1-9"></a>ds_hf <span class="op">=</span> load_dataset(name, split<span class="op">=</span><span class="st">'train'</span>)</span>
+<span id="cb1-10"><a href="#cb1-10"></a></span>
+<span id="cb1-11"><a href="#cb1-11"></a>x_train <span class="op">=</span> torch.stack([TF.to_tensor(i).view(<span class="op">-</span><span class="dv">1</span>) <span class="cf">for</span> i <span class="kw">in</span> ds_hf[<span class="st">'image'</span>]])</span>
+<span id="cb1-12"><a href="#cb1-12"></a>y_train <span class="op">=</span> torch.stack([torch.tensor(i) <span class="cf">for</span> i <span class="kw">in</span> ds_hf[<span class="st">'label'</span>]])</span>
+<span id="cb1-13"><a href="#cb1-13"></a></span>
+<span id="cb1-14"><a href="#cb1-14"></a><span class="kw">def</span> fit(epochs):</span>
+<span id="cb1-15"><a href="#cb1-15"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
+<span id="cb1-16"><a href="#cb1-16"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>,<span class="bu">len</span>(x_train), bs):</span>
+<span id="cb1-17"><a href="#cb1-17"></a>            xb <span class="op">=</span> x_train[i:i<span class="op">+</span>bs]</span>
+<span id="cb1-18"><a href="#cb1-18"></a>            yb <span class="op">=</span> y_train[i:i<span class="op">+</span>bs]</span>
+<span id="cb1-19"><a href="#cb1-19"></a></span>
+<span id="cb1-20"><a href="#cb1-20"></a>            preds <span class="op">=</span> model(xb)</span>
+<span id="cb1-21"><a href="#cb1-21"></a>            acc <span class="op">=</span> accuracy(preds, yb)</span>
+<span id="cb1-22"><a href="#cb1-22"></a>            loss <span class="op">=</span> loss_func(preds, yb)</span>
+<span id="cb1-23"><a href="#cb1-23"></a>            loss.backward()</span>
+<span id="cb1-24"><a href="#cb1-24"></a></span>
+<span id="cb1-25"><a href="#cb1-25"></a>            opt.step()</span>
+<span id="cb1-26"><a href="#cb1-26"></a>            opt.zero_grad()</span>
+<span id="cb1-27"><a href="#cb1-27"></a>        <span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span>epoch<span class="op">=</span><span class="sc">}</span><span class="ss"> | </span><span class="sc">{</span>loss<span class="op">=</span><span class="sc">:.3f}</span><span class="ss"> | </span><span class="sc">{</span>acc<span class="op">=</span><span class="sc">:.3f}</span><span class="ss">'</span>)</span>
+<span id="cb1-28"><a href="#cb1-28"></a></span>
+<span id="cb1-29"><a href="#cb1-29"></a><span class="kw">def</span> accuracy(preds, targs):</span>
+<span id="cb1-30"><a href="#cb1-30"></a>    <span class="cf">return</span> (preds.argmax(dim<span class="op">=</span><span class="dv">1</span>) <span class="op">==</span> targs).<span class="bu">float</span>().mean()        </span>
+<span id="cb1-31"><a href="#cb1-31"></a></span>
+<span id="cb1-32"><a href="#cb1-32"></a><span class="kw">def</span> get_model_opt():</span>
+<span id="cb1-33"><a href="#cb1-33"></a>    layers <span class="op">=</span> [nn.Linear(n_in, n_h), nn.ReLU(), nn.Linear(n_h, n_out)]</span>
+<span id="cb1-34"><a href="#cb1-34"></a>    model <span class="op">=</span> nn.Sequential(<span class="op">*</span>layers)</span>
+<span id="cb1-35"><a href="#cb1-35"></a>    </span>
+<span id="cb1-36"><a href="#cb1-36"></a>    opt <span class="op">=</span> torch.optim.SGD(model.parameters(), lr)</span>
+<span id="cb1-37"><a href="#cb1-37"></a>    </span>
+<span id="cb1-38"><a href="#cb1-38"></a>    <span class="cf">return</span> model, opt</span>
+<span id="cb1-39"><a href="#cb1-39"></a></span>
+<span id="cb1-40"><a href="#cb1-40"></a>n_in  <span class="op">=</span> <span class="dv">28</span><span class="op">*</span><span class="dv">28</span></span>
+<span id="cb1-41"><a href="#cb1-41"></a>n_h   <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb1-42"><a href="#cb1-42"></a>n_out <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb1-43"><a href="#cb1-43"></a>lr    <span class="op">=</span> <span class="fl">0.01</span></span>
+<span id="cb1-44"><a href="#cb1-44"></a>bs    <span class="op">=</span> <span class="dv">1024</span></span>
+<span id="cb1-45"><a href="#cb1-45"></a>loss_func <span class="op">=</span> F.cross_entropy</span>
+<span id="cb1-46"><a href="#cb1-46"></a></span>
+<span id="cb1-47"><a href="#cb1-47"></a>model, opt <span class="op">=</span> get_model_opt()</span>
+<span id="cb1-48"><a href="#cb1-48"></a>fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="datasets" class="level2">
+<h2 class="anchored" data-anchor-id="datasets">Datasets:</h2>
+<p>All the stuff in this post will be based on tackling the minibatch construct we currently have in the training loop on lines 16-18:</p>
+<div class="sourceCode" id="cb2" data-startfrom="15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 14;"><span id="cb2-15"><a href="#cb2-15"></a>...</span>
+<span id="cb2-16"><a href="#cb2-16"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>,<span class="bu">len</span>(x_train), bs):</span>
+<span id="cb2-17"><a href="#cb2-17"></a>    xb <span class="op">=</span> x_train[i:i<span class="op">+</span>bs]</span>
+<span id="cb2-18"><a href="#cb2-18"></a>    yb <span class="op">=</span> y_train[i:i<span class="op">+</span>bs]</span>
+<span id="cb2-19"><a href="#cb2-19"></a>...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And the first refactor will be to create a Dataset object, which allows us to simplify:</p>
+<div class="sourceCode" id="cb3" data-startfrom="15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 14;"><span id="cb3-15"><a href="#cb3-15"></a>...</span>
+<span id="cb3-16"><a href="#cb3-16"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>,<span class="bu">len</span>(x_train), bs):</span>
+<span id="cb3-17"><a href="#cb3-17"></a>    xb, yb <span class="op">=</span> dataset[i:i<span class="op">+</span>bs]</span>
+<span id="cb3-18"><a href="#cb3-18"></a>...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This is pretty straight-forward, a Dataset is something that holds our data and upon “indexing into” it returns a sample of the data:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Dataset():</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, x_train, y_train):</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.x_train <span class="op">=</span> x_train</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.y_train <span class="op">=</span> y_train</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, i):</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.x_train[i], <span class="va">self</span>.y_train[i]</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>):</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.x_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> Dataset(x_train, y_train)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>([i.shape <span class="cf">for</span> i <span class="kw">in</span> ds[<span class="dv">0</span>]])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[torch.Size([784]), torch.Size([])]</code></pre>
+</div>
+</div>
+<p>Next, we want to further improve the training loop and get to this behavior:</p>
+<div class="sourceCode" id="cb7" data-startfrom="15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 14;"><span id="cb7-15"><a href="#cb7-15"></a>...</span>
+<span id="cb7-16"><a href="#cb7-16"></a><span class="cf">for</span> xb, yb <span class="kw">in</span> dataloader:</span>
+<span id="cb7-17"><a href="#cb7-17"></a>...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>So our dataloader needs to wrap the dataset, and provide some kind of an iterator returning batches of data, based on the specified batch size. Let’s create one:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DataLoader():</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, dataset, batch_size):</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dataset <span class="op">=</span> dataset</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.batch_size <span class="op">=</span> batch_size</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__iter__</span>(<span class="va">self</span>):</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>,<span class="bu">len</span>(<span class="va">self</span>.dataset),<span class="va">self</span>.batch_size):</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">yield</span> <span class="va">self</span>.dataset[i:i<span class="op">+</span><span class="va">self</span>.batch_size]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now the training loop is simplified to:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit(epochs):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> xb, yb <span class="kw">in</span> dl:</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>            preds <span class="op">=</span> model(xb)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>            acc <span class="op">=</span> accuracy(preds, yb)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> loss_func(preds, yb)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>            loss.backward()</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>            opt.step()</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>            opt.zero_grad()</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span>epoch<span class="op">=</span><span class="sc">}</span><span class="ss"> | </span><span class="sc">{</span>loss<span class="op">=</span><span class="sc">:.3f}</span><span class="ss"> | </span><span class="sc">{</span>acc<span class="op">=</span><span class="sc">:.3f}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dl <span class="op">=</span> DataLoader(ds, bs)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>model, opt <span class="op">=</span> get_model_opt()</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>epoch=0 | loss=2.062 | acc=0.441
+epoch=1 | loss=1.785 | acc=0.597
+epoch=2 | loss=1.531 | acc=0.637
+epoch=3 | loss=1.334 | acc=0.645
+epoch=4 | loss=1.190 | acc=0.660</code></pre>
+</div>
+</div>
+</section>
+<section id="next-up-shuffling-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="next-up-shuffling-the-data">Next up: shuffling the data</h2>
+<p>The above training loop already looks pretty good, it’s small and concise, and fairly generic. The next improvement we are going to make is something that doesn’t improve the code of the training loop, but improves training of the model. So far during training, we cycle each epoch through the data in the exact same order. This means that all training samples are always batched together with the exact same other samples. This is not good for training our model, instead we want to shuffle the data up. So that each epoch, we have batches of data that have not yet been batched up together. This additional variation helps the model to generalize as we will see.</p>
+<p>The simplest implementation would be to create a list of indices, which we put in between the dataset and the sampling of the mini-batches. In case we don’t need to shuffle, this list will just be <code>[0, 1, ... len(dataset)]</code>.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DataLoader():</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, dataset, batch_size, shuffle):</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dataset <span class="op">=</span> dataset</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.batch_size <span class="op">=</span> batch_size</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.shuffle <span class="op">=</span> shuffle</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__iter__</span>(<span class="va">self</span>):</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.indices <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(<span class="va">self</span>.dataset)))</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.shuffle: </span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>            random.shuffle(<span class="va">self</span>.indices)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>,<span class="bu">len</span>(<span class="va">self</span>.dataset),<span class="va">self</span>.batch_size):</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">yield</span> <span class="va">self</span>.dataset[<span class="va">self</span>.indices[i:i<span class="op">+</span><span class="va">self</span>.batch_size]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>model, opt <span class="op">=</span> get_model_opt()</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>dl <span class="op">=</span> DataLoader(ds, bs, shuffle<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>epoch=0 | loss=2.067 | acc=0.429
+epoch=1 | loss=1.800 | acc=0.515
+epoch=2 | loss=1.539 | acc=0.592
+epoch=3 | loss=1.358 | acc=0.618
+epoch=4 | loss=1.187 | acc=0.692</code></pre>
+</div>
+</div>
+<p>This works just fine, but let’s see if we can encapsulate this logic in a separate class. We start with a simple <code>Sampler</code> class that we can iterate through and either gives indices in order, or shuffled:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Sampler():</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, ds, shuffle<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">range</span> <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(ds)))</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.shuffle <span class="op">=</span> shuffle</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__iter__</span>(<span class="va">self</span>):</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.shuffle: random.shuffle(<span class="va">self</span>.<span class="bu">range</span>)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="va">self</span>.<span class="bu">range</span>:</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">yield</span> i</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> Sampler(ds, <span class="va">False</span>)           <span class="co"># shuffle = False</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, sample <span class="kw">in</span> <span class="bu">enumerate</span>(s): </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(sample, end<span class="op">=</span><span class="st">', '</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> i <span class="op">==</span> <span class="dv">5</span>: <span class="cf">break</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>0, 1, 2, 3, 4, 5, </code></pre>
+</div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> Sampler(ds, <span class="va">True</span>)            <span class="co"># shuffle = TRUE</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, sample <span class="kw">in</span> <span class="bu">enumerate</span>(s): </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(sample, end<span class="op">=</span><span class="st">', '</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> i <span class="op">==</span> <span class="dv">5</span>: <span class="cf">break</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>58844, 19394, 36509, 38262, 51037, 46835, </code></pre>
+</div>
+</div>
+<p>Next, let’s create a BatchSampler that does the same, but returns the indexes in batches. For that we can use the <code>islice()</code> function from the <code>itertools</code> module:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> itertools <span class="im">import</span> islice</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> printlist(this): <span class="bu">print</span>(<span class="bu">list</span>(this))</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>lst <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">10</span>))         <span class="co"># create a list of 10 numbers</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>printlist(islice(lst, <span class="dv">0</span>, <span class="dv">3</span>))     <span class="co"># with islice we can get a slice out of the list</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>printlist(islice(lst, <span class="dv">5</span>, <span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[0, 1, 2]
+[5, 6, 7, 8, 9]</code></pre>
+</div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>printlist(islice(lst, <span class="dv">4</span>))        <span class="co"># we can also get the "next" 4 elements</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>printlist(islice(lst, <span class="dv">4</span>))        <span class="co"># doing that twice gives the same first 4 elements</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[0, 1, 2, 3]
+[0, 1, 2, 3]</code></pre>
+</div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>lst <span class="op">=</span> <span class="bu">iter</span>(lst)                  <span class="co"># however if we put an iterator on the list:</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>printlist(islice(lst, <span class="dv">4</span>))        <span class="co"># first 4 elements</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>printlist(islice(lst, <span class="dv">4</span>))        <span class="co"># second 4 elements</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>printlist(islice(lst, <span class="dv">4</span>))        <span class="co"># remaining 2 elements</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>printlist(islice(lst, <span class="dv">4</span>))        <span class="co"># iterator has finished..</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[0, 1, 2, 3]
+[4, 5, 6, 7]
+[8, 9]
+[]</code></pre>
+</div>
+</div>
+<p>And thus we create our <code>BatchSampler</code>:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BatchSampler():</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, sampler, batch_size):</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.sampler <span class="op">=</span> sampler</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.batch_size <span class="op">=</span> batch_size</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__iter__</span>(<span class="va">self</span>):</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>        it <span class="op">=</span> <span class="bu">iter</span>(<span class="va">self</span>.sampler)</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>            res <span class="op">=</span> <span class="bu">list</span>(islice(it, <span class="va">self</span>.batch_size))</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">len</span>(res) <span class="op">==</span> <span class="dv">0</span>:    <span class="co"># return when the iterator has finished          </span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span>           </span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>            <span class="cf">yield</span> res</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s see the BatchSamepler in action:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> Sampler(<span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">0</span>,<span class="dv">10</span>)), shuffle<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>batchs <span class="op">=</span> BatchSampler(s, <span class="dv">4</span>)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> batchs:</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    printlist(i)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[0, 1, 2, 3]
+[4, 5, 6, 7]
+[8, 9]</code></pre>
+</div>
+</div>
+<p>And let’s incorporate it into the DataLoader:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DataLoader():</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, dataset, batch_sampler):</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dataset <span class="op">=</span> dataset</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.batch_sampler <span class="op">=</span> batch_sampler</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__iter__</span>(<span class="va">self</span>):</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> batch <span class="kw">in</span> <span class="va">self</span>.batch_sampler:</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">yield</span> <span class="va">self</span>.dataset[batch]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> Sampler(ds, shuffle<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>dl <span class="op">=</span> DataLoader(ds, BatchSampler(s, bs))</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>model, opt <span class="op">=</span> get_model_opt()</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>epoch=0 | loss=1.981 | acc=0.462
+epoch=1 | loss=1.698 | acc=0.567
+epoch=2 | loss=1.468 | acc=0.620
+epoch=3 | loss=1.346 | acc=0.613
+epoch=4 | loss=1.202 | acc=0.656</code></pre>
+</div>
+</div>
+</section>
+<section id="collation" class="level2">
+<h2 class="anchored" data-anchor-id="collation">Collation</h2>
+<p>And this works pretty good. However, there is one caveat. In the very beginning of this post we did:</p>
+<div class="sourceCode" id="cb32" data-startfrom="11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 10;"><span id="cb32-11"><a href="#cb32-11"></a>x_train <span class="op">=</span> torch.stack([TF.to_tensor(i).view(<span class="op">-</span><span class="dv">1</span>) <span class="cf">for</span> i <span class="kw">in</span> ds_hf[<span class="st">'image'</span>]])</span>
+<span id="cb32-12"><a href="#cb32-12"></a>y_train <span class="op">=</span> torch.stack([torch.tensor(i) <span class="cf">for</span> i <span class="kw">in</span> ds_hf[<span class="st">'label'</span>]])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And we ideally would like these transformations to be part of the Dataloaders / Dataset paradigm. So instead of first transforming the Huggingface Dataset into <code>x_train</code> and <code>y_train</code>, we want to directly use the dataset. We can do so by adding a <strong>collate function</strong>. This wraps around a list of individual samples into the datasets, and receives a list of individual x,y tuples (<code>[(x1,y1), (x2,y2), ..]</code>) as argument. In that function, we can determine how to treat these items and parse it in a way that is suitable to our needs. i.e.:</p>
+<ul>
+<li>batch the <code>x</code> and <code>y</code>, so that we transform from <code>[(x1,y1), (x2,y2), ..]</code> to <code>[(x_1,x_2, ..), (y_1,y_2, ..)]</code></li>
+<li>move individual items <code>x_i</code> and <code>y_i</code> to tensors</li>
+<li>stack the <code>x</code> tensors and <code>y</code> tensors respectively into one big tensor</li>
+</ul>
+<p>So let’s update our DataLoader with a <code>collate_func</code> that wraps around individual samples:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DataLoader():</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, dataset, batch_sampler, collate_func):</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dataset <span class="op">=</span> dataset</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.batch_sampler <span class="op">=</span> batch_sampler</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.collate_func <span class="op">=</span> collate_func</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__iter__</span>(<span class="va">self</span>):</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> batch <span class="kw">in</span> <span class="va">self</span>.batch_sampler:</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">yield</span> <span class="va">self</span>.collate_func(<span class="va">self</span>.dataset[sample] <span class="cf">for</span> sample <span class="kw">in</span> batch)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>And now let’s create a custom collate function to deal with our data. Specifically, remember that a sample of our huggingface dataset is a dictionary (and not a tuple) with keys <code>image</code> and <code>label</code> holding a <code>PIL.Image.image</code> object and a number (representing any out of 10 classes) respectively.</p>
+<p>So our <code>collate_func</code> should:</p>
+<ol type="1">
+<li>transform the dictionary into a tuple</li>
+<li>move everything to a tensor</li>
+<li>zip the results so that <code>x</code> and <code>y</code> are batched</li>
+<li>and combine the list of tensors for <code>x</code> and <code>y</code> respectively into one big tensor</li>
+</ol>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> collate_func(data):</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> [(TF.to_tensor(sample[<span class="st">'image'</span>]).view(<span class="op">-</span><span class="dv">1</span>), torch.tensor(sample[<span class="st">'label'</span>])) <span class="cf">for</span> sample <span class="kw">in</span> data]</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    x, y <span class="op">=</span> <span class="bu">zip</span>(<span class="op">*</span>data)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> torch.stack(x), torch.stack(y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>And let’s see it in action, now using the huggingface dataset <code>ds_hf</code>:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> Sampler(ds_hf, shuffle<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>dl <span class="op">=</span> DataLoader(ds_hf, BatchSampler(s, bs), collate_func)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>model, opt <span class="op">=</span> get_model_opt()</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>epoch=0 | loss=2.125 | acc=0.345
+epoch=1 | loss=1.899 | acc=0.497
+epoch=2 | loss=1.635 | acc=0.609
+epoch=3 | loss=1.389 | acc=0.640
+epoch=4 | loss=1.260 | acc=0.641</code></pre>
+</div>
+</div>
+<p>Not bad, we have replicated the main logic of PyTorch’s DataLoader. The version from PyTorch has a slightly different API as we don’t have to specify the <code>BatchSampler</code>, instead we can just pass <code>shuffle=True</code>:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> Sampler(ds_hf, shuffle<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>dl <span class="op">=</span> DataLoader(ds_hf, batch_size<span class="op">=</span>bs, shuffle<span class="op">=</span><span class="va">True</span>, collate_fn<span class="op">=</span>collate_func)</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>model, opt <span class="op">=</span> get_model_opt()</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>epoch=0 | loss=2.107 | acc=0.434
+epoch=1 | loss=1.840 | acc=0.620
+epoch=2 | loss=1.605 | acc=0.641
+epoch=3 | loss=1.354 | acc=0.641
+epoch=4 | loss=1.258 | acc=0.618</code></pre>
+</div>
+</div>
+</section>
+<section id="validation-set" class="level2">
+<h2 class="anchored" data-anchor-id="validation-set">Validation set</h2>
+<p>Let’s add a validation set to make sure we validate on data we are not training on. For that we are going to pull the data from the datasets library without the <code>splits</code> argument, which will give us a dataset dictionary containing both a training and a test dataset:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>hf_dd <span class="op">=</span> load_dataset(name)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>hf_dd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Reusing dataset fashion_mnist (/root/.cache/huggingface/datasets/fashion_mnist/fashion_mnist/1.0.0/8d6c32399aa01613d96e2cbc9b13638f359ef62bb33612b077b4c247f6ef99c1)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"c6b69b7005de4bc08ad49086a7796a80","version_major":2,"version_minor":0}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>DatasetDict({
+    train: Dataset({
+        features: ['image', 'label'],
+        num_rows: 60000
+    })
+    test: Dataset({
+        features: ['image', 'label'],
+        num_rows: 10000
+    })
+})</code></pre>
+</div>
+</div>
+<p>And let’s create two dataloaders, one for the train and one for the validation set. For the validation loader we can double the batch size since we won’t be computing gradients for the forward pass:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>train_loader <span class="op">=</span> DataLoader(hf_dd[<span class="st">'train'</span>], batch_size<span class="op">=</span>bs, shuffle<span class="op">=</span><span class="va">True</span>, collate_fn<span class="op">=</span>collate_func)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>valid_loader <span class="op">=</span> DataLoader(hf_dd[<span class="st">'test'</span>], batch_size<span class="op">=</span><span class="dv">2</span><span class="op">*</span>bs, shuffle<span class="op">=</span><span class="va">False</span>, collate_fn<span class="op">=</span>collate_func)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We change the training loop in a couple of ways:</p>
+<ul>
+<li>compute loss and metrics more correctly, by taking care of the batch-size and taking the average over all data</li>
+<li>add a seperate forward pass for the validation set</li>
+</ul>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit(epochs):</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>        model.train()                                       <span class="co"># put the model in "train" mode</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>        n_t <span class="op">=</span> train_loss_s <span class="op">=</span> <span class="dv">0</span>                              <span class="co"># initialize variables for computing averages</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> xb, yb <span class="kw">in</span> train_loader:</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>            preds <span class="op">=</span> model(xb)</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>            train_loss <span class="op">=</span> loss_func(preds, yb)</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>            train_loss.backward()</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>            n_t <span class="op">+=</span> <span class="bu">len</span>(xb)</span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>            train_loss_s <span class="op">+=</span> train_loss.item() <span class="op">*</span> <span class="bu">len</span>(xb)</span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>            opt.step()</span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>            opt.zero_grad()</span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>        model.<span class="bu">eval</span>()                                        <span class="co"># put the model in "eval" mode</span></span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>        n_v <span class="op">=</span> valid_loss_s <span class="op">=</span> acc_s <span class="op">=</span> <span class="dv">0</span>                      <span class="co"># initialize variables for computing averages</span></span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> xb, yb <span class="kw">in</span> valid_loader: </span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">with</span> torch.no_grad():                           <span class="co"># no need to compute gradients on validation set</span></span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>                preds <span class="op">=</span> model(xb)</span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a>                valid_loss <span class="op">=</span> loss_func(preds, yb)</span>
+<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a>                n_v <span class="op">+=</span> <span class="bu">len</span>(xb)</span>
+<span id="cb43-24"><a href="#cb43-24" aria-hidden="true" tabindex="-1"></a>                valid_loss_s <span class="op">+=</span> valid_loss.item() <span class="op">*</span> <span class="bu">len</span>(xb)</span>
+<span id="cb43-25"><a href="#cb43-25" aria-hidden="true" tabindex="-1"></a>                acc_s <span class="op">+=</span> accuracy(preds, yb) <span class="op">*</span> <span class="bu">len</span>(xb)</span>
+<span id="cb43-26"><a href="#cb43-26" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb43-27"><a href="#cb43-27" aria-hidden="true" tabindex="-1"></a>        train_loss <span class="op">=</span> train_loss_s <span class="op">/</span> n_t                     <span class="co"># compute averages of loss and metrics</span></span>
+<span id="cb43-28"><a href="#cb43-28" aria-hidden="true" tabindex="-1"></a>        valid_loss <span class="op">=</span> valid_loss_s <span class="op">/</span> n_v</span>
+<span id="cb43-29"><a href="#cb43-29" aria-hidden="true" tabindex="-1"></a>        acc <span class="op">=</span> acc_s <span class="op">/</span> n_v</span>
+<span id="cb43-30"><a href="#cb43-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span>epoch<span class="op">=</span><span class="sc">}</span><span class="ss"> | </span><span class="sc">{</span>train_loss<span class="op">=</span><span class="sc">:.3f}</span><span class="ss"> | </span><span class="sc">{</span>valid_loss<span class="op">=</span><span class="sc">:.3f}</span><span class="ss"> | </span><span class="sc">{</span>acc<span class="op">=</span><span class="sc">:.3f}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>model, opt <span class="op">=</span> get_model_opt()</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>epoch=0 | train_loss=2.198 | valid_loss=2.095 | acc=0.276
+epoch=1 | train_loss=1.980 | valid_loss=1.852 | acc=0.539
+epoch=2 | train_loss=1.718 | valid_loss=1.591 | acc=0.617
+epoch=3 | train_loss=1.481 | valid_loss=1.387 | acc=0.624
+epoch=4 | train_loss=1.305 | valid_loss=1.241 | acc=0.637</code></pre>
+</div>
+</div>
+<p>And that’s it for this post (almost)! We have seen a lot of details on Datasets, Dataloaders and the transformation of data. We have used these concepts to improve our training loop: shuffling the training data on each epoch, and the computation of the metrics on the validation set. But before we close off, let’s make our very first exports into the library, so that next time we can continue where we finished off.</p>
+</section>
+<section id="first-exports" class="level2">
+<h2 class="anchored" data-anchor-id="first-exports">First exports</h2>
+<p>When exporting code to a module with <code>nbdev</code> the first thing we need to do is declare the <code>default_exp</code> directive. This makes sure that when we run the export, the module will be exported to <code>dataloaders.py</code></p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| default_exp dataloaders</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, we can export any code into the module by adding <code>#|export</code> on top of the cell we want to export. For example:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> print_hello():</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'hello'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To export, we simply execute:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> nbdev<span class="op">;</span> nbdev.nbdev_export()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This will create a file called <code>dataloaders.py</code> in the library folder (in my case <code>nntrain</code>) with the contents:</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AUTOGENERATED! DO NOT EDIT! File to edit: ../nbs/01_dataloaders.ipynb.</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="co"># %% auto 0</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>__all__ <span class="op">=</span> [<span class="st">'func'</span>]</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a><span class="co"># %% ../nbs/01_dataloaders.ipynb 59</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> print_hello():</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'hello'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>So what do we want to export here? Let’s see if we can create some generic code for loading data from the Huggingface datasets library into a PyTorch Dataloader:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#|export</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torchvision.transforms.functional <span class="im">as</span> TF</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> PIL</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#|export</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hf_ds_collate_func(data):</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Collation function for building a PyTorch DataLoader from a a huggingface dataset.</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a><span class="co">    Tries to put all items from an entry into the dataset to tensor.</span></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a><span class="co">    PIL images are converted to tensor.</span></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a><span class="co">    '''</span></span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> to_tensor(i):</span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">isinstance</span>(i, PIL.Image.Image):</span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> TF.to_tensor(i).view(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> torch.tensor(i)</span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> [<span class="bu">map</span>(to_tensor, el.values()) <span class="cf">for</span> el <span class="kw">in</span> data]  <span class="co"># map each item from a dataset entry through to_tensor()</span></span>
+<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> <span class="bu">zip</span>(<span class="op">*</span>data)                                    <span class="co"># zip data of any length not just (x,y) but also (x,y,z)</span></span>
+<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (torch.stack(i) <span class="cf">for</span> i <span class="kw">in</span> data)                </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#|export</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DataLoaders:</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, train, valid):</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">'''Dataloaders class wrapping two PyTorch dataloaders: train and valid'''</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.train <span class="op">=</span> train</span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.valid <span class="op">=</span> valid</span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">@classmethod</span></span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _get_dls(cls, train_ds, valid_ds, bs, collate_fn):</span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">'''Helper function returning 2 PyTorch Dataloaders as a tuple for 2 Datasets'''</span></span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (DataLoader(train_ds, batch_size<span class="op">=</span>bs, shuffle<span class="op">=</span><span class="va">True</span>, collate_fn<span class="op">=</span>collate_fn),</span>
+<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>                DataLoader(valid_ds, batch_size<span class="op">=</span>bs<span class="op">*</span><span class="dv">2</span>, collate_fn<span class="op">=</span>collate_fn))</span>
+<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">@classmethod</span></span>
+<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> from_hf_dd(cls, dd, batch_size):</span>
+<span id="cb52-16"><a href="#cb52-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">'''Factory method to create a Dataloaders object for a Huggingface Dataset dict,</span></span>
+<span id="cb52-17"><a href="#cb52-17" aria-hidden="true" tabindex="-1"></a><span class="co">        uses the `hf_ds_collate_func` collation function'''</span></span>
+<span id="cb52-18"><a href="#cb52-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> cls(<span class="op">*</span>cls._get_dls(<span class="op">*</span>dd.values(), batch_size, hf_ds_collate_func))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>With <code>show_doc()</code> we can include the documentations of class methods:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#|hide</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nbdev.showdoc <span class="im">import</span> <span class="op">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>show_doc(DataLoaders.from_hf_dd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<hr>
+<section id="dataloaders.from_hf_dd" class="level3">
+<h3 class="anchored" data-anchor-id="dataloaders.from_hf_dd">DataLoaders.from_hf_dd</h3>
+<blockquote class="blockquote">
+<pre><code> DataLoaders.from_hf_dd (dd, batch_size)</code></pre>
+</blockquote>
+<p>Factory method to create a Dataloaders object for a Huggingface Dataset dict, uses the <code>hf_ds_collate_func</code> collation function</p>
+</section>
+</div>
+</div>
+<p>Example usage:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit(epochs):</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>        model.train()                                       </span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>        n_t <span class="op">=</span> train_loss_s <span class="op">=</span> <span class="dv">0</span>                              </span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> xb, yb <span class="kw">in</span> dls.train:</span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>            preds <span class="op">=</span> model(xb)</span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>            train_loss <span class="op">=</span> loss_func(preds, yb)</span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>            train_loss.backward()</span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a>            n_t <span class="op">+=</span> <span class="bu">len</span>(xb)</span>
+<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a>            train_loss_s <span class="op">+=</span> train_loss.item() <span class="op">*</span> <span class="bu">len</span>(xb)</span>
+<span id="cb56-12"><a href="#cb56-12" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb56-13"><a href="#cb56-13" aria-hidden="true" tabindex="-1"></a>            opt.step()</span>
+<span id="cb56-14"><a href="#cb56-14" aria-hidden="true" tabindex="-1"></a>            opt.zero_grad()</span>
+<span id="cb56-15"><a href="#cb56-15" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb56-16"><a href="#cb56-16" aria-hidden="true" tabindex="-1"></a>        model.<span class="bu">eval</span>()                                        </span>
+<span id="cb56-17"><a href="#cb56-17" aria-hidden="true" tabindex="-1"></a>        n_v <span class="op">=</span> valid_loss_s <span class="op">=</span> acc_s <span class="op">=</span> <span class="dv">0</span>                      </span>
+<span id="cb56-18"><a href="#cb56-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> xb, yb <span class="kw">in</span> dls.valid: </span>
+<span id="cb56-19"><a href="#cb56-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">with</span> torch.no_grad():                           </span>
+<span id="cb56-20"><a href="#cb56-20" aria-hidden="true" tabindex="-1"></a>                preds <span class="op">=</span> model(xb)</span>
+<span id="cb56-21"><a href="#cb56-21" aria-hidden="true" tabindex="-1"></a>                valid_loss <span class="op">=</span> loss_func(preds, yb)</span>
+<span id="cb56-22"><a href="#cb56-22" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb56-23"><a href="#cb56-23" aria-hidden="true" tabindex="-1"></a>                n_v <span class="op">+=</span> <span class="bu">len</span>(xb)</span>
+<span id="cb56-24"><a href="#cb56-24" aria-hidden="true" tabindex="-1"></a>                valid_loss_s <span class="op">+=</span> valid_loss.item() <span class="op">*</span> <span class="bu">len</span>(xb)</span>
+<span id="cb56-25"><a href="#cb56-25" aria-hidden="true" tabindex="-1"></a>                acc_s <span class="op">+=</span> accuracy(preds, yb) <span class="op">*</span> <span class="bu">len</span>(xb)</span>
+<span id="cb56-26"><a href="#cb56-26" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb56-27"><a href="#cb56-27" aria-hidden="true" tabindex="-1"></a>        train_loss <span class="op">=</span> train_loss_s <span class="op">/</span> n_t                     </span>
+<span id="cb56-28"><a href="#cb56-28" aria-hidden="true" tabindex="-1"></a>        valid_loss <span class="op">=</span> valid_loss_s <span class="op">/</span> n_v</span>
+<span id="cb56-29"><a href="#cb56-29" aria-hidden="true" tabindex="-1"></a>        acc <span class="op">=</span> acc_s <span class="op">/</span> n_v</span>
+<span id="cb56-30"><a href="#cb56-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span>epoch<span class="op">=</span><span class="sc">}</span><span class="ss"> | </span><span class="sc">{</span>train_loss<span class="op">=</span><span class="sc">:.3f}</span><span class="ss"> | </span><span class="sc">{</span>valid_loss<span class="op">=</span><span class="sc">:.3f}</span><span class="ss"> | </span><span class="sc">{</span>acc<span class="op">=</span><span class="sc">:.3f}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> DataLoaders.from_hf_dd(hf_dd, bs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>model, opt <span class="op">=</span> get_model_opt()</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>epoch=0 | train_loss=2.183 | valid_loss=2.051 | acc=0.359
+epoch=1 | train_loss=1.923 | valid_loss=1.790 | acc=0.512
+epoch=2 | train_loss=1.662 | valid_loss=1.542 | acc=0.611
+epoch=3 | train_loss=1.438 | valid_loss=1.350 | acc=0.633
+epoch=4 | train_loss=1.271 | valid_loss=1.210 | acc=0.639</code></pre>
+</div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#|hide</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> nbdev<span class="op">;</span> nbdev.nbdev_export()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>And that’s it. We have created our first module of the <code>nntrain</code> library🕺. Links:</p>
+<ul>
+<li><a href="https://github.com/lucasvw/nntrain/blob/main/nbs/01_dataloaders.ipynb">Dataloaders Notebook</a>: the “source” of the source code</li>
+<li><a href="https://github.com/lucasvw/nntrain/blob/main/nntrain/dataloaders.py">Dataloaders module</a>: the <code>.py</code> source code exported from the notebook</li>
+<li><a href="https://lucasvw.github.io/nntrain/dataloaders.html">Documentation</a>: automatically created from the notebook and hosted on Github</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://utteranc.es/client.js" repo="lucasvw/BlogComments" issue-term="pathname" theme="github-light" crossorigin="anonymous" async="">
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
