@@ -632,7 +632,7 @@ epoch=4 | loss=1.258 | acc=0.618</code></pre>
 <span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>        </span>
 <span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>        model.<span class="bu">eval</span>()                                        <span class="co"># put the model in "eval" mode</span></span>
 <span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>        n_v <span class="op">=</span> valid_loss_s <span class="op">=</span> acc_s <span class="op">=</span> <span class="dv">0</span>                      <span class="co"># initialize variables for computing averages</span></span>
-<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> xb, yb <span class="kw">in</span> valid_loader: </span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> xb, yb <span class="kw">in</span> valid_loader:</span>
 <span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">with</span> torch.no_grad():                           <span class="co"># no need to compute gradients on validation set</span></span>
 <span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>                preds <span class="op">=</span> model(xb)</span>
 <span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a>                valid_loss <span class="op">=</span> loss_func(preds, yb)</span>
