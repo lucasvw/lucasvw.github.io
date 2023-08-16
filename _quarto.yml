@@ -23,5 +23,5 @@ website:
         href: https://lucasvw.github.io/index.xml
 format:
   html:
-    theme: [cosmo, syles.scss]
+    theme: cosmo
     css: styles.css
