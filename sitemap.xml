@@ -2,42 +2,46 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://lucasvw.github.io/posts/05_crossentropy/index.html</loc>
-    <lastmod>2023-08-14T08:42:16.552Z</lastmod>
+    <lastmod>2023-08-16T09:14:44.855Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/04_matmul/index.html</loc>
-    <lastmod>2023-08-14T08:42:15.096Z</lastmod>
+    <lastmod>2023-08-16T09:14:43.359Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/01_blog_setup/index.html</loc>
-    <lastmod>2023-08-14T08:42:13.496Z</lastmod>
+    <lastmod>2023-08-16T09:14:41.711Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/07_stable_diffusion_code/index.html</loc>
-    <lastmod>2023-08-14T08:42:12.044Z</lastmod>
+    <lastmod>2023-08-16T09:14:40.263Z</lastmod>
   </url>
   <url>
-    <loc>https://lucasvw.github.io/about.html</loc>
-    <lastmod>2023-08-14T08:42:10.116Z</lastmod>
+    <loc>https://lucasvw.github.io/posts/09_nntrain_ds/index.html</loc>
+    <lastmod>2023-08-16T09:14:38.623Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/index.html</loc>
-    <lastmod>2023-08-14T08:42:09.504Z</lastmod>
+    <lastmod>2023-08-16T09:14:36.871Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/about.html</loc>
+    <lastmod>2023-08-16T09:14:37.499Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/06_stable_diffusion_basics/index.html</loc>
-    <lastmod>2023-08-14T08:42:11.136Z</lastmod>
+    <lastmod>2023-08-16T09:14:39.311Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/03_aiornot/index.html</loc>
-    <lastmod>2023-08-14T08:42:12.452Z</lastmod>
+    <lastmod>2023-08-16T09:14:40.663Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/02_paperspace_setup/index.html</loc>
-    <lastmod>2023-08-14T08:42:14.456Z</lastmod>
+    <lastmod>2023-08-16T09:14:42.711Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/08_nntrain_setup/index.html</loc>
-    <lastmod>2023-08-14T08:42:16.056Z</lastmod>
+    <lastmod>2023-08-16T09:14:44.351Z</lastmod>
   </url>
 </urlset>

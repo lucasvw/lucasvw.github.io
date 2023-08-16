@@ -20,7 +20,7 @@
     margin-top: 0;
 }
   
-.cell > .sourceCode {
+.sourceCode > .sourceCode {
     margin-bottom: 0;
     font-size: 0.875em;
 }
