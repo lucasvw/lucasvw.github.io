@@ -289,7 +289,7 @@ background-color: null;
 font-style: inherit;">+</span>bs]</span>
 <span id="cb3-18">...</span></code></pre></div>
 <p>This is pretty straight-forward, a Dataset is something that holds our data and upon “indexing into” it returns a sample of the data:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> Dataset():</span>
@@ -342,7 +342,7 @@ font-style: inherit;">len</span>(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.x_train)</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">ds <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Dataset(x_train, y_train)</span>
@@ -368,7 +368,7 @@ background-color: null;
 font-style: inherit;">in</span> dataloader:</span>
 <span id="cb7-17">...</span></code></pre></div>
 <p>So our dataloader needs to wrap the dataset, and provide some kind of an iterator returning batches of data, based on the specified batch size. Let’s create one:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> DataLoader():</span>
@@ -424,7 +424,7 @@ background-color: null;
 font-style: inherit;">self</span>.batch_size]</span></code></pre></div>
 </div>
 <p>Now the training loop is simplified to:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> fit(epochs):</span>
@@ -483,7 +483,7 @@ font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'</span>)</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">dl <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> DataLoader(ds, bs)</span>
@@ -507,7 +507,7 @@ epoch=4 | loss=1.190 | acc=0.660</code></pre>
 <h2 class="anchored" data-anchor-id="next-up-shuffling-the-data">Next up: shuffling the data</h2>
 <p>The above training loop already looks pretty good, it’s small and concise, and fairly generic. The next improvement we are going to make is something that doesn’t improve the code of the training loop, but improves training of the model. So far during training, we cycle each epoch through the data in the exact same order. This means that all training samples are always batched together with the exact same other samples. This is not good for training our model, instead we want to shuffle the data up. So that each epoch, we have batches of data that have not yet been batched up together. This additional variation helps the model to generalize as we will see.</p>
 <p>The simplest implementation would be to create a list of indices, which we put in between the dataset and the sampling of the mini-batches. In case we don’t need to shuffle, this list will just be <code>[0, 1, ... len(dataset)]</code>.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> random</span>
@@ -597,7 +597,7 @@ font-style: inherit;">+</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.batch_size]]</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">model, opt <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> get_model_opt()</span>
@@ -620,7 +620,7 @@ epoch=4 | loss=1.187 | acc=0.692</code></pre>
 </div>
 </div>
 <p>This works just fine, but let’s see if we can encapsulate this logic in a separate class. We start with a simple <code>Sampler</code> class that we can iterate through and either gives indices in order, or shuffled:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> Sampler():</span>
@@ -685,7 +685,7 @@ font-style: inherit;">range</span>:</span>
 background-color: null;
 font-style: inherit;">yield</span> i</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">s <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Sampler(ds, <span class="va" style="color: #111111;
@@ -720,7 +720,7 @@ font-style: inherit;">break</span></span></code></pre></div>
 <pre><code>0, 1, 2, 3, 4, 5, </code></pre>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1">s <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Sampler(ds, <span class="va" style="color: #111111;
@@ -756,7 +756,7 @@ font-style: inherit;">break</span></span></code></pre></div>
 </div>
 </div>
 <p>Next, let’s create a BatchSampler that does the same, but returns the indexes in batches. For that we can use the <code>islice()</code> function from the <code>itertools</code> module:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> itertools <span class="im" style="color: #00769E;
@@ -802,7 +802,7 @@ font-style: inherit;">10</span>))</span></code></pre></div>
 [5, 6, 7, 8, 9]</code></pre>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1">printlist(islice(lst, <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">4</span>))        <span class="co" style="color: #5E5E5E;
@@ -818,7 +818,7 @@ font-style: inherit;"># doing that twice gives the same first 4 elements</span><
 [0, 1, 2, 3]</code></pre>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1">lst <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
@@ -855,7 +855,7 @@ font-style: inherit;"># iterator has finished..</span></span></code></pre></div>
 </div>
 </div>
 <p>And thus we create our <code>BatchSampler</code>:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> BatchSampler():</span>
@@ -922,7 +922,7 @@ background-color: null;
 font-style: inherit;">yield</span> res</span></code></pre></div>
 </div>
 <p>Let’s see the BatchSamepler in action:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1">s <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Sampler(<span class="bu" style="color: null;
@@ -956,7 +956,7 @@ font-style: inherit;">in</span> batchs:</span>
 </div>
 </div>
 <p>And let’s incorporate it into the DataLoader:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb29" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> DataLoader():</span>
@@ -999,7 +999,7 @@ font-style: inherit;">yield</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.dataset[batch]</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1">s <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Sampler(ds, shuffle<span class="op" style="color: #5E5E5E;
@@ -1058,7 +1058,7 @@ font-style: inherit;">'label'</span>]])</span></code></pre></div>
 <li>stack the <code>x</code> tensors and <code>y</code> tensors respectively into one big tensor</li>
 </ul>
 <p>So let’s update our DataLoader with a <code>collate_func</code> that wraps around individual samples:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> DataLoader():</span>
@@ -1120,7 +1120,7 @@ font-style: inherit;">in</span> batch)</span></code></pre></div>
 <li>zip the results so that <code>x</code> and <code>y</code> are batched</li>
 <li>and combine the list of tensors for <code>x</code> and <code>y</code> respectively into one big tensor</li>
 </ol>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> collate_func(data):</span>
@@ -1151,7 +1151,7 @@ background-color: null;
 font-style: inherit;">return</span> torch.stack(x), torch.stack(y)</span></code></pre></div>
 </div>
 <p>And let’s see it in action, now using the huggingface dataset <code>ds_hf</code>:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb35" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1">s <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Sampler(ds_hf, shuffle<span class="op" style="color: #5E5E5E;
@@ -1178,7 +1178,7 @@ epoch=4 | loss=1.260 | acc=0.641</code></pre>
 </div>
 </div>
 <p>Not bad, we have replicated the main logic of PyTorch’s DataLoader. The version from PyTorch has a slightly different API as we don’t have to specify the <code>BatchSampler</code>, instead we can just pass <code>shuffle=True</code>:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb37" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> torch.utils.data <span class="im" style="color: #00769E;
@@ -1222,7 +1222,7 @@ epoch=4 | loss=1.258 | acc=0.618</code></pre>
 <section id="validation-set" class="level2">
 <h2 class="anchored" data-anchor-id="validation-set">Validation set</h2>
 <p>Let’s add a validation set to make sure we validate on data we are not training on. For that we are going to pull the data from the datasets library without the <code>splits</code> argument, which will give us a dataset dictionary containing both a training and a test dataset:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb39" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1">hf_dd <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> load_dataset(name)</span>
@@ -1249,7 +1249,7 @@ font-style: inherit;">=</span> load_dataset(name)</span>
 </div>
 </div>
 <p>And let’s create two dataloaders, one for the train and one for the validation set. For the validation loader we can double the batch size since we won’t be computing gradients for the forward pass:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb42" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1">train_loader <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> DataLoader(hf_dd[<span class="st" style="color: #20794D;
@@ -1286,7 +1286,7 @@ font-style: inherit;">=</span>collate_func)</span></code></pre></div>
 <li>compute loss and metrics more correctly, by taking care of the batch-size and taking the average over all data</li>
 <li>add a seperate forward pass for the validation set</li>
 </ul>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb43" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> fit(epochs):</span>
@@ -1446,7 +1446,7 @@ font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'</span>)</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb44" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1">model, opt <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> get_model_opt()</span>
@@ -1467,13 +1467,13 @@ epoch=4 | train_loss=1.305 | valid_loss=1.241 | acc=0.637</code></pre>
 <section id="first-exports" class="level2">
 <h2 class="anchored" data-anchor-id="first-exports">First exports</h2>
 <p>When exporting code to a module with <code>nbdev</code> the first thing we need to do is declare the <code>default_exp</code> directive. This makes sure that when we run the export, the module will be exported to <code>dataloaders.py</code></p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb46" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| default_exp dataloaders</span></span></code></pre></div>
 </div>
 <p>Next, we can export any code into the module by adding <code>#|export</code> on top of the cell we want to export. For example:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb47" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
@@ -1488,7 +1488,7 @@ background-color: null;
 font-style: inherit;">'hello'</span>)</span></code></pre></div>
 </div>
 <p>To export, we simply execute:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb48" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> nbdev<span class="op" style="color: #5E5E5E;
@@ -1521,7 +1521,7 @@ font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'hello'</span>)</span></code></pre></div>
 <p>So what do we want to export here? Let’s see if we can create some generic code for loading data from the Huggingface datasets library into a PyTorch Dataloader:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb50" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#|export</span></span>
@@ -1542,7 +1542,7 @@ font-style: inherit;">import</span> torch</span>
 background-color: null;
 font-style: inherit;">import</span> PIL</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb51" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#|export</span></span>
@@ -1615,7 +1615,7 @@ font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> data)                </span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb52" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#|export</span></span>
@@ -1648,7 +1648,9 @@ background-color: null;
 font-style: inherit;">@classmethod</span></span>
 <span id="cb52-9">    <span class="kw" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">def</span> _get_dls(cls, train_ds, valid_ds, bs, collate_fn):</span>
+font-style: inherit;">def</span> _get_dls(cls, train_ds, valid_ds, bs, collate_fn, <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span>kwargs):</span>
 <span id="cb52-10">        <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">'''Helper function returning 2 PyTorch Dataloaders as a tuple for 2 Datasets'''</span></span>
@@ -1662,7 +1664,9 @@ font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">True</span>, collate_fn<span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span>collate_fn),</span>
+font-style: inherit;">=</span>collate_fn, <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span>kwargs),</span>
 <span id="cb52-12">                DataLoader(valid_ds, batch_size<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>bs<span class="op" style="color: #5E5E5E;
@@ -1671,30 +1675,38 @@ font-style: inherit;">*</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span>, collate_fn<span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span>collate_fn))</span>
+font-style: inherit;">=</span>collate_fn, <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span>kwargs))</span>
 <span id="cb52-13">        </span>
 <span id="cb52-14">    <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@classmethod</span></span>
 <span id="cb52-15">    <span class="kw" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">def</span> from_hf_dd(cls, dd, batch_size):</span>
+font-style: inherit;">def</span> from_hf_dd(cls, dd, batch_size, collate_fn<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>hf_ds_collate_func, <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span>kwargs):</span>
 <span id="cb52-16">        <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">'''Factory method to create a Dataloaders object for a Huggingface Dataset dict,</span></span>
 <span id="cb52-17"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">        uses the `hf_ds_collate_func` collation function'''</span></span>
+font-style: inherit;">        uses the `hf_ds_collate_func` collation function by default'''</span></span>
 <span id="cb52-18">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> cls(<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span>cls._get_dls(<span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">*</span>dd.values(), batch_size, hf_ds_collate_func))</span></code></pre></div>
+font-style: inherit;">*</span>dd.values(), batch_size, collate_fn, <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span>kwargs))</span></code></pre></div>
 </div>
 <p>With <code>show_doc()</code> we can include the documentations of class methods:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb53" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#|hide</span></span>
@@ -1706,21 +1718,22 @@ font-style: inherit;">import</span> <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span></span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb54" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1">show_doc(DataLoaders.from_hf_dd)</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <hr>
 <section id="dataloaders.from_hf_dd" class="level3">
 <h3 class="anchored" data-anchor-id="dataloaders.from_hf_dd">DataLoaders.from_hf_dd</h3>
 <blockquote class="blockquote">
-<pre><code> DataLoaders.from_hf_dd (dd, batch_size)</code></pre>
+<pre><code> DataLoaders.from_hf_dd (dd, batch_size, collate_fn=&lt;function
+                         hf_ds_collate_func&gt;, **kwargs)</code></pre>
 </blockquote>
-<p>Factory method to create a Dataloaders object for a Huggingface Dataset dict, uses the <code>hf_ds_collate_func</code> collation function</p>
+<p>Factory method to create a Dataloaders object for a Huggingface Dataset dict, uses the <code>hf_ds_collate_func</code> collation function by default</p>
 </section>
 </div>
 </div>
 <p>Example usage:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb56" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> fit(epochs):</span>
@@ -1868,12 +1881,12 @@ font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'</span>)</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb57" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1">dls <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> DataLoaders.from_hf_dd(hf_dd, bs)</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb58" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1">model, opt <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> get_model_opt()</span>
@@ -1889,7 +1902,7 @@ epoch=3 | train_loss=1.438 | valid_loss=1.350 | acc=0.633
 epoch=4 | train_loss=1.271 | valid_loss=1.210 | acc=0.639</code></pre>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb60" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#|hide</span></span>
@@ -5119,7 +5132,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-87660"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-87660").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-92872"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-92872").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>
