@@ -1232,7 +1232,7 @@ font-style: inherit;">=</span> load_dataset(name)</span>
 </div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"c6b69b7005de4bc08ad49086a7796a80","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"17183763453740089b95f79c7cbabd59","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 <div class="cell-output cell-output-display">
@@ -1645,7 +1645,7 @@ background-color: null;
 font-style: inherit;">self</span>, train, valid):</span>
 <span id="cb52-4">        <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">'''Dataloaders class wrapping two PyTorch dataloaders: train and valid'''</span></span>
+font-style: inherit;">'''Class that exposes two PyTorch dataloaders as train and valid arguments'''</span></span>
 <span id="cb52-5">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.train <span class="op" style="color: #5E5E5E;
@@ -1667,7 +1667,7 @@ background-color: null;
 font-style: inherit;">**</span>kwargs):</span>
 <span id="cb52-10">        <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">'''Helper function returning 2 PyTorch Dataloaders as a tuple for 2 Datasets'''</span></span>
+font-style: inherit;">'''Helper function returning 2 PyTorch Dataloaders as a tuple for 2 Datasets. **kwargs are passed to the DataLoader'''</span></span>
 <span id="cb52-11">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> (DataLoader(train_ds, batch_size<span class="op" style="color: #5E5E5E;
@@ -1708,7 +1708,7 @@ background-color: null;
 font-style: inherit;">'''Factory method to create a Dataloaders object for a Huggingface Dataset dict,</span></span>
 <span id="cb52-17"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">        uses the `hf_ds_collate_func` collation function by default'''</span></span>
+font-style: inherit;">        uses the `hf_ds_collate_func` collation function by default, **kwargs are passes to the DataLoaders'''</span></span>
 <span id="cb52-18">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> cls(<span class="op" style="color: #5E5E5E;
@@ -1740,9 +1740,9 @@ font-style: inherit;">*</span></span></code></pre></div>
 <h3 class="anchored" data-anchor-id="dataloaders.from_hf_dd">DataLoaders.from_hf_dd</h3>
 <blockquote class="blockquote">
 <pre><code> DataLoaders.from_hf_dd (dd, batch_size, collate_fn=&lt;function
-                         hf_ds_collate_func&gt;, **kwargs)</code></pre>
+                         hf_ds_collate_fn&gt;, **kwargs)</code></pre>
 </blockquote>
-<p>Factory method to create a Dataloaders object for a Huggingface Dataset dict, uses the <code>hf_ds_collate_func</code> collation function by default</p>
+<p>Factory method to create a Dataloaders object for a Huggingface Dataset dict, uses the <code>hf_ds_collate_func</code> collation function by default, **kwargs are passes to the DataLoaders</p>
 </section>
 </div>
 </div>
@@ -1896,31 +1896,45 @@ background-color: null;
 font-style: inherit;">'</span>)</span></code></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb57" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1">dls <span class="op" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb57" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1">hf_dd <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> load_dataset(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'fashion_mnist'</span>)</span>
+<span id="cb57-2">bs    <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1024</span></span>
+<span id="cb57-3">dls <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> DataLoaders.from_hf_dd(hf_dd, bs)</span></code></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Reusing dataset fashion_mnist (/root/.cache/huggingface/datasets/fashion_mnist/fashion_mnist/1.0.0/8d6c32399aa01613d96e2cbc9b13638f359ef62bb33612b077b4c247f6ef99c1)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"812c4c34962d4e1aba8baa1b1f2204d1","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb58" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1">model, opt <span class="op" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb59" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1">model, opt <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> get_model_opt()</span>
-<span id="cb58-2"></span>
-<span id="cb58-3">fit(<span class="dv" style="color: #AD0000;
+<span id="cb59-2"></span>
+<span id="cb59-3">fit(<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">5</span>)</span></code></pre></div>
+font-style: inherit;">1</span>)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>epoch=0 | train_loss=2.183 | valid_loss=2.051 | acc=0.359
-epoch=1 | train_loss=1.923 | valid_loss=1.790 | acc=0.512
-epoch=2 | train_loss=1.662 | valid_loss=1.542 | acc=0.611
-epoch=3 | train_loss=1.438 | valid_loss=1.350 | acc=0.633
-epoch=4 | train_loss=1.271 | valid_loss=1.210 | acc=0.639</code></pre>
+<pre><code>epoch=0 | loss=2.094 | acc=0.431</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb60" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"> <span class="co" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb61" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#|hide</span></span>
-<span id="cb60-2"><span class="im" style="color: #00769E;
+<span id="cb61-2"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> nbdev<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -5146,7 +5160,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-37145"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-37145").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-26804"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-26804").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>

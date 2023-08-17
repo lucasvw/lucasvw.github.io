@@ -588,7 +588,7 @@ epoch=4 | loss=1.258 | acc=0.618</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"c6b69b7005de4bc08ad49086a7796a80","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"17183763453740089b95f79c7cbabd59","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 <div class="cell-output cell-output-display">
@@ -721,20 +721,20 @@ epoch=4 | train_loss=1.305 | valid_loss=1.241 | acc=0.637</code></pre>
 <div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#|export</span></span>
 <span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DataLoaders:</span>
 <span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, train, valid):</span>
-<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">'''Dataloaders class wrapping two PyTorch dataloaders: train and valid'''</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">'''Class that exposes two PyTorch dataloaders as train and valid arguments'''</span></span>
 <span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.train <span class="op">=</span> train</span>
 <span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.valid <span class="op">=</span> valid</span>
 <span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">@classmethod</span></span>
 <span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _get_dls(cls, train_ds, valid_ds, bs, collate_fn, <span class="op">**</span>kwargs):</span>
-<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">'''Helper function returning 2 PyTorch Dataloaders as a tuple for 2 Datasets'''</span></span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">'''Helper function returning 2 PyTorch Dataloaders as a tuple for 2 Datasets. **kwargs are passed to the DataLoader'''</span></span>
 <span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (DataLoader(train_ds, batch_size<span class="op">=</span>bs, shuffle<span class="op">=</span><span class="va">True</span>, collate_fn<span class="op">=</span>collate_fn, <span class="op">**</span>kwargs),</span>
 <span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>                DataLoader(valid_ds, batch_size<span class="op">=</span>bs<span class="op">*</span><span class="dv">2</span>, collate_fn<span class="op">=</span>collate_fn, <span class="op">**</span>kwargs))</span>
 <span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a>        </span>
 <span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">@classmethod</span></span>
 <span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> from_hf_dd(cls, dd, batch_size, collate_fn<span class="op">=</span>hf_ds_collate_fn, <span class="op">**</span>kwargs):</span>
 <span id="cb52-16"><a href="#cb52-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">'''Factory method to create a Dataloaders object for a Huggingface Dataset dict,</span></span>
-<span id="cb52-17"><a href="#cb52-17" aria-hidden="true" tabindex="-1"></a><span class="co">        uses the `hf_ds_collate_func` collation function by default'''</span></span>
+<span id="cb52-17"><a href="#cb52-17" aria-hidden="true" tabindex="-1"></a><span class="co">        uses the `hf_ds_collate_func` collation function by default, **kwargs are passes to the DataLoaders'''</span></span>
 <span id="cb52-18"><a href="#cb52-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> cls(<span class="op">*</span>cls._get_dls(<span class="op">*</span>dd.values(), batch_size, collate_fn, <span class="op">**</span>kwargs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>With <code>show_doc()</code> we can include the documentations of class methods:</p>
@@ -750,9 +750,9 @@ epoch=4 | train_loss=1.305 | valid_loss=1.241 | acc=0.637</code></pre>
 <h3 class="anchored" data-anchor-id="dataloaders.from_hf_dd">DataLoaders.from_hf_dd</h3>
 <blockquote class="blockquote">
 <pre><code> DataLoaders.from_hf_dd (dd, batch_size, collate_fn=&lt;function
-                         hf_ds_collate_func&gt;, **kwargs)</code></pre>
+                         hf_ds_collate_fn&gt;, **kwargs)</code></pre>
 </blockquote>
-<p>Factory method to create a Dataloaders object for a Huggingface Dataset dict, uses the <code>hf_ds_collate_func</code> collation function by default</p>
+<p>Factory method to create a Dataloaders object for a Huggingface Dataset dict, uses the <code>hf_ds_collate_func</code> collation function by default, **kwargs are passes to the DataLoaders</p>
 </section>
 </div>
 </div>
@@ -790,23 +790,29 @@ epoch=4 | train_loss=1.305 | valid_loss=1.241 | acc=0.637</code></pre>
 <span id="cb56-30"><a href="#cb56-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span>epoch<span class="op">=</span><span class="sc">}</span><span class="ss"> | </span><span class="sc">{</span>train_loss<span class="op">=</span><span class="sc">:.3f}</span><span class="ss"> | </span><span class="sc">{</span>valid_loss<span class="op">=</span><span class="sc">:.3f}</span><span class="ss"> | </span><span class="sc">{</span>acc<span class="op">=</span><span class="sc">:.3f}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> DataLoaders.from_hf_dd(hf_dd, bs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>hf_dd <span class="op">=</span> load_dataset(<span class="st">'fashion_mnist'</span>)</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>bs    <span class="op">=</span> <span class="dv">1024</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> DataLoaders.from_hf_dd(hf_dd, bs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Reusing dataset fashion_mnist (/root/.cache/huggingface/datasets/fashion_mnist/fashion_mnist/1.0.0/8d6c32399aa01613d96e2cbc9b13638f359ef62bb33612b077b4c247f6ef99c1)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"812c4c34962d4e1aba8baa1b1f2204d1","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>model, opt <span class="op">=</span> get_model_opt()</span>
-<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>model, opt <span class="op">=</span> get_model_opt()</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>fit(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>epoch=0 | train_loss=2.183 | valid_loss=2.051 | acc=0.359
-epoch=1 | train_loss=1.923 | valid_loss=1.790 | acc=0.512
-epoch=2 | train_loss=1.662 | valid_loss=1.542 | acc=0.611
-epoch=3 | train_loss=1.438 | valid_loss=1.350 | acc=0.633
-epoch=4 | train_loss=1.271 | valid_loss=1.210 | acc=0.639</code></pre>
+<pre><code>epoch=0 | loss=2.094 | acc=0.431</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#|hide</span></span>
-<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> nbdev<span class="op">;</span> nbdev.nbdev_export()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#|hide</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> nbdev<span class="op">;</span> nbdev.nbdev_export()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>And that’s it. We have created our first module of the <code>nntrain</code> library🕺. Links:</p>
 <ul>
