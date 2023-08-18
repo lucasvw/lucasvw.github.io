@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Lucas van Walstijn">
+<meta name="dcterms.date" content="2023-08-16">
+
+<title>Lucas van Walstijn - nntrain: Learner (2/n)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../profile.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-contrib/iconify-1.0.0-beta.2/iconify-icon.min.js"></script>
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+<script src="https://unpkg.com/@jupyter-widgets/html-manager@*/dist/embed-amd.js" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Lucas van Walstijn</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/lucasvw" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/lvWal" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/lucasvanwalstijn/" rel="" target=""><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://www.kaggle.com/lucasvw" rel="" target="">
+ <span class="menu-text"><iconify-icon inline="" icon="fa6-brands:kaggle"></iconify-icon></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://lucasvw.github.io/index.xml" rel="" target=""><i class="bi bi-rss" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#end-of-last-post" id="toc-end-of-last-post" class="nav-link active" data-scroll-target="#end-of-last-post">End of last post:</a></li>
+  <li><a href="#learner-class" id="toc-learner-class" class="nav-link" data-scroll-target="#learner-class">Learner Class</a></li>
+  <li><a href="#callbacks-pubsub-and-event-handlers" id="toc-callbacks-pubsub-and-event-handlers" class="nav-link" data-scroll-target="#callbacks-pubsub-and-event-handlers">Callbacks, pubsub and event handlers</a></li>
+  <li><a href="#subscribers-can-cancel-execution" id="toc-subscribers-can-cancel-execution" class="nav-link" data-scroll-target="#subscribers-can-cancel-execution">Subscribers can cancel execution</a></li>
+  <li><a href="#final-version-of-learner" id="toc-final-version-of-learner" class="nav-link" data-scroll-target="#final-version-of-learner">Final version of <code>Learner</code></a></li>
+  <li><a href="#metrics-subscriber" id="toc-metrics-subscriber" class="nav-link" data-scroll-target="#metrics-subscriber">Metrics Subscriber</a></li>
+  <li><a href="#device-subscriber" id="toc-device-subscriber" class="nav-link" data-scroll-target="#device-subscriber">Device Subscriber</a></li>
+  <li><a href="#learning-rate-finder" id="toc-learning-rate-finder" class="nav-link" data-scroll-target="#learning-rate-finder">Learning Rate Finder</a></li>
+  <li><a href="#momentumlearner" id="toc-momentumlearner" class="nav-link" data-scroll-target="#momentumlearner">MomentumLearner</a></li>
+  <li><a href="#closing-remarks" id="toc-closing-remarks" class="nav-link" data-scroll-target="#closing-remarks">Closing remarks</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><code>nntrain</code>: Learner (2/n)</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">code</div>
+    <div class="quarto-category">neural network</div>
+    <div class="quarto-category">deep learning</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Lucas van Walstijn </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 16, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<p>In this series, I want to discuss the creation of a small library for training neural networks: <code>nntrain</code>. It’s based off the excellent <a href="https://course.fast.ai/">part 2</a> of Practical Deep Learning for Coders by Jeremy Howard, in which from lessons 13 to 18 (roughly) the development of the <code>miniai</code> library is discussed.</p>
+<p>The library will build upon PyTorch. We’ll try as much as possible to build from scratch to understand how it all works. Once the main functionality of components are implemented and verified, we can switch over to PyTorch’s version. This is similar to how things are done in the course. However, this is not just a “copy / paste” of the course: on many occasions I take a different route, and most of the code is my own. That is not to say that all of this is meant to be extremely innovative, instead I had the following goals:</p>
+<ul>
+<li>Deeply understand the training of neural networks with a focus on PyTorch</li>
+<li>Try to create an even better narrative then what’s presented in FastAI 🙉🤷‍♂️🙈</li>
+<li>Get hands-on experience with creating a library with <a href="https://nbdev.fast.ai/"><code>nb_dev</code></a></li>
+</ul>
+<p><code>nb_dev</code> is another great project from the fastai community, which allows python libraries to be written in jupyter notebooks. This may sound a bit weird since the mainstream paradigm is to only do experimental work in notebooks. It has the advantage though that we can create the source code for our library in the very same environment in which we want to experiment and interact with our methods, objects and structure <strong>while we are building the library</strong>. For more details on why this is a good idea and other nice features of <code>nb_dev</code>, see <a href="https://www.fast.ai/posts/2022-07-28-nbdev2.html">here</a>.</p>
+<p>So without further ado, let’s start with where we left off in the previous <a href="https://lucasvw.github.io/posts/08_nntrain_setup/">post</a>:</p>
+<section id="end-of-last-post" class="level2">
+<h2 class="anchored" data-anchor-id="end-of-last-post">End of last post:</h2>
+<p>We finished the last post with exporting the <code>dataloaders</code> module into the <code>nntrain</code> library, which helps transforming a huggingface dataset dictionary into PyTorch dataloaders, so let’s use <a href="https://lucasvw.github.io/nntrain/dataloaders.html">that</a>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset,load_dataset_builder</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nntrain.dataloaders <span class="im">import</span> DataLoaders, hf_ds_collate_fn</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torchvision.transforms.functional <span class="im">as</span> TF</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> operator <span class="im">import</span> attrgetter</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> fastcore.<span class="bu">all</span> <span class="im">as</span> fc</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastprogress <span class="im">import</span> progress_bar,master_bar</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torcheval.metrics <span class="im">as</span> tem</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>name <span class="op">=</span> <span class="st">"fashion_mnist"</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ds_builder <span class="op">=</span> load_dataset_builder(name)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>hf_dd <span class="op">=</span> load_dataset(name)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>bs <span class="op">=</span> <span class="dv">1024</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> DataLoaders.from_hf_dd(hf_dd, batch_size<span class="op">=</span>bs)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># As a reminder, `DataLoaders` expose a PyTorch train and validation dataloader as `train` and `valid` attributes:</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>dls.train, dls.valid</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Reusing dataset fashion_mnist (/root/.cache/huggingface/datasets/fashion_mnist/fashion_mnist/1.0.0/8d6c32399aa01613d96e2cbc9b13638f359ef62bb33612b077b4c247f6ef99c1)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"61fc5bc3ecd7454c86ef10eb50784723","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>(&lt;torch.utils.data.dataloader.DataLoader&gt;,
+ &lt;torch.utils.data.dataloader.DataLoader&gt;)</code></pre>
+</div>
+</div>
+</section>
+<section id="learner-class" class="level2">
+<h2 class="anchored" data-anchor-id="learner-class">Learner Class</h2>
+<p>Let’s continue to formalize our training loop into a <code>Learner</code> class with a <code>fit()</code> method. So far the training loop looks like:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">def</span> fit(epochs):</span>
+<span id="cb6-2"><a href="#cb6-2"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
+<span id="cb6-3"><a href="#cb6-3"></a>        model.train()                                       </span>
+<span id="cb6-4"><a href="#cb6-4"></a>        n_t <span class="op">=</span> train_loss_s <span class="op">=</span> <span class="dv">0</span>                              </span>
+<span id="cb6-5"><a href="#cb6-5"></a>        <span class="cf">for</span> xb, yb <span class="kw">in</span> dls.train:</span>
+<span id="cb6-6"><a href="#cb6-6"></a>            preds <span class="op">=</span> model(xb)</span>
+<span id="cb6-7"><a href="#cb6-7"></a>            train_loss <span class="op">=</span> loss_func(preds, yb)</span>
+<span id="cb6-8"><a href="#cb6-8"></a>            train_loss.backward()</span>
+<span id="cb6-9"><a href="#cb6-9"></a>            </span>
+<span id="cb6-10"><a href="#cb6-10"></a>            n_t <span class="op">+=</span> <span class="bu">len</span>(xb)</span>
+<span id="cb6-11"><a href="#cb6-11"></a>            train_loss_s <span class="op">+=</span> train_loss.item() <span class="op">*</span> <span class="bu">len</span>(xb)</span>
+<span id="cb6-12"><a href="#cb6-12"></a>            </span>
+<span id="cb6-13"><a href="#cb6-13"></a>            opt.step()</span>
+<span id="cb6-14"><a href="#cb6-14"></a>            opt.zero_grad()</span>
+<span id="cb6-15"><a href="#cb6-15"></a>        </span>
+<span id="cb6-16"><a href="#cb6-16"></a>        model.<span class="bu">eval</span>()                                        </span>
+<span id="cb6-17"><a href="#cb6-17"></a>        n_v <span class="op">=</span> valid_loss_s <span class="op">=</span> acc_s <span class="op">=</span> <span class="dv">0</span>                      </span>
+<span id="cb6-18"><a href="#cb6-18"></a>        <span class="cf">for</span> xb, yb <span class="kw">in</span> dls.valid: </span>
+<span id="cb6-19"><a href="#cb6-19"></a>            <span class="cf">with</span> torch.no_grad():                           </span>
+<span id="cb6-20"><a href="#cb6-20"></a>                preds <span class="op">=</span> model(xb)</span>
+<span id="cb6-21"><a href="#cb6-21"></a>                valid_loss <span class="op">=</span> loss_func(preds, yb)</span>
+<span id="cb6-22"><a href="#cb6-22"></a>                </span>
+<span id="cb6-23"><a href="#cb6-23"></a>                n_v <span class="op">+=</span> <span class="bu">len</span>(xb)</span>
+<span id="cb6-24"><a href="#cb6-24"></a>                valid_loss_s <span class="op">+=</span> valid_loss.item() <span class="op">*</span> <span class="bu">len</span>(xb)</span>
+<span id="cb6-25"><a href="#cb6-25"></a>                acc_s <span class="op">+=</span> accuracy(preds, yb) <span class="op">*</span> <span class="bu">len</span>(xb)</span>
+<span id="cb6-26"><a href="#cb6-26"></a>        </span>
+<span id="cb6-27"><a href="#cb6-27"></a>        train_loss <span class="op">=</span> train_loss_s <span class="op">/</span> n_t                     </span>
+<span id="cb6-28"><a href="#cb6-28"></a>        valid_loss <span class="op">=</span> valid_loss_s <span class="op">/</span> n_v</span>
+<span id="cb6-29"><a href="#cb6-29"></a>        acc <span class="op">=</span> acc_s <span class="op">/</span> n_v</span>
+<span id="cb6-30"><a href="#cb6-30"></a>        <span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span>epoch<span class="op">=</span><span class="sc">}</span><span class="ss"> | </span><span class="sc">{</span>train_loss<span class="op">=</span><span class="sc">:.3f}</span><span class="ss"> | </span><span class="sc">{</span>valid_loss<span class="op">=</span><span class="sc">:.3f}</span><span class="ss"> | </span><span class="sc">{</span>acc<span class="op">=</span><span class="sc">:.3f}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Let’s build this class in steps. Initialization is straigh forward: pass in everything the class needs to have access to. Note that we pass the optimizer class in, and instantiate it during initialization to be able to pass the model parameters and the learning rate.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Learner():</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, model, dls, loss_fn, metric_fn, optim_class, lr):</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model <span class="op">=</span> model</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dls <span class="op">=</span> dls</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss_fn <span class="op">=</span> loss_fn</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.metric_fn <span class="op">=</span> metric_fn</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.optim <span class="op">=</span> optim_class(model.parameters(), lr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, let’s define the outer most call: <code>fit()</code>. The main improvement here is to call <code>one_epoch</code> twice, once for the training and once for the validation. Both passes are fairly similar as can be seen from comparing lines 3-8 with 16-21</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="at">@fc.patch</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit(<span class="va">self</span>:Learner, epochs):</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):                <span class="co"># iterate through the epochs</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.one_epoch(epoch, train<span class="op">=</span><span class="va">True</span>)      <span class="co"># one epoch through the training dataloader</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> torch.no_grad():                  <span class="co"># for the validation epoch we don't need grads</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.one_epoch(epoch, train<span class="op">=</span><span class="va">False</span>) <span class="co"># one epoch through the validation dataloader</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, let’s implement <code>one_epoch()</code>. To keep the functionality nice and small, we factor <code>do_batch()</code> out into it’s own method</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="at">@fc.patch</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> one_epoch(<span class="va">self</span>:Learner, epoch, train):</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.reset_stats()                         <span class="co"># reset the stats at beginning of each epoch</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.model.train(train)                    <span class="co"># put the model either in train or validation mode</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.dl <span class="op">=</span> <span class="va">self</span>.dls.train <span class="cf">if</span> train <span class="cf">else</span> <span class="va">self</span>.dls.valid <span class="co"># reference to the active dataloader</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="va">self</span>.batch <span class="kw">in</span> <span class="va">self</span>.dl:                 <span class="co"># iterate through the active dataloader</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.one_batch(train)                  <span class="co"># do one batch</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.print_stats(epoch, train)             <span class="co"># print stats at the end of the epoch</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>And finally the method responsible for dealing with a single batch of data:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="at">@fc.patch</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> one_batch(<span class="va">self</span>:Learner, train):</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.xb, <span class="va">self</span>.yb <span class="op">=</span> <span class="va">self</span>.batch</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.preds <span class="op">=</span> <span class="va">self</span>.model(<span class="va">self</span>.xb)           <span class="co"># forward pass through the model</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.loss <span class="op">=</span> <span class="va">self</span>.loss_fn(<span class="va">self</span>.preds, <span class="va">self</span>.yb)  <span class="co"># loss</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> train:                                  <span class="co"># only do a backward and weight update if train</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss.backward()</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.optim.step()</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.optim.zero_grad()</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.update_stats()                        <span class="co"># update stats</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We also add the methods related to the computation of the statistics:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="at">@fc.patch</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> update_stats(<span class="va">self</span>:Learner):</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">len</span>(<span class="va">self</span>.xb)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.loss_s <span class="op">+=</span> <span class="va">self</span>.loss.item() <span class="op">*</span> n</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.metric_s <span class="op">+=</span> <span class="va">self</span>.metric_fn(<span class="va">self</span>.preds, <span class="va">self</span>.yb).item() <span class="op">*</span> n</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.counter <span class="op">+=</span> n</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="at">@fc.patch</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> reset_stats(<span class="va">self</span>:Learner):</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.counter <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.loss_s <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.metric_s <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="at">@fc.patch</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> print_stats(<span class="va">self</span>:Learner, epoch, train):</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> <span class="va">self</span>.loss_s <span class="op">/</span> <span class="va">self</span>.counter</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    metric <span class="op">=</span> <span class="va">self</span>.metric_s <span class="op">/</span> <span class="va">self</span>.counter</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span>epoch<span class="op">=</span><span class="sc">:02d}</span><span class="ss"> | </span><span class="sc">{</span><span class="st">"train"</span> <span class="cf">if</span> train <span class="cf">else</span> <span class="st">"eval"</span><span class="sc">:&lt;5}</span><span class="ss"> | </span><span class="sc">{</span>loss<span class="op">=</span><span class="sc">:.3f}</span><span class="ss"> | </span><span class="sc">{</span>metric<span class="op">=</span><span class="sc">:.3f}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>And let’s do a round of training:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>n_in <span class="op">=</span> <span class="dv">28</span><span class="op">*</span><span class="dv">28</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>n_h <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>n_out <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> <span class="fl">0.01</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> accuracy(preds, targs):</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (preds.argmax(dim<span class="op">=</span><span class="dv">1</span>) <span class="op">==</span> targs).<span class="bu">float</span>().mean()</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_model():</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    layers <span class="op">=</span> [nn.Linear(n_in, n_h), nn.ReLU(), nn.Linear(n_h, n_out)]</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> nn.Sequential(<span class="op">*</span>layers)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> Learner(get_model(), dls, F.cross_entropy, accuracy, torch.optim.SGD, lr)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>epoch=00 | train | loss=2.198 | metric=0.157
+epoch=00 | eval  | loss=2.092 | metric=0.249
+epoch=01 | train | loss=1.977 | metric=0.419
+epoch=01 | eval  | loss=1.854 | metric=0.570
+epoch=02 | train | loss=1.726 | metric=0.622
+epoch=02 | eval  | loss=1.602 | metric=0.627
+epoch=03 | train | loss=1.488 | metric=0.643
+epoch=03 | eval  | loss=1.390 | metric=0.637
+epoch=04 | train | loss=1.302 | metric=0.651
+epoch=04 | eval  | loss=1.235 | metric=0.651</code></pre>
+</div>
+</div>
+</section>
+<section id="callbacks-pubsub-and-event-handlers" class="level2">
+<h2 class="anchored" data-anchor-id="callbacks-pubsub-and-event-handlers">Callbacks, pubsub and event handlers</h2>
+<p>On the one side we want to keep the <code>Learner</code> and its training loop generic on the other side we need to be able to tweak the dynamics of the training loop depending on the use-case. One way to customize the training loop, without having to re-write the training loop would be to add a publish/subscribe (pubsub) mechanism. In the FastAI course, they are referred to as “callbacks”, and although callbacks, event handlers and pubsub are all related. I think the mechanism implemented here is best referred to as pubsub. It can be compared to the way front-end development works. Whenever the user takes an action such as clicking a button, or hovering over a button certain events are <strong>published</strong>. The developer can <strong>subscribe</strong> to these events by adding a function (a <strong>callback</strong> or <strong>event handler</strong>) that get’s called whenever they occur.</p>
+<p>For the purposes of training neural networks we have the following requirements:</p>
+<ul>
+<li>The Learner framework defines a number of “events” that are published:
+<ul>
+<li><code>before_fit</code>, <code>after_fit</code></li>
+<li><code>before_epoch</code>, <code>after_epoch</code></li>
+<li><code>before_batch</code>, <code>after_batch</code></li>
+</ul></li>
+<li>Subscribers are classes that implement methods (e.g.&nbsp;<code>before_fit()</code>) that will be triggered whenever the associated event is published. They also have an <code>order</code> attribute which determines the order in which they are called in case multiple Subscribers subscribed to the same event.</li>
+<li>As an additional feature, subscribers will be able to redirect flow, but we will come back to that later</li>
+</ul>
+<p>So let’s implement this. First, we will need to store subscribers in the Learner class:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Learner():</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, model, dls, loss_fn, metric_fn, optim_class, lr, subs):</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model <span class="op">=</span> model</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dls <span class="op">=</span> dls</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss_fn <span class="op">=</span> loss_fn</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.metric_fn <span class="op">=</span> metric_fn</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.optim <span class="op">=</span> optim(model.parameters(), lr)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.subs <span class="op">=</span> subs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, let’s define a method for publishing events. The method will go through the registered subscribers and if a method with the name of the event is declared, call that method passing the <code>learner</code> object as an argument:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="at">@fc.patch</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> publish(<span class="va">self</span>:Learner, event):</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> sub <span class="kw">in</span> <span class="bu">sorted</span>(<span class="va">self</span>.subs, key<span class="op">=</span>attrgetter(<span class="st">'order'</span>)):</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        method <span class="op">=</span> <span class="bu">getattr</span>(sub, name, <span class="va">None</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> method <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>: method(<span class="va">self</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To publish the events during the training loop, realize that we have three time the same construct:</p>
+<pre><code>publish "before_event" event
+do event
+publish "after_event" event</code></pre>
+<p>With <code>event</code> being either <code>fit</code>, <code>epoch</code> or <code>batch</code>. So instead of adding this construct multiple times in the training loop let’s define a class we can use as a decorater wrapping the actual “event”:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PublishEvents():</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, event): </span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.event <span class="op">=</span> event</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__call__</span>(<span class="va">self</span>, decorated_fn):</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">def</span> decorated_fn_with_publishing(learner, <span class="op">*</span>args, <span class="op">**</span>kwargs):</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>            learner.publish(<span class="ss">f'before_</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>event<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>            decorated_fn(learner, <span class="op">*</span>args, <span class="op">**</span>kwargs)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>            learner.publish(<span class="ss">f'after_</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>event<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> decorated_fn_with_publishing</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To implement this into the <code>Learner</code> we have to factor out the exact code we want to be executed in between the publishing of the <code>before</code> and <code>after</code>, see the additional <code>_one_epoch()</code> method:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Learner():</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, model, dls, loss_fn, metric_fn, optim_class, lr, subs):</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model <span class="op">=</span> model</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dls <span class="op">=</span> dls</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss_fn <span class="op">=</span> loss_fn</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.metric_fn <span class="op">=</span> metric_fn</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.optim <span class="op">=</span> optim_class(model.parameters(), lr)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.subs <span class="op">=</span> subs</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">@PublishEvents</span>(<span class="st">'fit'</span>)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> fit(<span class="va">self</span>, epochs):</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.one_epoch(epoch, train<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.one_epoch(epoch, train<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> one_epoch(<span class="va">self</span>, epoch, train):</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.reset_stats()</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model.train(train)</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dl <span class="op">=</span> <span class="va">self</span>.dls.train <span class="cf">if</span> train <span class="cf">else</span> <span class="va">self</span>.dls.valid</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._one_epoch(epoch, train)</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">@PublishEvents</span>(<span class="st">'epoch'</span>)</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _one_epoch(<span class="va">self</span>, epoch, train):</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="va">self</span>.batch <span class="kw">in</span> <span class="va">self</span>.dl:</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.xb, <span class="va">self</span>.yb <span class="op">=</span> <span class="va">self</span>.batch</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.one_batch(train)</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.print_stats(epoch, train)</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">@PublishEvents</span>(<span class="st">'batch'</span>)</span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> one_batch(<span class="va">self</span>, train):</span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.preds <span class="op">=</span> <span class="va">self</span>.model(<span class="va">self</span>.xb)           </span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss <span class="op">=</span> <span class="va">self</span>.loss_fn(<span class="va">self</span>.preds, <span class="va">self</span>.yb)</span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> train:                                  </span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.loss.backward()</span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.optim.step()</span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.optim.zero_grad()</span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.update_stats()</span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> publish(<span class="va">self</span>, event):</span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> sub <span class="kw">in</span> <span class="bu">sorted</span>(<span class="va">self</span>.subs, key<span class="op">=</span>attrgetter(<span class="st">'order'</span>)):</span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a>            method <span class="op">=</span> <span class="bu">getattr</span>(sub, event, <span class="va">None</span>)</span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> method <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>: method(<span class="va">self</span>)</span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> update_stats(<span class="va">self</span>):</span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> <span class="bu">len</span>(<span class="va">self</span>.xb)</span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss_s <span class="op">+=</span> <span class="va">self</span>.loss.detach().cpu().item() <span class="op">*</span> n</span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.metric_s <span class="op">+=</span> <span class="va">self</span>.metric_fn(<span class="va">self</span>.preds, <span class="va">self</span>.yb).detach().cpu().item() <span class="op">*</span> n</span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.counter <span class="op">+=</span> n</span>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> reset_stats(<span class="va">self</span>):</span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.counter <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss_s <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.metric_s <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> print_stats(<span class="va">self</span>, epoch, train):</span>
+<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> <span class="va">self</span>.loss_s <span class="op">/</span> <span class="va">self</span>.counter</span>
+<span id="cb18-58"><a href="#cb18-58" aria-hidden="true" tabindex="-1"></a>        metric <span class="op">=</span> <span class="va">self</span>.metric_s <span class="op">/</span> <span class="va">self</span>.counter</span>
+<span id="cb18-59"><a href="#cb18-59" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span>epoch<span class="op">=</span><span class="sc">:02d}</span><span class="ss"> | </span><span class="sc">{</span><span class="st">"train"</span> <span class="cf">if</span> train <span class="cf">else</span> <span class="st">"eval"</span><span class="sc">:&lt;5}</span><span class="ss"> | </span><span class="sc">{</span>loss<span class="op">=</span><span class="sc">:.3f}</span><span class="ss"> | </span><span class="sc">{</span>metric<span class="op">=</span><span class="sc">:.3f}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s create a dummy subscriber and test it out:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Subscriber():</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    order <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DummySub(Subscriber):</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> before_fit(<span class="va">self</span>, learn):</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">'before fit👋'</span>)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> after_fit(<span class="va">self</span>, learn):</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">'after fit👋'</span>)</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> before_epoch(<span class="va">self</span>, learn):</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">'before epoch 💥'</span>)</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> after_epoch(<span class="va">self</span>, learn):</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">'after epoch 💥'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> Learner(get_model(), dls, F.cross_entropy, accuracy, torch.optim.SGD, lr, [DummySub()])</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>before fit👋
+before epoch 💥
+epoch=00 | train | loss=2.192 | metric=0.308
+after epoch 💥
+before epoch 💥
+epoch=00 | eval  | loss=2.082 | metric=0.454
+after epoch 💥
+after fit👋</code></pre>
+</div>
+</div>
+</section>
+<section id="subscribers-can-cancel-execution" class="level2">
+<h2 class="anchored" data-anchor-id="subscribers-can-cancel-execution">Subscribers can cancel execution</h2>
+<p>Now let’s add the last component of our pubsub system: subscribers should be able to cancel processing. For example, a a subscriber that would implement Early Stopping, will have to be able to cancel any further epochs when the validation loss starts increasing. One way to implement this, is with the help of <code>Exceptions</code> and <code>try</code> / <code>except</code> blocks:</p>
+<p>It’s actually very easy to implement this logic, we only need to define custom <code>Exceptions</code>, and update the <code>PublishEvents</code> class we are using as decorater to catch the exceptions that are thrown in any subscriber:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CancelFitException(<span class="pp">Exception</span>): <span class="cf">pass</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CancelEpochException(<span class="pp">Exception</span>): <span class="cf">pass</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CancelBatchException(<span class="pp">Exception</span>): <span class="cf">pass</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PublishEvents():</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, name): </span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.name <span class="op">=</span> name</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__call__</span>(<span class="va">self</span>, decorated_fn):</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">def</span> decorated_fn_with_publishing(learner, <span class="op">*</span>args, <span class="op">**</span>kwargs):</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span>:</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>                learner.publish(<span class="ss">f'before_</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>name<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>                decorated_fn(learner, <span class="op">*</span>args, <span class="op">**</span>kwargs)</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>                learner.publish(<span class="ss">f'after_</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>name<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">except</span> <span class="bu">globals</span>()[<span class="ss">f'Cancel</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>name<span class="sc">.</span>title()<span class="sc">}</span><span class="ss">Exception'</span>]: <span class="cf">pass</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> decorated_fn_with_publishing</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DummySub(Subscriber):</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> before_fit(<span class="va">self</span>, learn): <span class="bu">print</span>(<span class="st">'before fit👋'</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> before_epoch(<span class="va">self</span>, learn): <span class="cf">raise</span> CancelFitException</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> after_fit(<span class="va">self</span>, learn): <span class="bu">print</span>(<span class="st">'after fit 👋'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> Learner(get_model(), dls, F.cross_entropy, accuracy, torch.optim.SGD, lr, [DummySub()])</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>before fit👋</code></pre>
+</div>
+</div>
+<p>And indeed, the <code>after_fit</code> event is never published, since the fit was cancelled during <code>before_epoch</code></p>
+</section>
+<section id="final-version-of-learner" class="level2">
+<h2 class="anchored" data-anchor-id="final-version-of-learner">Final version of <code>Learner</code></h2>
+<p>We are going to make some final changes to the Learner class:</p>
+<ul>
+<li>remove all the methods related to metrics and statistics, since we will do that in a Subscriber</li>
+<li>factor out the computation of the following logic. This is practical to create subclasses of <code>Learner</code> with custom behavior:
+<ul>
+<li>prediction: <code>self.predict()</code></li>
+<li>loss: <code>self.get_loss()</code></li>
+<li>backward pass: <code>self.backward()</code></li>
+<li>stepping of weights: <code>self.step()</code></li>
+<li>zeroing of gradients: <code>self.zero_grad()</code></li>
+</ul></li>
+<li>add a Subscriber argument to <code>fit</code>, these subs will only be added for the duration of the fit, and afterwards removed</li>
+<li>add a couple of additional events (<code>after_predict</code>, <code>after_loss</code>, <code>after_backward</code> and <code>after_step</code>) to which subscribers can listen</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Learner():</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, model, dls, loss_fn, optim_class, lr, subs):</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model <span class="op">=</span> model</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dls <span class="op">=</span> dls</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss_fn <span class="op">=</span> loss_fn</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.optim_class <span class="op">=</span> optim_class</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.lr <span class="op">=</span> lr</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.subs <span class="op">=</span> subs</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> fit(<span class="va">self</span>, epochs, train<span class="op">=</span><span class="va">True</span>, valid<span class="op">=</span><span class="va">True</span>, subs<span class="op">=</span>[], lr<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> sub <span class="kw">in</span> subs: <span class="va">self</span>.subs.append(sub)</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_epochs <span class="op">=</span> epochs</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.epochs <span class="op">=</span> <span class="bu">range</span>(<span class="va">self</span>.n_epochs)</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>        lr <span class="op">=</span> <span class="va">self</span>.lr <span class="cf">if</span> lr <span class="kw">is</span> <span class="va">None</span> <span class="cf">else</span> lr</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.opt <span class="op">=</span> <span class="va">self</span>.optim_class(<span class="va">self</span>.model.parameters(), lr)</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._fit(train, valid)</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">finally</span>:</span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> sub <span class="kw">in</span> subs: <span class="va">self</span>.subs.remove(sub)</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>                    </span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">@PublishEvents</span>(<span class="st">'fit'</span>)</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _fit(<span class="va">self</span>, train, valid):</span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="va">self</span>.epoch <span class="kw">in</span> <span class="va">self</span>.epochs:</span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> train: </span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.one_epoch(<span class="va">True</span>)</span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> valid:</span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>                <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>                    <span class="va">self</span>.one_epoch(<span class="va">False</span>)</span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> one_epoch(<span class="va">self</span>, train):</span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model.train(train)</span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dl <span class="op">=</span> <span class="va">self</span>.dls.train <span class="cf">if</span> train <span class="cf">else</span> <span class="va">self</span>.dls.valid</span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._one_epoch()</span>
+<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">@PublishEvents</span>(<span class="st">'epoch'</span>)</span>
+<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _one_epoch(<span class="va">self</span>):</span>
+<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="va">self</span>.batch <span class="kw">in</span> <span class="va">self</span>.dl: </span>
+<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.one_batch()</span>
+<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">@PublishEvents</span>(<span class="st">'batch'</span>)</span>
+<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> one_batch(<span class="va">self</span>):</span>
+<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.predict()</span>
+<span id="cb26-44"><a href="#cb26-44" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.publish(<span class="st">'after_predict'</span>)</span>
+<span id="cb26-45"><a href="#cb26-45" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.get_loss()</span>
+<span id="cb26-46"><a href="#cb26-46" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.publish(<span class="st">'after_loss'</span>)</span>
+<span id="cb26-47"><a href="#cb26-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.model.training:</span>
+<span id="cb26-48"><a href="#cb26-48" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.backward()</span>
+<span id="cb26-49"><a href="#cb26-49" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.publish(<span class="st">'after_backward'</span>)</span>
+<span id="cb26-50"><a href="#cb26-50" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.step()</span>
+<span id="cb26-51"><a href="#cb26-51" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.publish(<span class="st">'after_step'</span>)</span>
+<span id="cb26-52"><a href="#cb26-52" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.zero_grad()</span>
+<span id="cb26-53"><a href="#cb26-53" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb26-54"><a href="#cb26-54" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> publish(<span class="va">self</span>, event):</span>
+<span id="cb26-55"><a href="#cb26-55" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> sub <span class="kw">in</span> <span class="bu">sorted</span>(<span class="va">self</span>.subs, key<span class="op">=</span>attrgetter(<span class="st">'order'</span>)):</span>
+<span id="cb26-56"><a href="#cb26-56" aria-hidden="true" tabindex="-1"></a>            method <span class="op">=</span> <span class="bu">getattr</span>(sub, event, <span class="va">None</span>)</span>
+<span id="cb26-57"><a href="#cb26-57" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> method <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>: method(<span class="va">self</span>)</span>
+<span id="cb26-58"><a href="#cb26-58" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb26-59"><a href="#cb26-59" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> predict(<span class="va">self</span>): </span>
+<span id="cb26-60"><a href="#cb26-60" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.preds <span class="op">=</span> <span class="va">self</span>.model(<span class="va">self</span>.batch[<span class="dv">0</span>])</span>
+<span id="cb26-61"><a href="#cb26-61" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb26-62"><a href="#cb26-62" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> get_loss(<span class="va">self</span>): </span>
+<span id="cb26-63"><a href="#cb26-63" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss <span class="op">=</span> <span class="va">self</span>.loss_fn(<span class="va">self</span>.preds, <span class="va">self</span>.batch[<span class="dv">1</span>])</span>
+<span id="cb26-64"><a href="#cb26-64" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb26-65"><a href="#cb26-65" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> backward(<span class="va">self</span>): <span class="va">self</span>.loss.backward()</span>
+<span id="cb26-66"><a href="#cb26-66" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> step(<span class="va">self</span>): <span class="va">self</span>.opt.step()</span>
+<span id="cb26-67"><a href="#cb26-67" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> zero_grad(<span class="va">self</span>): <span class="va">self</span>.opt.zero_grad()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="metrics-subscriber" class="level2">
+<h2 class="anchored" data-anchor-id="metrics-subscriber">Metrics Subscriber</h2>
+<p>Since we took out the metrics, let’s create a subscriber that adds that. We want the subscriber to be generic, to it should be able to accept one or multiple metrics. Let’s make sure that it can accept the metrics from the <code>torcheval</code> library:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>metric <span class="op">=</span> tem.Mean()</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>metric.update(torch.tensor([<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]))  <span class="co"># update() adds data</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>metric.update(torch.tensor([<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>]))  </span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(metric.compute())               <span class="co"># compute() computes the metric</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>metric.reset()</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(metric.compute())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>WARNING:root:No calls to update() have been made - returning 0.0</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tensor(3.5000, dtype=torch.float64)
+tensor(0., dtype=torch.float64)</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#|export</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MetricsSub(Subscriber):</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, <span class="op">**</span>metrics):</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.metrics <span class="op">=</span> metrics</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss <span class="op">=</span> tem.Mean()</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> before_fit(<span class="va">self</span>, learn): </span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>        learn.metrics <span class="op">=</span> <span class="va">self</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> before_epoch(<span class="va">self</span>, learn):</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> m <span class="kw">in</span> <span class="va">self</span>.metrics.values(): m.reset()</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss.reset()</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> after_batch(<span class="va">self</span>, learn):</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>        x,y,<span class="op">*</span>_ <span class="op">=</span> <span class="va">self</span>.to_cpu(learn.batch)</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> m <span class="kw">in</span> <span class="va">self</span>.metrics.values(): m.update(<span class="va">self</span>.to_cpu(learn.preds), y)</span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss.update(<span class="va">self</span>.to_cpu(learn.loss), weight<span class="op">=</span><span class="bu">len</span>(x))</span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> after_epoch(<span class="va">self</span>, learn):</span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>        log <span class="op">=</span> {</span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>            <span class="st">'epoch'</span>: learn.epoch,</span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a>            <span class="st">'mode'</span>: <span class="st">'train'</span> <span class="cf">if</span> learn.model.training <span class="cf">else</span> <span class="st">'eval'</span>,</span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>            <span class="st">'loss'</span> : <span class="ss">f'</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>loss<span class="sc">.</span>compute()<span class="sc">:.3f}</span><span class="ss">'</span></span>
+<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> k, v <span class="kw">in</span> <span class="va">self</span>.metrics.items():</span>
+<span id="cb30-26"><a href="#cb30-26" aria-hidden="true" tabindex="-1"></a>            log[k] <span class="op">=</span> <span class="ss">f'</span><span class="sc">{</span>v<span class="sc">.</span>compute()<span class="sc">:.3f}</span><span class="ss">'</span></span>
+<span id="cb30-27"><a href="#cb30-27" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output(log)</span>
+<span id="cb30-28"><a href="#cb30-28" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb30-29"><a href="#cb30-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> to_cpu(<span class="va">self</span>, x):</span>
+<span id="cb30-30"><a href="#cb30-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">isinstance</span>(x, <span class="bu">list</span>): <span class="cf">return</span> (<span class="va">self</span>.to_cpu(el) <span class="cf">for</span> el <span class="kw">in</span> x)</span>
+<span id="cb30-31"><a href="#cb30-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x.detach().cpu()</span>
+<span id="cb30-32"><a href="#cb30-32" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb30-33"><a href="#cb30-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> output(<span class="va">self</span>, log): <span class="bu">print</span>(log)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>metrics <span class="op">=</span> MetricsSub(accuracy<span class="op">=</span>tem.MulticlassAccuracy())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> Learner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics])</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'epoch': 0, 'mode': 'train', 'loss': '2.200', 'accuracy': '0.248'}
+{'epoch': 0, 'mode': 'eval', 'loss': '2.090', 'accuracy': '0.394'}</code></pre>
+</div>
+</div>
+</section>
+<section id="device-subscriber" class="level2">
+<h2 class="anchored" data-anchor-id="device-subscriber">Device Subscriber</h2>
+<p>It’s time we start training on the GPU, to do that we have to move the model (and it’s parameters) as well as all the data onto the GPU. We can easily do this with a <code>DeviceSub</code>:</p>
+<ul>
+<li>move the model to the device <strong>before fit</strong></li>
+<li>move each batch to the device <strong>before batch</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> torch.device(<span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span>)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DeviceSub(Subscriber):</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, device):</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.device <span class="op">=</span> device</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> before_fit(<span class="va">self</span>, learn):</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>        learn.model.to(<span class="va">self</span>.device)</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> before_batch(<span class="va">self</span>, learn):</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>        learn.batch <span class="op">=</span> [x.to(<span class="va">self</span>.device) <span class="cf">for</span> x <span class="kw">in</span> learn.batch]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> Learner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics, DeviceSub(device)])</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'epoch': 0, 'mode': 'train', 'loss': '2.193', 'accuracy': '0.283'}
+{'epoch': 0, 'mode': 'eval', 'loss': '2.063', 'accuracy': '0.449'}</code></pre>
+</div>
+</div>
+</section>
+<section id="learning-rate-finder" class="level2">
+<h2 class="anchored" data-anchor-id="learning-rate-finder">Learning Rate Finder</h2>
+<p>The learning rate finder is very simple technique that can be used to find a good learning rate for training your network. It basically starts with a very small learning rate with which just one batch of data is processed. After the batch the loss is recorded. Then, before continuing with the next batch, the learning rate is increased by some constant factor. This process is continued until some criterion is reached, for example the loss has reached a factor of 3 times the smallest value. Then, we plot the learning rates vs the obtained loss’s and determine a good learning rate:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LRFindSub(Subscriber):</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, mult<span class="op">=</span><span class="fl">1.25</span>):</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.mult <span class="op">=</span> mult</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">min</span> <span class="op">=</span> math.inf</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> before_epoch(<span class="va">self</span>, learn):</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> learn.model.training: <span class="cf">raise</span> CancelFitException</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.losses <span class="op">=</span> []</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.lrs <span class="op">=</span> []</span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> after_loss(<span class="va">self</span>, learn):</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>        lr <span class="op">=</span> learn.opt.param_groups[<span class="dv">0</span>][<span class="st">'lr'</span>]</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.lrs.append(lr)</span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> learn.loss.detach().cpu()</span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.losses.append(loss)</span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> loss <span class="op">&lt;</span> <span class="va">self</span>.<span class="bu">min</span>: <span class="va">self</span>.<span class="bu">min</span> <span class="op">=</span> loss</span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> loss <span class="op">&gt;</span> <span class="va">self</span>.<span class="bu">min</span><span class="op">*</span><span class="dv">3</span>: <span class="cf">raise</span> CancelFitException()</span>
+<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> g <span class="kw">in</span> learn.opt.param_groups: g[<span class="st">'lr'</span>] <span class="op">=</span> lr <span class="op">*</span> <span class="va">self</span>.mult</span>
+<span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb37-22"><a href="#cb37-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> plot(<span class="va">self</span>):</span>
+<span id="cb37-23"><a href="#cb37-23" aria-hidden="true" tabindex="-1"></a>        plt.plot(lrfind.lrs, lrfind.losses)</span>
+<span id="cb37-24"><a href="#cb37-24" aria-hidden="true" tabindex="-1"></a>        plt.xscale(<span class="st">'log'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> Learner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics, DeviceSub(device)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>lrfind <span class="op">=</span> LRFindSub()</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">5</span>, subs<span class="op">=</span>[lrfind])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>lrfind.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-30-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>From which we see that a learning rate of 0.1 to 0.5 would be fine</p>
+</section>
+<section id="momentumlearner" class="level2">
+<h2 class="anchored" data-anchor-id="momentumlearner">MomentumLearner</h2>
+<p>Additionally, we can create a subclass of <code>Learner</code> that implements Momentum. Momentum is a technique that doesn’t just use the gradient of the last backward pass, but uses an exponentially weighted average of all previously computed gradients.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MomentumLearner(Learner):</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, model, dls, loss_fn, optim_class, lr, subs, mom<span class="op">=</span><span class="fl">0.85</span>):</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.mom <span class="op">=</span> mom</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(model, dls, loss_fn, optim_class, lr, subs)</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> zero_grad(<span class="va">self</span>):</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> p <span class="kw">in</span> <span class="va">self</span>.model.parameters(): p.grad <span class="op">*=</span> <span class="va">self</span>.mom</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> MomentumLearner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics, DeviceSub(device)])</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'epoch': 0, 'mode': 'train', 'loss': '1.758', 'accuracy': '0.475'}
+{'epoch': 0, 'mode': 'eval', 'loss': '1.148', 'accuracy': '0.648'}
+{'epoch': 1, 'mode': 'train', 'loss': '0.945', 'accuracy': '0.680'}
+{'epoch': 1, 'mode': 'eval', 'loss': '0.839', 'accuracy': '0.691'}
+{'epoch': 2, 'mode': 'train', 'loss': '0.770', 'accuracy': '0.730'}
+{'epoch': 2, 'mode': 'eval', 'loss': '0.740', 'accuracy': '0.739'}
+{'epoch': 3, 'mode': 'train', 'loss': '0.690', 'accuracy': '0.763'}
+{'epoch': 3, 'mode': 'eval', 'loss': '0.679', 'accuracy': '0.766'}
+{'epoch': 4, 'mode': 'train', 'loss': '0.637', 'accuracy': '0.785'}
+{'epoch': 4, 'mode': 'eval', 'loss': '0.635', 'accuracy': '0.783'}</code></pre>
+</div>
+</div>
+<p>From which we see that the accuracy on the validation set is increasing (even with this simple linear model) from 66% with normal SGD to 78% with momentum.</p>
+</section>
+<section id="closing-remarks" class="level2">
+<h2 class="anchored" data-anchor-id="closing-remarks">Closing remarks</h2>
+<p>In this post we have again covered a lot of ground. We have created a very flexible Learner framework, making heavy use of a pubsub system to customize the training loop. As examples we have seen a Subscriber that enables training on the GPU, and another one that takes care of tracking the loss and the metrics while we are training. Additionally we have implement the learning rate finder as a Subscriber, and last but not least we have seen how we can subclass the Learner class to create custom learners that for example implement momentum. Below I have added one additional Subscriber that displays the progress of the loss a bit nicer in a graph, as well as puts the outputs in a table. It has been copied from the miniai library as is (with some minor changes to make it work for <code>nntrain</code>).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ProgressSub(Subscriber):</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    order <span class="op">=</span> MetricsSub.order<span class="op">+</span><span class="dv">1</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, plot<span class="op">=</span><span class="va">False</span>): <span class="va">self</span>.plot <span class="op">=</span> plot</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> before_fit(<span class="va">self</span>, learn):</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>        learn.epochs <span class="op">=</span> <span class="va">self</span>.mbar <span class="op">=</span> master_bar(learn.epochs)</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.first <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">hasattr</span>(learn, <span class="st">'metrics'</span>): learn.metrics.output <span class="op">=</span> <span class="va">self</span>.output</span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.losses <span class="op">=</span> []</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val_losses <span class="op">=</span> []</span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> output(<span class="va">self</span>, d):</span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.first:</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.mbar.write(<span class="bu">list</span>(d), table<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.first <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.mbar.write(<span class="bu">list</span>(d.values()), table<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-19"><a href="#cb44-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> before_epoch(<span class="va">self</span>, learn): learn.dl <span class="op">=</span> progress_bar(learn.dl, leave<span class="op">=</span><span class="va">False</span>, parent<span class="op">=</span><span class="va">self</span>.mbar)</span>
+<span id="cb44-20"><a href="#cb44-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb44-21"><a href="#cb44-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> after_batch(<span class="va">self</span>, learn):</span>
+<span id="cb44-22"><a href="#cb44-22" aria-hidden="true" tabindex="-1"></a>        learn.dl.comment <span class="op">=</span> <span class="ss">f'</span><span class="sc">{</span>learn<span class="sc">.</span>loss<span class="sc">:.3f}</span><span class="ss">'</span></span>
+<span id="cb44-23"><a href="#cb44-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.plot <span class="kw">and</span> <span class="bu">hasattr</span>(learn, <span class="st">'metrics'</span>) <span class="kw">and</span> learn.model.training:</span>
+<span id="cb44-24"><a href="#cb44-24" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.losses.append(learn.loss.item())</span>
+<span id="cb44-25"><a href="#cb44-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.val_losses: <span class="va">self</span>.mbar.update_graph([[fc.L.<span class="bu">range</span>(<span class="va">self</span>.losses), <span class="va">self</span>.losses],[fc.L.<span class="bu">range</span>(learn.epoch).<span class="bu">map</span>(<span class="kw">lambda</span> x: (x<span class="op">+</span><span class="dv">1</span>)<span class="op">*</span><span class="bu">len</span>(learn.dls.train)), <span class="va">self</span>.val_losses]])</span>
+<span id="cb44-26"><a href="#cb44-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb44-27"><a href="#cb44-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> after_epoch(<span class="va">self</span>, learn): </span>
+<span id="cb44-28"><a href="#cb44-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> learn.model.training:</span>
+<span id="cb44-29"><a href="#cb44-29" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.plot <span class="kw">and</span> <span class="bu">hasattr</span>(learn, <span class="st">'metrics'</span>): </span>
+<span id="cb44-30"><a href="#cb44-30" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.val_losses.append(learn.metrics.loss.compute())</span>
+<span id="cb44-31"><a href="#cb44-31" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.mbar.update_graph([[fc.L.<span class="bu">range</span>(<span class="va">self</span>.losses), <span class="va">self</span>.losses],[fc.L.<span class="bu">range</span>(learn.epoch<span class="op">+</span><span class="dv">1</span>).<span class="bu">map</span>(<span class="kw">lambda</span> x: (x<span class="op">+</span><span class="dv">1</span>)<span class="op">*</span><span class="bu">len</span>(learn.dls.train)), <span class="va">self</span>.val_losses]])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>progress <span class="op">=</span> ProgressSub(<span class="va">True</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> DeviceSub(device)</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> MomentumLearner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics, progress, device])</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">epoch</th>
+<th data-quarto-table-cell-role="th">mode</th>
+<th data-quarto-table-cell-role="th">loss</th>
+<th data-quarto-table-cell-role="th">accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>train</td>
+<td>1.770</td>
+<td>0.467</td>
+</tr>
+<tr class="even">
+<td>0</td>
+<td>eval</td>
+<td>1.207</td>
+<td>0.635</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>train</td>
+<td>0.987</td>
+<td>0.670</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>eval</td>
+<td>0.865</td>
+<td>0.679</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>train</td>
+<td>0.791</td>
+<td>0.714</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>eval</td>
+<td>0.757</td>
+<td>0.730</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>train</td>
+<td>0.707</td>
+<td>0.753</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>eval</td>
+<td>0.690</td>
+<td>0.758</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>train</td>
+<td>0.650</td>
+<td>0.778</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>eval</td>
+<td>0.644</td>
+<td>0.774</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-34-output-3.png" class="img-fluid"></p>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://utteranc.es/client.js" repo="lucasvw/BlogComments" issue-term="pathname" theme="github-light" crossorigin="anonymous" async="">
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
