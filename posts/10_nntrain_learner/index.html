@@ -231,12 +231,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="end-of-last-post" class="level2">
 <h2 class="anchored" data-anchor-id="end-of-last-post">End of last post:</h2>
 <p>We finished the last post with exporting the <code>dataloaders</code> module into the <code>nntrain</code> library, which helps transforming a huggingface dataset dictionary into PyTorch dataloaders, so let’s use <a href="https://lucasvw.github.io/nntrain/dataloaders.html">that</a>:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset,load_dataset_builder</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nntrain.dataloaders <span class="im">import</span> DataLoaders, hf_ds_collate_fn</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torchvision.transforms.functional <span class="im">as</span> TF</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
@@ -249,7 +249,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torcheval.metrics <span class="im">as</span> tem</span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>name <span class="op">=</span> <span class="st">"fashion_mnist"</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ds_builder <span class="op">=</span> load_dataset_builder(name)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>hf_dd <span class="op">=</span> load_dataset(name)</span>
@@ -265,7 +265,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"61fc5bc3ecd7454c86ef10eb50784723","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"0892e52b68f54dc7b71e21cddf536fdd","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 <div class="cell-output cell-output-display">
@@ -308,7 +308,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb6-29"><a href="#cb6-29"></a>        acc <span class="op">=</span> acc_s <span class="op">/</span> n_v</span>
 <span id="cb6-30"><a href="#cb6-30"></a>        <span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span>epoch<span class="op">=</span><span class="sc">}</span><span class="ss"> | </span><span class="sc">{</span>train_loss<span class="op">=</span><span class="sc">:.3f}</span><span class="ss"> | </span><span class="sc">{</span>valid_loss<span class="op">=</span><span class="sc">:.3f}</span><span class="ss"> | </span><span class="sc">{</span>acc<span class="op">=</span><span class="sc">:.3f}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Let’s build this class in steps. Initialization is straight forward:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Learner():</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, model, dls, loss_fn, metric_fn, optim_class, lr):</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model <span class="op">=</span> model</span>
@@ -324,7 +324,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>In each epoch we iterate through the batches of a dataloader, let’s put this functionality in a method <code>one_batch()</code></li>
 </ul>
 <p>let’s define the outer most call: <code>fit()</code>. In this method we’ll call <code>one_epoch</code> twice, once for the training and once for the validation. Both passes are fairly similar as can be seen from comparing lines 3-8 with 16-21</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="at">@fc.patch</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit(<span class="va">self</span>:Learner, epochs):</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):                <span class="co"># iterate through the epochs</span></span>
@@ -333,7 +333,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.one_epoch(epoch, train<span class="op">=</span><span class="va">False</span>) <span class="co"># one epoch through the validation dataloader</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Next, let’s implement <code>one_epoch()</code>. To make sure each method does one thing, we factor <code>do_batch()</code> out into it’s own method:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="at">@fc.patch</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> one_epoch(<span class="va">self</span>:Learner, epoch, train):</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.reset_stats()                         <span class="co"># reset the stats at beginning of each epoch</span></span>
@@ -344,7 +344,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.print_stats(epoch, train)             <span class="co"># print stats at the end of the epoch</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>And finally the method responsible for dealing with a single batch of data:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="at">@fc.patch</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> one_batch(<span class="va">self</span>:Learner, train):</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.xb, <span class="va">self</span>.yb <span class="op">=</span> <span class="va">self</span>.batch              <span class="co"># self.batch is either a training or validation batch</span></span>
@@ -357,7 +357,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.update_stats()                        <span class="co"># update stats</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>And the methods related to the computation of the statistics:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="at">@fc.patch</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> update_stats(<span class="va">self</span>:Learner):</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">len</span>(<span class="va">self</span>.xb)</span>
@@ -378,7 +378,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span>epoch<span class="op">=</span><span class="sc">:02d}</span><span class="ss"> | </span><span class="sc">{</span><span class="st">"train"</span> <span class="cf">if</span> train <span class="cf">else</span> <span class="st">"eval"</span><span class="sc">:&lt;5}</span><span class="ss"> | </span><span class="sc">{</span>loss<span class="op">=</span><span class="sc">:.3f}</span><span class="ss"> | </span><span class="sc">{</span>metric<span class="op">=</span><span class="sc">:.3f}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s try it out on the data:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>n_in <span class="op">=</span> <span class="dv">28</span><span class="op">*</span><span class="dv">28</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>n_h <span class="op">=</span> <span class="dv">50</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>n_out <span class="op">=</span> <span class="dv">10</span></span>
@@ -395,16 +395,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>epoch=00 | train | loss=2.198 | metric=0.157
-epoch=00 | eval  | loss=2.092 | metric=0.249
-epoch=01 | train | loss=1.977 | metric=0.419
-epoch=01 | eval  | loss=1.854 | metric=0.570
-epoch=02 | train | loss=1.726 | metric=0.622
-epoch=02 | eval  | loss=1.602 | metric=0.627
-epoch=03 | train | loss=1.488 | metric=0.643
-epoch=03 | eval  | loss=1.390 | metric=0.637
-epoch=04 | train | loss=1.302 | metric=0.651
-epoch=04 | eval  | loss=1.235 | metric=0.651</code></pre>
+<pre><code>epoch=00 | train | loss=2.202 | metric=0.240
+epoch=00 | eval  | loss=2.078 | metric=0.378
+epoch=01 | train | loss=1.943 | metric=0.464
+epoch=01 | eval  | loss=1.802 | metric=0.538
+epoch=02 | train | loss=1.667 | metric=0.578
+epoch=02 | eval  | loss=1.543 | metric=0.601
+epoch=03 | train | loss=1.435 | metric=0.628
+epoch=03 | eval  | loss=1.346 | metric=0.639
+epoch=04 | train | loss=1.266 | metric=0.652
+epoch=04 | eval  | loss=1.207 | metric=0.651</code></pre>
 </div>
 </div>
 </section>
@@ -423,7 +423,7 @@ epoch=04 | eval  | loss=1.235 | metric=0.651</code></pre>
 <li>As an additional feature, subscribers will be able to redirect flow, but we will come back to that later</li>
 </ul>
 <p>So let’s implement this. First, we will need to store a list of subscribers in the Learner class:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Learner():</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, model, dls, loss_fn, metric_fn, optim_class, lr, subs):</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model <span class="op">=</span> model</span>
@@ -434,7 +434,7 @@ epoch=04 | eval  | loss=1.235 | metric=0.651</code></pre>
 <span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.subs <span class="op">=</span> subs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Next, let’s define a method for publishing events. The method will go through the registered subscribers and if a method with the name of the event is declared, call that method passing the <code>learner</code> object as an argument:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="at">@fc.patch</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> publish(<span class="va">self</span>:Learner, event):</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> sub <span class="kw">in</span> <span class="bu">sorted</span>(<span class="va">self</span>.subs, key<span class="op">=</span>attrgetter(<span class="st">'order'</span>)):</span>
@@ -446,7 +446,7 @@ epoch=04 | eval  | loss=1.235 | metric=0.651</code></pre>
 do event
 publish "after_event" event</code></pre>
 <p>With <code>event</code> being either <code>fit</code>, <code>epoch</code> or <code>batch</code>. So instead of adding this construct multiple times in the training loop let’s define a class we can use as a decorater wrapping the <code>do_event</code> logic:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PublishEvents():</span>
@@ -462,7 +462,7 @@ publish "after_event" event</code></pre>
 </div>
 <p>To implement this into the <code>Learner</code> we have to factor out the exact code we want to be executed in between the publishing of the <code>before</code> and <code>after</code>, see the additional <code>_one_epoch()</code> method.</p>
 <p>Note that we are taking out the logic concerning the statistics, this will be implemented as a Subscriber as we’ll see.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Learner():</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, model, dls, loss_fn, metric_fn, optim_class, lr, subs):</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model <span class="op">=</span> model</span>
@@ -480,35 +480,32 @@ publish "after_event" event</code></pre>
 <span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.one_epoch(epoch, train<span class="op">=</span><span class="va">False</span>)</span>
 <span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> one_epoch(<span class="va">self</span>, epoch, train):</span>
-<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.reset_stats()</span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model.train(train)</span>
-<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dl <span class="op">=</span> <span class="va">self</span>.dls.train <span class="cf">if</span> train <span class="cf">else</span> <span class="va">self</span>.dls.valid</span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._one_epoch(epoch, train)</span>
-<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">@PublishEvents</span>(<span class="st">'epoch'</span>)</span>
-<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _one_epoch(<span class="va">self</span>, epoch, train):</span>
-<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="va">self</span>.batch <span class="kw">in</span> <span class="va">self</span>.dl:</span>
-<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.xb, <span class="va">self</span>.yb <span class="op">=</span> <span class="va">self</span>.batch</span>
-<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.one_batch(train)</span>
-<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.print_stats(epoch, train)</span>
-<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">@PublishEvents</span>(<span class="st">'batch'</span>)</span>
-<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> one_batch(<span class="va">self</span>, train):</span>
-<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.preds <span class="op">=</span> <span class="va">self</span>.model(<span class="va">self</span>.xb)           </span>
-<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss <span class="op">=</span> <span class="va">self</span>.loss_fn(<span class="va">self</span>.preds, <span class="va">self</span>.yb)</span>
-<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> train:                                  </span>
-<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.loss.backward()</span>
-<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.optim.step()</span>
-<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.optim.zero_grad()</span>
-<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.update_stats()</span>
-<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> publish(<span class="va">self</span>, event):</span>
-<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> sub <span class="kw">in</span> <span class="bu">sorted</span>(<span class="va">self</span>.subs, key<span class="op">=</span>attrgetter(<span class="st">'order'</span>)):</span>
-<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a>            method <span class="op">=</span> <span class="bu">getattr</span>(sub, event, <span class="va">None</span>)</span>
-<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> method <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>: method(<span class="va">self</span>)            </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model.train(train)</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dl <span class="op">=</span> <span class="va">self</span>.dls.train <span class="cf">if</span> train <span class="cf">else</span> <span class="va">self</span>.dls.valid</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._one_epoch(epoch, train)</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">@PublishEvents</span>(<span class="st">'epoch'</span>)</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _one_epoch(<span class="va">self</span>, epoch, train):</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="va">self</span>.batch <span class="kw">in</span> <span class="va">self</span>.dl:</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.xb, <span class="va">self</span>.yb <span class="op">=</span> <span class="va">self</span>.batch</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.one_batch(train)</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">@PublishEvents</span>(<span class="st">'batch'</span>)</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> one_batch(<span class="va">self</span>, train):</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.preds <span class="op">=</span> <span class="va">self</span>.model(<span class="va">self</span>.xb)           </span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss <span class="op">=</span> <span class="va">self</span>.loss_fn(<span class="va">self</span>.preds, <span class="va">self</span>.yb)</span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> train:                                  </span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.loss.backward()</span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.optim.step()</span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.optim.zero_grad()</span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> publish(<span class="va">self</span>, event):</span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> sub <span class="kw">in</span> <span class="bu">sorted</span>(<span class="va">self</span>.subs, key<span class="op">=</span>attrgetter(<span class="st">'order'</span>)):</span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a>            method <span class="op">=</span> <span class="bu">getattr</span>(sub, event, <span class="va">None</span>)</span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> method <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>: method(<span class="va">self</span>)            </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s create a dummy subscriber and test it out:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Subscriber():</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    order <span class="op">=</span> <span class="dv">0</span></span>
@@ -527,16 +524,14 @@ publish "after_event" event</code></pre>
 <span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> after_epoch(<span class="va">self</span>, learn):</span>
 <span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">'after epoch 💥'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> Learner(get_model(), dls, F.cross_entropy, accuracy, torch.optim.SGD, lr, [DummyS()])</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>before fit👋
 before epoch 💥
-epoch=00 | train | loss=2.192 | metric=0.308
 after epoch 💥
 before epoch 💥
-epoch=00 | eval  | loss=2.082 | metric=0.454
 after epoch 💥
 after fit👋</code></pre>
 </div>
@@ -546,7 +541,7 @@ after fit👋</code></pre>
 <h2 class="anchored" data-anchor-id="subscribers-can-cancel-execution">Subscribers can cancel execution</h2>
 <p>Now let’s add the last component of our pubsub system: subscribers should be able to cancel processing. For example, a a subscriber that would implement Early Stopping, will have to be able to cancel any further epochs when the validation loss starts increasing. One way to implement this, is with the help of <code>Exceptions</code> and <code>try</code> / <code>except</code> blocks:</p>
 <p>It’s actually very easy to implement this logic, we only need to define custom <code>Exceptions</code>, and update the <code>PublishEvents</code> class to catch the exceptions that are thrown in any subscriber:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CancelFitException(<span class="pp">Exception</span>): <span class="cf">pass</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CancelEpochException(<span class="pp">Exception</span>): <span class="cf">pass</span></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CancelBatchException(<span class="pp">Exception</span>): <span class="cf">pass</span></span>
@@ -565,7 +560,7 @@ after fit👋</code></pre>
 <span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">except</span> <span class="bu">globals</span>()[<span class="ss">f'Cancel</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>name<span class="sc">.</span>title()<span class="sc">}</span><span class="ss">Exception'</span>]: <span class="cf">pass</span></span>
 <span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> decorated_fn_with_publishing</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DummyS(Subscriber):</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> before_fit(<span class="va">self</span>, learn): <span class="bu">print</span>(<span class="st">'before fit👋'</span>)</span>
@@ -574,7 +569,7 @@ after fit👋</code></pre>
 <span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> after_fit(<span class="va">self</span>, learn): <span class="bu">print</span>(<span class="st">'after fit 👋'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> Learner(get_model(), dls, F.cross_entropy, accuracy, torch.optim.SGD, lr, [DummyS()])</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -598,7 +593,7 @@ after fit👋</code></pre>
 <li>add a Subscriber argument to <code>fit</code>, these subs will only be added for the duration of the fit, and afterwards removed</li>
 <li>add a couple of additional events (<code>after_predict</code>, <code>after_loss</code>, <code>after_backward</code> and <code>after_step</code>) to which subscribers can listen</li>
 </ul>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Learner():</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, model, dls, loss_fn, optim_class, lr, subs):</span>
@@ -671,7 +666,7 @@ after fit👋</code></pre>
 <section id="metrics-subscriber" class="level2">
 <h2 class="anchored" data-anchor-id="metrics-subscriber">Metrics Subscriber</h2>
 <p>Since we took out the metrics, let’s create a subscriber that adds that. We want the subscriber to be generic, to it should be able to accept one or multiple metrics. Let’s make sure that it can accept the metrics from the <code>torcheval</code> library:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>metric <span class="op">=</span> tem.Mean()</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>metric.update(torch.tensor([<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]))  <span class="co"># update() adds data</span></span>
@@ -688,7 +683,7 @@ after fit👋</code></pre>
 tensor(0., dtype=torch.float64)</code></pre>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#|export</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MetricsS(Subscriber):</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, <span class="op">**</span>metrics):</span>
@@ -723,14 +718,14 @@ tensor(0., dtype=torch.float64)</code></pre>
 <span id="cb30-32"><a href="#cb30-32" aria-hidden="true" tabindex="-1"></a>        </span>
 <span id="cb30-33"><a href="#cb30-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> output(<span class="va">self</span>, log): <span class="bu">print</span>(log)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>metrics_s <span class="op">=</span> MetricsS(accuracy<span class="op">=</span>tem.MulticlassAccuracy())</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> Learner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics_s])</span>
 <span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>{'epoch': 0, 'mode': 'train', 'loss': '2.200', 'accuracy': '0.248'}
-{'epoch': 0, 'mode': 'eval', 'loss': '2.090', 'accuracy': '0.394'}</code></pre>
+<pre><code>{'epoch': 0, 'mode': 'train', 'loss': '2.220', 'accuracy': '0.206'}
+{'epoch': 0, 'mode': 'eval', 'loss': '2.121', 'accuracy': '0.352'}</code></pre>
 </div>
 </div>
 </section>
@@ -741,7 +736,7 @@ tensor(0., dtype=torch.float64)</code></pre>
 <li>move the model (and all it’s trainable parameters) to the device <strong>before fit</strong></li>
 <li>move each batch to the device <strong>before batch</strong></li>
 </ul>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> torch.device(<span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span>)</span>
@@ -757,14 +752,14 @@ tensor(0., dtype=torch.float64)</code></pre>
 <span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> before_batch(<span class="va">self</span>, learn):</span>
 <span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>        learn.batch <span class="op">=</span> [x.to(<span class="va">self</span>.device) <span class="cf">for</span> x <span class="kw">in</span> learn.batch]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>device_s <span class="op">=</span> DeviceS(device)</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> Learner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics_s, device_s])</span>
 <span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>{'epoch': 0, 'mode': 'train', 'loss': '2.193', 'accuracy': '0.283'}
-{'epoch': 0, 'mode': 'eval', 'loss': '2.063', 'accuracy': '0.449'}</code></pre>
+<pre><code>{'epoch': 0, 'mode': 'train', 'loss': '2.209', 'accuracy': '0.256'}
+{'epoch': 0, 'mode': 'eval', 'loss': '2.115', 'accuracy': '0.306'}</code></pre>
 </div>
 </div>
 </section>
@@ -779,7 +774,7 @@ tensor(0., dtype=torch.float64)</code></pre>
 <li>Continue to do this until at some point the loss “explodes”: for example because the current loss is 3 times as large as the minimum loss recorded so far</li>
 </ul>
 <p>After this, we plot the learning rate vs the recorded losses and look for a learning rate at which the loss is decreasing the most (i.e.&nbsp;the point where the loss has the smallest derivative).</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LRFindS(Subscriber):</span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    </span>
@@ -802,22 +797,22 @@ tensor(0., dtype=torch.float64)</code></pre>
 <span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> g <span class="kw">in</span> learn.opt.param_groups: g[<span class="st">'lr'</span>] <span class="op">=</span> lr <span class="op">*</span> <span class="va">self</span>.mult</span>
 <span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>        </span>
 <span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> plot(<span class="va">self</span>):</span>
-<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>        plt.plot(lrfind.lrs, lrfind.losses)</span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>        plt.plot(<span class="va">self</span>.lrs, <span class="va">self</span>.losses)</span>
 <span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>        plt.xscale(<span class="st">'log'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> Learner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics_s, device_s])</span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>lrfind_s <span class="op">=</span> LRFindS()</span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">5</span>, lr<span class="op">=</span><span class="fl">1e-4</span> subs<span class="op">=</span>[lrfind])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">5</span>, lr<span class="op">=</span><span class="fl">1e-4</span>, subs<span class="op">=</span>[lrfind_s])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>lrfind.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>lrfind_s.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-28-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<p>From which we see that a learning rate of 0.1 to 0.5 would be fine</p>
+<p>From which we see that a learning rate of around 0.2 would be best</p>
 </section>
 <section id="momentumlearner" class="level2">
 <h2 class="anchored" data-anchor-id="momentumlearner">MomentumLearner</h2>
@@ -834,7 +829,7 @@ tensor(0., dtype=torch.float64)</code></pre>
 m_t = g_t + c \cdot g_{t-1} + c^2 \cdot g_{t-2} + ...
 \]</span></p>
 <p>This is called momentum and the idea is to add a sense of “inertia” to the gradients, i.e.&nbsp;if in one step we are moving through the loss manifold in a certain direction, then in the next step we want to keep moving somewhat in that direction irrespective of the gradient of the current step.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MomentumLearner(Learner):</span>
 <span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    </span>
@@ -846,20 +841,20 @@ m_t = g_t + c \cdot g_{t-1} + c^2 \cdot g_{t-2} + ...
 <span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> torch.no_grad():</span>
 <span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> p <span class="kw">in</span> <span class="va">self</span>.model.parameters(): p.grad <span class="op">*=</span> <span class="va">self</span>.mom</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> MomentumLearner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics_s, device_s])</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>{'epoch': 0, 'mode': 'train', 'loss': '1.758', 'accuracy': '0.475'}
-{'epoch': 0, 'mode': 'eval', 'loss': '1.148', 'accuracy': '0.648'}
-{'epoch': 1, 'mode': 'train', 'loss': '0.945', 'accuracy': '0.680'}
-{'epoch': 1, 'mode': 'eval', 'loss': '0.839', 'accuracy': '0.691'}
-{'epoch': 2, 'mode': 'train', 'loss': '0.770', 'accuracy': '0.730'}
-{'epoch': 2, 'mode': 'eval', 'loss': '0.740', 'accuracy': '0.739'}
-{'epoch': 3, 'mode': 'train', 'loss': '0.690', 'accuracy': '0.763'}
-{'epoch': 3, 'mode': 'eval', 'loss': '0.679', 'accuracy': '0.766'}
-{'epoch': 4, 'mode': 'train', 'loss': '0.637', 'accuracy': '0.785'}
-{'epoch': 4, 'mode': 'eval', 'loss': '0.635', 'accuracy': '0.783'}</code></pre>
+<pre><code>{'epoch': 0, 'mode': 'train', 'loss': '1.657', 'accuracy': '0.481'}
+{'epoch': 0, 'mode': 'eval', 'loss': '1.105', 'accuracy': '0.647'}
+{'epoch': 1, 'mode': 'train', 'loss': '0.925', 'accuracy': '0.685'}
+{'epoch': 1, 'mode': 'eval', 'loss': '0.831', 'accuracy': '0.695'}
+{'epoch': 2, 'mode': 'train', 'loss': '0.763', 'accuracy': '0.732'}
+{'epoch': 2, 'mode': 'eval', 'loss': '0.736', 'accuracy': '0.739'}
+{'epoch': 3, 'mode': 'train', 'loss': '0.686', 'accuracy': '0.764'}
+{'epoch': 3, 'mode': 'eval', 'loss': '0.675', 'accuracy': '0.766'}
+{'epoch': 4, 'mode': 'train', 'loss': '0.635', 'accuracy': '0.784'}
+{'epoch': 4, 'mode': 'eval', 'loss': '0.634', 'accuracy': '0.779'}</code></pre>
 </div>
 </div>
 <p>And this simple technique has a pretty good effect on training our model: the accuracy on the validation set is increasing (even with this simple linear model) from 66% with normal SGD to 78% with momentum.</p>
@@ -867,11 +862,11 @@ m_t = g_t + c \cdot g_{t-1} + c^2 \cdot g_{t-2} + ...
 <section id="closing-remarks" class="level2">
 <h2 class="anchored" data-anchor-id="closing-remarks">Closing remarks</h2>
 <p>In this post we have again covered a lot of ground. We have created a very flexible Learner framework, making heavy use of a pubsub system to customize the training loop. As examples we have seen a Subscriber that enables training on the GPU, and another one that takes care of tracking the loss and the metrics while we are training. Additionally we have implement the learning rate finder as a Subscriber, and last but not least we have seen how we can subclass the Learner class to create custom learners that for example implement momentum. Below I have added one additional Subscriber that displays the progress of the loss a bit nicer in a graph, as well as puts the outputs in a table. It has been copied from the miniai library as is (with some minor changes to make it work for <code>nntrain</code>).</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ProgressS(Subscriber):</span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    order <span class="op">=</span> MetricsSub.order<span class="op">+</span><span class="dv">1</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    order <span class="op">=</span> MetricsS.order<span class="op">+</span><span class="dv">1</span></span>
 <span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, plot<span class="op">=</span><span class="va">False</span>): <span class="va">self</span>.plot <span class="op">=</span> plot</span>
 <span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> before_fit(<span class="va">self</span>, learn):</span>
 <span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>        learn.epochs <span class="op">=</span> <span class="va">self</span>.mbar <span class="op">=</span> master_bar(learn.epochs)</span>
@@ -900,7 +895,7 @@ m_t = g_t + c \cdot g_{t-1} + c^2 \cdot g_{t-2} + ...
 <span id="cb42-30"><a href="#cb42-30" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.val_losses.append(learn.metrics.loss.compute())</span>
 <span id="cb42-31"><a href="#cb42-31" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.mbar.update_graph([[fc.L.<span class="bu">range</span>(<span class="va">self</span>.losses), <span class="va">self</span>.losses],[fc.L.<span class="bu">range</span>(learn.epoch<span class="op">+</span><span class="dv">1</span>).<span class="bu">map</span>(<span class="kw">lambda</span> x: (x<span class="op">+</span><span class="dv">1</span>)<span class="op">*</span><span class="bu">len</span>(learn.dls.train)), <span class="va">self</span>.val_losses]])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>progress_s <span class="op">=</span> ProgressS(<span class="va">True</span>)</span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> MomentumLearner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics_s, device_s, progress_s])</span>
@@ -937,62 +932,62 @@ m_t = g_t + c \cdot g_{t-1} + c^2 \cdot g_{t-2} + ...
 <tr class="odd">
 <td>0</td>
 <td>train</td>
-<td>1.770</td>
-<td>0.467</td>
+<td>1.818</td>
+<td>0.425</td>
 </tr>
 <tr class="even">
 <td>0</td>
 <td>eval</td>
-<td>1.207</td>
-<td>0.635</td>
+<td>1.192</td>
+<td>0.640</td>
 </tr>
 <tr class="odd">
 <td>1</td>
 <td>train</td>
-<td>0.987</td>
-<td>0.670</td>
+<td>0.965</td>
+<td>0.676</td>
 </tr>
 <tr class="even">
 <td>1</td>
 <td>eval</td>
-<td>0.865</td>
-<td>0.679</td>
+<td>0.845</td>
+<td>0.693</td>
 </tr>
 <tr class="odd">
 <td>2</td>
 <td>train</td>
-<td>0.791</td>
-<td>0.714</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>eval</td>
-<td>0.757</td>
+<td>0.772</td>
 <td>0.730</td>
 </tr>
+<tr class="even">
+<td>2</td>
+<td>eval</td>
+<td>0.740</td>
+<td>0.737</td>
+</tr>
 <tr class="odd">
 <td>3</td>
 <td>train</td>
-<td>0.707</td>
-<td>0.753</td>
-</tr>
-<tr class="even">
-<td>3</td>
-<td>eval</td>
 <td>0.690</td>
-<td>0.758</td>
+<td>0.762</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>eval</td>
+<td>0.676</td>
+<td>0.765</td>
 </tr>
 <tr class="odd">
 <td>4</td>
 <td>train</td>
-<td>0.650</td>
-<td>0.778</td>
+<td>0.636</td>
+<td>0.784</td>
 </tr>
 <tr class="even">
 <td>4</td>
 <td>eval</td>
-<td>0.644</td>
-<td>0.774</td>
+<td>0.634</td>
+<td>0.780</td>
 </tr>
 </tbody>
 </table>
