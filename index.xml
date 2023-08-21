@@ -31,7 +31,7 @@
 <section id="end-of-last-post" class="level2">
 <h2 class="anchored" data-anchor-id="end-of-last-post">End of last post:</h2>
 <p>We finished the last post with exporting the <code>dataloaders</code> module into the <code>nntrain</code> library, which helps transforming a huggingface dataset dictionary into PyTorch dataloaders, so let’s use <a href="https://lucasvw.github.io/nntrain/dataloaders.html">that</a>:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> datasets <span class="im" style="color: #00769E;
@@ -44,7 +44,7 @@ font-style: inherit;">from</span> nntrain.dataloaders <span class="im" style="co
 background-color: null;
 font-style: inherit;">import</span> DataLoaders, hf_ds_collate_fn</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
@@ -97,7 +97,7 @@ font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="co
 background-color: null;
 font-style: inherit;">as</span> plt</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">name <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
@@ -142,7 +142,7 @@ font-style: inherit;"># As a reminder, `DataLoaders` expose a PyTorch train and 
 </section>
 <section id="learner-class" class="level2">
 <h2 class="anchored" data-anchor-id="learner-class">Learner Class</h2>
-<p>Let’s continue to formalize our training loop into a <code>Learner</code> class with a <code>fit()</code> method. So far the training loop looks like:</p>
+<p>Let’s continue to formalize our training loop into a <code>Learner</code> class with a <code>fit()</code> method. The training loop created so far looks like this:</p>
 <div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> fit(epochs):</span>
@@ -289,8 +289,8 @@ background-color: null;
 font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'</span>)</span></code></pre></div>
-<p>Let’s build this class in steps. Initialization is straigh forward: pass in everything the class needs to have access to. Note that we pass the optimizer class in, and instantiate it during initialization to be able to pass the model parameters and the learning rate.</p>
-<div class="cell">
+<p>Let’s build this class in steps. Initialization is straight forward:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> Learner():</span>
@@ -327,8 +327,14 @@ font-style: inherit;">self</span>.optim <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> optim_class(model.parameters(), lr)</span></code></pre></div>
 </div>
-<p>Next, let’s define the outer most call: <code>fit()</code>. The main improvement here is to call <code>one_epoch</code> twice, once for the training and once for the validation. Both passes are fairly similar as can be seen from comparing lines 3-8 with 16-21</p>
-<div class="cell">
+<p>Next, let’s implement the training loop. Instead of writing the full loop in a single <code>fit()</code> method, let’s try to break the training loop down into pieces:</p>
+<ul>
+<li><code>fit()</code> iterates through the epochs</li>
+<li>Per epoch we do a training round through the training data and an evaluation round through the validation set. Both rounds are quite similar, so let’s put this functionality in a separate method <code>one_epoch()</code></li>
+<li>In each epoch we iterate through the batches of a dataloader, let’s put this functionality in a method <code>one_batch()</code></li>
+</ul>
+<p>let’s define the outer most call: <code>fit()</code>. In this method we’ll call <code>one_epoch</code> twice, once for the training and once for the validation. Both passes are fairly similar as can be seen from comparing lines 3-8 with 16-21</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@fc.patch</span></span>
@@ -370,8 +376,8 @@ font-style: inherit;">False</span>) <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># one epoch through the validation dataloader</span></span></code></pre></div>
 </div>
-<p>Next, let’s implement <code>one_epoch()</code>. To keep the functionality nice and small, we factor <code>do_batch()</code> out into it’s own method</p>
-<div class="cell">
+<p>Next, let’s implement <code>one_epoch()</code>. To make sure each method does one thing, we factor <code>do_batch()</code> out into it’s own method:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@fc.patch</span></span>
@@ -428,7 +434,7 @@ background-color: null;
 font-style: inherit;"># print stats at the end of the epoch</span></span></code></pre></div>
 </div>
 <p>And finally the method responsible for dealing with a single batch of data:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@fc.patch</span></span>
@@ -445,7 +451,9 @@ font-style: inherit;">self</span>.yb <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="va" style="color: #111111;
 background-color: null;
-font-style: inherit;">self</span>.batch</span>
+font-style: inherit;">self</span>.batch              <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># self.batch is either a training or validation batch</span></span>
 <span id="cb10-4">    <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.preds <span class="op" style="color: #5E5E5E;
@@ -490,8 +498,8 @@ font-style: inherit;">self</span>.update_stats()                        <span cl
 background-color: null;
 font-style: inherit;"># update stats</span></span></code></pre></div>
 </div>
-<p>We also add the methods related to the computation of the statistics:</p>
-<div class="cell">
+<p>And the methods related to the computation of the statistics:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@fc.patch</span></span>
@@ -635,8 +643,8 @@ font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'</span>)</span></code></pre></div>
 </div>
-<p>And let’s do a round of training:</p>
-<div class="cell">
+<p>Let’s try it out on the data:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">n_in <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
@@ -712,7 +720,7 @@ epoch=04 | eval  | loss=1.235 | metric=0.651</code></pre>
 </section>
 <section id="callbacks-pubsub-and-event-handlers" class="level2">
 <h2 class="anchored" data-anchor-id="callbacks-pubsub-and-event-handlers">Callbacks, pubsub and event handlers</h2>
-<p>On the one side we want to keep the <code>Learner</code> and its training loop generic on the other side we need to be able to tweak the dynamics of the training loop depending on the use-case. One way to customize the training loop, without having to re-write the training loop would be to add a publish/subscribe (pubsub) mechanism. In the FastAI course, they are referred to as “callbacks”, and although callbacks, event handlers and pubsub are all related. I think the mechanism implemented here is best referred to as pubsub. It can be compared to the way front-end development works. Whenever the user takes an action such as clicking a button, or hovering over a button certain events are <strong>published</strong>. The developer can <strong>subscribe</strong> to these events by adding a function (a <strong>callback</strong> or <strong>event handler</strong>) that get’s called whenever they occur.</p>
+<p>On the one side we want to keep the <code>Learner</code> and its training loop generic on the other side we need to be able to tweak the dynamics of the training loop depending on the use-case. One way to customize the training loop, without having to re-write the training loop would be to add a publish/subscribe (pubsub) mechanism. In the FastAI course, they are referred to as “callbacks”, and although callbacks, event handlers and pubsub are all related and basically refer to any logic (encapsulated in a function) which we want to specify <em>now</em>, and execute at a later point in time whenever some condition arises. In my vocabulary a callback is a function that is passed to another function, and is executed whenever that other function is finished.</p>
 <p>For the purposes of training neural networks we have the following requirements:</p>
 <ul>
 <li>The Learner framework defines a number of “events” that are published:
@@ -724,8 +732,8 @@ epoch=04 | eval  | loss=1.235 | metric=0.651</code></pre>
 <li>Subscribers are classes that implement methods (e.g.&nbsp;<code>before_fit()</code>) that will be triggered whenever the associated event is published. They also have an <code>order</code> attribute which determines the order in which they are called in case multiple Subscribers subscribed to the same event.</li>
 <li>As an additional feature, subscribers will be able to redirect flow, but we will come back to that later</li>
 </ul>
-<p>So let’s implement this. First, we will need to store subscribers in the Learner class:</p>
-<div class="cell">
+<p>So let’s implement this. First, we will need to store a list of subscribers in the Learner class:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> Learner():</span>
@@ -768,7 +776,7 @@ background-color: null;
 font-style: inherit;">=</span> subs</span></code></pre></div>
 </div>
 <p>Next, let’s define a method for publishing events. The method will go through the registered subscribers and if a method with the name of the event is declared, call that method passing the <code>learner</code> object as an argument:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@fc.patch</span></span>
@@ -809,12 +817,12 @@ font-style: inherit;">None</span>: method(<span class="va" style="color: #111111
 background-color: null;
 font-style: inherit;">self</span>)</span></code></pre></div>
 </div>
-<p>To publish the events during the training loop, realize that we have three time the same construct:</p>
+<p>With the <code>before_x</code> / <code>after_x</code> events, realize that we have three times the same construct:</p>
 <pre><code>publish "before_event" event
 do event
 publish "after_event" event</code></pre>
-<p>With <code>event</code> being either <code>fit</code>, <code>epoch</code> or <code>batch</code>. So instead of adding this construct multiple times in the training loop let’s define a class we can use as a decorater wrapping the actual “event”:</p>
-<div class="cell">
+<p>With <code>event</code> being either <code>fit</code>, <code>epoch</code> or <code>batch</code>. So instead of adding this construct multiple times in the training loop let’s define a class we can use as a decorater wrapping the <code>do_event</code> logic:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
@@ -884,8 +892,9 @@ font-style: inherit;">'</span>)</span>
 background-color: null;
 font-style: inherit;">return</span> decorated_fn_with_publishing</span></code></pre></div>
 </div>
-<p>To implement this into the <code>Learner</code> we have to factor out the exact code we want to be executed in between the publishing of the <code>before</code> and <code>after</code>, see the additional <code>_one_epoch()</code> method:</p>
-<div class="cell">
+<p>To implement this into the <code>Learner</code> we have to factor out the exact code we want to be executed in between the publishing of the <code>before</code> and <code>after</code>, see the additional <code>_one_epoch()</code> method.</p>
+<p>Note that we are taking out the logic concerning the statistics, this will be implemented as a Subscriber as we’ll see.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> Learner():</span>
@@ -1106,144 +1115,10 @@ font-style: inherit;">not</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">None</span>: method(<span class="va" style="color: #111111;
 background-color: null;
-font-style: inherit;">self</span>)</span>
-<span id="cb18-44">            </span>
-<span id="cb18-45">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> update_stats(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>):</span>
-<span id="cb18-46">        n <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.xb)</span>
-<span id="cb18-47">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.loss_s <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.loss.detach().cpu().item() <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> n</span>
-<span id="cb18-48">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.metric_s <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.metric_fn(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.preds, <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.yb).detach().cpu().item() <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> n</span>
-<span id="cb18-49">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.counter <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+=</span> n</span>
-<span id="cb18-50"></span>
-<span id="cb18-51">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> reset_stats(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>):</span>
-<span id="cb18-52">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.counter <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span></span>
-<span id="cb18-53">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.loss_s <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span></span>
-<span id="cb18-54">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.metric_s <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span></span>
-<span id="cb18-55"></span>
-<span id="cb18-56">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> print_stats(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, epoch, train):</span>
-<span id="cb18-57">        loss <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.loss_s <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.counter</span>
-<span id="cb18-58">        metric <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.metric_s <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.counter</span>
-<span id="cb18-59">        <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>epoch<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:02d}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;"> | </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"train"</span> <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">if</span> train <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">else</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"eval"</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:&lt;5}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;"> | </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>loss<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;"> | </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>metric<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'</span>)</span></code></pre></div>
+font-style: inherit;">self</span>)            </span></code></pre></div>
 </div>
 <p>Let’s create a dummy subscriber and test it out:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
@@ -1258,7 +1133,7 @@ font-style: inherit;">0</span></span>
 <span id="cb19-4"></span>
 <span id="cb19-5"><span class="kw" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">class</span> DummySub(Subscriber):</span>
+font-style: inherit;">class</span> DummyS(Subscriber):</span>
 <span id="cb19-6">    </span>
 <span id="cb19-7">    <span class="kw" style="color: #003B4F;
 background-color: null;
@@ -1304,10 +1179,10 @@ font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'after epoch 💥'</span>)</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1">l <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> Learner(get_model(), dls, F.cross_entropy, accuracy, torch.optim.SGD, lr, [DummySub()])</span>
+font-style: inherit;">=</span> Learner(get_model(), dls, F.cross_entropy, accuracy, torch.optim.SGD, lr, [DummyS()])</span>
 <span id="cb20-2">l.fit(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>)</span></code></pre></div>
@@ -1326,8 +1201,8 @@ after fit👋</code></pre>
 <section id="subscribers-can-cancel-execution" class="level2">
 <h2 class="anchored" data-anchor-id="subscribers-can-cancel-execution">Subscribers can cancel execution</h2>
 <p>Now let’s add the last component of our pubsub system: subscribers should be able to cancel processing. For example, a a subscriber that would implement Early Stopping, will have to be able to cancel any further epochs when the validation loss starts increasing. One way to implement this, is with the help of <code>Exceptions</code> and <code>try</code> / <code>except</code> blocks:</p>
-<p>It’s actually very easy to implement this logic, we only need to define custom <code>Exceptions</code>, and update the <code>PublishEvents</code> class we are using as decorater to catch the exceptions that are thrown in any subscriber:</p>
-<div class="cell">
+<p>It’s actually very easy to implement this logic, we only need to define custom <code>Exceptions</code>, and update the <code>PublishEvents</code> class to catch the exceptions that are thrown in any subscriber:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> CancelFitException(<span class="pp" style="color: #AD0000;
@@ -1440,10 +1315,10 @@ font-style: inherit;">pass</span></span>
 background-color: null;
 font-style: inherit;">return</span> decorated_fn_with_publishing</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><span class="kw" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">class</span> DummySub(Subscriber):</span>
+font-style: inherit;">class</span> DummyS(Subscriber):</span>
 <span id="cb23-2">    </span>
 <span id="cb23-3">    <span class="kw" style="color: #003B4F;
 background-color: null;
@@ -1473,10 +1348,10 @@ font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'after fit 👋'</span>)</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1">l <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> Learner(get_model(), dls, F.cross_entropy, accuracy, torch.optim.SGD, lr, [DummySub()])</span>
+font-style: inherit;">=</span> Learner(get_model(), dls, F.cross_entropy, accuracy, torch.optim.SGD, lr, [DummyS()])</span>
 <span id="cb24-2">l.fit(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span>)</span></code></pre></div>
@@ -1484,13 +1359,12 @@ font-style: inherit;">5</span>)</span></code></pre></div>
 <pre><code>before fit👋</code></pre>
 </div>
 </div>
-<p>And indeed, the <code>after_fit</code> event is never published, since the fit was cancelled during <code>before_epoch</code></p>
+<p>And indeed, the <code>after_fit</code> event is never called, since the fit was cancelled during <code>before_epoch</code> by the dummy subscriber</p>
 </section>
 <section id="final-version-of-learner" class="level2">
 <h2 class="anchored" data-anchor-id="final-version-of-learner">Final version of <code>Learner</code></h2>
 <p>We are going to make some final changes to the Learner class:</p>
 <ul>
-<li>remove all the methods related to metrics and statistics, since we will do that in a Subscriber</li>
 <li>factor out the computation of the following logic. This is practical to create subclasses of <code>Learner</code> with custom behavior:
 <ul>
 <li>prediction: <code>self.predict()</code></li>
@@ -1502,7 +1376,7 @@ font-style: inherit;">5</span>)</span></code></pre></div>
 <li>add a Subscriber argument to <code>fit</code>, these subs will only be added for the duration of the fit, and afterwards removed</li>
 <li>add a couple of additional events (<code>after_predict</code>, <code>after_loss</code>, <code>after_backward</code> and <code>after_step</code>) to which subscribers can listen</li>
 </ul>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
@@ -1863,7 +1737,7 @@ font-style: inherit;">self</span>.opt.zero_grad()</span></code></pre></div>
 <section id="metrics-subscriber" class="level2">
 <h2 class="anchored" data-anchor-id="metrics-subscriber">Metrics Subscriber</h2>
 <p>Since we took out the metrics, let’s create a subscriber that adds that. We want the subscriber to be generic, to it should be able to accept one or multiple metrics. Let’s make sure that it can accept the metrics from the <code>torcheval</code> library:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1">metric <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> tem.Mean()</span>
@@ -1890,7 +1764,9 @@ font-style: inherit;">print</span>(metric.compute())               <span class="
 background-color: null;
 font-style: inherit;"># compute() computes the metric</span></span>
 <span id="cb27-6"></span>
-<span id="cb27-7">metric.reset()</span>
+<span id="cb27-7">metric.reset()                        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># remove all data</span></span>
 <span id="cb27-8"><span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(metric.compute())</span></code></pre></div>
@@ -1902,13 +1778,13 @@ font-style: inherit;">print</span>(metric.compute())</span></code></pre></div>
 tensor(0., dtype=torch.float64)</code></pre>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#|export</span></span>
 <span id="cb30-2"><span class="kw" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">class</span> MetricsSub(Subscriber):</span>
+font-style: inherit;">class</span> MetricsS(Subscriber):</span>
 <span id="cb30-3">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
@@ -2083,18 +1959,17 @@ font-style: inherit;">self</span>, log): <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(log)</span></code></pre></div>
 </div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb31" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1">metrics <span class="op" style="color: #5E5E5E;
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb31" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1">metrics_s <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> MetricsSub(accuracy<span class="op" style="color: #5E5E5E;
+font-style: inherit;">=</span> MetricsS(accuracy<span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span>tem.MulticlassAccuracy())</span></code></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb32" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1">l <span class="op" style="color: #5E5E5E;
+font-style: inherit;">=</span>tem.MulticlassAccuracy())</span>
+<span id="cb31-2"></span>
+<span id="cb31-3">l <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> Learner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics])</span>
-<span id="cb32-2">l.fit(<span class="dv" style="color: #AD0000;
+font-style: inherit;">=</span> Learner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics_s])</span>
+<span id="cb31-4">l.fit(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -2105,17 +1980,17 @@ font-style: inherit;">1</span>)</span></code></pre></div>
 </section>
 <section id="device-subscriber" class="level2">
 <h2 class="anchored" data-anchor-id="device-subscriber">Device Subscriber</h2>
-<p>It’s time we start training on the GPU, to do that we have to move the model (and it’s parameters) as well as all the data onto the GPU. We can easily do this with a <code>DeviceSub</code>:</p>
+<p>It’s time we start training on the GPU, to do that we have to move the model (and it’s parameters) as well as all the data onto the GPU. We can easily do this with a Subscriber:</p>
 <ul>
-<li>move the model to the device <strong>before fit</strong></li>
+<li>move the model (and all it’s trainable parameters) to the device <strong>before fit</strong></li>
 <li>move each batch to the device <strong>before batch</strong></li>
 </ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"> <span class="co" style="color: #5E5E5E;
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
-<span id="cb34-2"></span>
-<span id="cb34-3">device <span class="op" style="color: #5E5E5E;
+<span id="cb33-2"></span>
+<span id="cb33-3">device <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.device(<span class="st" style="color: #20794D;
 background-color: null;
@@ -2126,39 +2001,39 @@ background-color: null;
 font-style: inherit;">else</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"cpu"</span>)</span>
-<span id="cb34-4">    </span>
-<span id="cb34-5"><span class="kw" style="color: #003B4F;
+<span id="cb33-4">    </span>
+<span id="cb33-5"><span class="kw" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">class</span> DeviceSub(Subscriber):</span>
-<span id="cb34-6">    </span>
-<span id="cb34-7">    <span class="kw" style="color: #003B4F;
+font-style: inherit;">class</span> DeviceS(Subscriber):</span>
+<span id="cb33-6">    </span>
+<span id="cb33-7">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>, device):</span>
-<span id="cb34-8">        <span class="va" style="color: #111111;
+<span id="cb33-8">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.device <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> device</span>
-<span id="cb34-9">    </span>
-<span id="cb34-10">    <span class="kw" style="color: #003B4F;
+<span id="cb33-9">    </span>
+<span id="cb33-10">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> before_fit(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>, learn):</span>
-<span id="cb34-11">        learn.model.to(<span class="va" style="color: #111111;
+<span id="cb33-11">        learn.model.to(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.device)</span>
-<span id="cb34-12">    </span>
-<span id="cb34-13">    <span class="kw" style="color: #003B4F;
+<span id="cb33-12">    </span>
+<span id="cb33-13">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> before_batch(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>, learn):</span>
-<span id="cb34-14">        learn.batch <span class="op" style="color: #5E5E5E;
+<span id="cb33-14">        learn.batch <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> [x.to(<span class="va" style="color: #111111;
 background-color: null;
@@ -2168,11 +2043,15 @@ font-style: inherit;">for</span> x <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> learn.batch]</span></code></pre></div>
 </div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb35" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1">l <span class="op" style="color: #5E5E5E;
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1">device_s <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> Learner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics, DeviceSub(device)])</span>
-<span id="cb35-2">l.fit(<span class="dv" style="color: #AD0000;
+font-style: inherit;">=</span> DeviceS(device)</span>
+<span id="cb34-2"></span>
+<span id="cb34-3">l <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Learner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics_s, device_s])</span>
+<span id="cb34-4">l.fit(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -2183,16 +2062,24 @@ font-style: inherit;">1</span>)</span></code></pre></div>
 </section>
 <section id="learning-rate-finder" class="level2">
 <h2 class="anchored" data-anchor-id="learning-rate-finder">Learning Rate Finder</h2>
-<p>The learning rate finder is very simple technique that can be used to find a good learning rate for training your network. It basically starts with a very small learning rate with which just one batch of data is processed. After the batch the loss is recorded. Then, before continuing with the next batch, the learning rate is increased by some constant factor. This process is continued until some criterion is reached, for example the loss has reached a factor of 3 times the smallest value. Then, we plot the learning rates vs the obtained loss’s and determine a good learning rate:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb37" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"> <span class="co" style="color: #5E5E5E;
+<p>The learning rate finder is very simple technique that can be used to find a good learning rate for training a network. It works like this:</p>
+<ul>
+<li>Start with a very small learning rate</li>
+<li>Do a forward pass through the network of a single batch of data and record the loss</li>
+<li>Increase the learning rate with constant factor</li>
+<li>Do another forward pass through the network of a single batch and record the loss</li>
+<li>Continue to do this until at some point the loss “explodes”: for example because the current loss is 3 times as large as the minimum loss recorded so far</li>
+</ul>
+<p>After this, we plot the learning rate vs the recorded losses and look for a learning rate at which the loss is decreasing the most (i.e.&nbsp;the point where the loss has the smallest derivative).</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb36" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
-<span id="cb37-2"><span class="kw" style="color: #003B4F;
+<span id="cb36-2"><span class="kw" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">class</span> LRFindSub(Subscriber):</span>
-<span id="cb37-3">    </span>
-<span id="cb37-4">    <span class="kw" style="color: #003B4F;
+font-style: inherit;">class</span> LRFindS(Subscriber):</span>
+<span id="cb36-3">    </span>
+<span id="cb36-4">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -2203,64 +2090,64 @@ background-color: null;
 font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1.25</span>):</span>
-<span id="cb37-5">        <span class="va" style="color: #111111;
+<span id="cb36-5">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.mult <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> mult</span>
-<span id="cb37-6">        <span class="va" style="color: #111111;
+<span id="cb36-6">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">min</span> <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> math.inf</span>
-<span id="cb37-7">        </span>
-<span id="cb37-8">    <span class="kw" style="color: #003B4F;
+<span id="cb36-7">        </span>
+<span id="cb36-8">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> before_epoch(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>, learn):</span>
-<span id="cb37-9">        <span class="cf" style="color: #003B4F;
+<span id="cb36-9">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">not</span> learn.model.training: <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">raise</span> CancelFitException</span>
-<span id="cb37-10">        <span class="va" style="color: #111111;
+<span id="cb36-10">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.losses <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> []</span>
-<span id="cb37-11">        <span class="va" style="color: #111111;
+<span id="cb36-11">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.lrs <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> []</span>
-<span id="cb37-12">    </span>
-<span id="cb37-13">    <span class="kw" style="color: #003B4F;
+<span id="cb36-12">    </span>
+<span id="cb36-13">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> after_loss(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>, learn):</span>
-<span id="cb37-14">        lr <span class="op" style="color: #5E5E5E;
+<span id="cb36-14">        lr <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> learn.opt.param_groups[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>][<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'lr'</span>]</span>
-<span id="cb37-15">        <span class="va" style="color: #111111;
+<span id="cb36-15">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.lrs.append(lr)</span>
-<span id="cb37-16">        loss <span class="op" style="color: #5E5E5E;
+<span id="cb36-16">        loss <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> learn.loss.detach().cpu()</span>
-<span id="cb37-17">        <span class="va" style="color: #111111;
+<span id="cb36-17">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.losses.append(loss)</span>
-<span id="cb37-18">        <span class="cf" style="color: #003B4F;
+<span id="cb36-18">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> loss <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -2275,7 +2162,7 @@ background-color: null;
 font-style: inherit;">min</span> <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> loss</span>
-<span id="cb37-19">        <span class="cf" style="color: #003B4F;
+<span id="cb36-19">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> loss <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -2290,7 +2177,7 @@ background-color: null;
 font-style: inherit;">3</span>: <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">raise</span> CancelFitException()</span>
-<span id="cb37-20">        <span class="cf" style="color: #003B4F;
+<span id="cb36-20">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> g <span class="kw" style="color: #003B4F;
 background-color: null;
@@ -2303,52 +2190,65 @@ background-color: null;
 font-style: inherit;">*</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.mult</span>
-<span id="cb37-21">        </span>
-<span id="cb37-22">    <span class="kw" style="color: #003B4F;
+<span id="cb36-21">        </span>
+<span id="cb36-22">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> plot(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>):</span>
-<span id="cb37-23">        plt.plot(lrfind.lrs, lrfind.losses)</span>
-<span id="cb37-24">        plt.xscale(<span class="st" style="color: #20794D;
+<span id="cb36-23">        plt.plot(lrfind.lrs, lrfind.losses)</span>
+<span id="cb36-24">        plt.xscale(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'log'</span>)</span></code></pre></div>
 </div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb38" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1">l <span class="op" style="color: #5E5E5E;
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb37" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1">l <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> Learner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics, DeviceSub(device)])</span></code></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb39" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1">lrfind <span class="op" style="color: #5E5E5E;
+font-style: inherit;">=</span> Learner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics_s, device_s])</span>
+<span id="cb37-2"></span>
+<span id="cb37-3">lrfind_s <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> LRFindSub()</span>
-<span id="cb39-2">l.fit(<span class="dv" style="color: #AD0000;
+font-style: inherit;">=</span> LRFindS()</span>
+<span id="cb37-4">l.fit(<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">5</span>, subs<span class="op" style="color: #5E5E5E;
+font-style: inherit;">5</span>, lr<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1e-4</span> subs<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>[lrfind])</span></code></pre></div>
 </div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb40" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1">lrfind.plot()</span></code></pre></div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb38" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1">lrfind.plot()</span></code></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="https://lucasvw.github.io/posts/10_nntrain_learner/index_files/figure-html/cell-30-output-1.png" class="img-fluid"></p>
+<p><img src="https://lucasvw.github.io/posts/10_nntrain_learner/index_files/figure-html/cell-28-output-1.png" class="img-fluid"></p>
 </div>
 </div>
 <p>From which we see that a learning rate of 0.1 to 0.5 would be fine</p>
 </section>
 <section id="momentumlearner" class="level2">
 <h2 class="anchored" data-anchor-id="momentumlearner">MomentumLearner</h2>
-<p>Additionally, we can create a subclass of <code>Learner</code> that implements Momentum. Momentum is a technique that doesn’t just use the gradient of the last backward pass, but uses an exponentially weighted average of all previously computed gradients.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb41" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"> <span class="co" style="color: #5E5E5E;
+<p>Additionally, we can easily subclass <code>Learner</code>, and implement custom functionality into any of its 5 main functionalities:</p>
+<ul>
+<li>prediction: <code>self.predict()</code></li>
+<li>loss: <code>self.get_loss()</code></li>
+<li>backward pass: <code>self.backward()</code></li>
+<li>stepping of weights: <code>self.step()</code></li>
+<li>zeroing of gradients: <code>self.zero_grad()</code></li>
+</ul>
+<p>For example we can create a <code>MomentumLearner</code> which doesn’t just use the gradient of the last backward pass, but uses an exponentially weighted average of all previously computed gradients. We can do this by not zeroing out the gradients, but just reduce them by a factor between 0 and 1 (the momentum parameter). This way the “gradient with momentum” at time <img src="https://latex.codecogs.com/png.latex?t"> (<img src="https://latex.codecogs.com/png.latex?m_t">), will be a function of the normal gradient (<img src="https://latex.codecogs.com/png.latex?g_t">):</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Am_t%20=%20g_t%20+%20c%20%5Ccdot%20g_%7Bt-1%7D%20+%20c%5E2%20%5Ccdot%20g_%7Bt-2%7D%20+%20...%0A"></p>
+<p>This is called momentum and the idea is to add a sense of “inertia” to the gradients, i.e.&nbsp;if in one step we are moving through the loss manifold in a certain direction, then in the next step we want to keep moving somewhat in that direction irrespective of the gradient of the current step.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb39" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
-<span id="cb41-2"><span class="kw" style="color: #003B4F;
+<span id="cb39-2"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> MomentumLearner(Learner):</span>
-<span id="cb41-3">    </span>
-<span id="cb41-4">    <span class="kw" style="color: #003B4F;
+<span id="cb39-3">    </span>
+<span id="cb39-4">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -2359,26 +2259,26 @@ background-color: null;
 font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.85</span>):</span>
-<span id="cb41-5">        <span class="va" style="color: #111111;
+<span id="cb39-5">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.mom <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> mom</span>
-<span id="cb41-6">        <span class="bu" style="color: null;
+<span id="cb39-6">        <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">super</span>().<span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">__init__</span>(model, dls, loss_fn, optim_class, lr, subs)</span>
-<span id="cb41-7">        </span>
-<span id="cb41-8">    <span class="kw" style="color: #003B4F;
+<span id="cb39-7">        </span>
+<span id="cb39-8">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> zero_grad(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>):</span>
-<span id="cb41-9">        <span class="cf" style="color: #003B4F;
+<span id="cb39-9">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">with</span> torch.no_grad():</span>
-<span id="cb41-10">            <span class="cf" style="color: #003B4F;
+<span id="cb39-10">            <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
 background-color: null;
@@ -2390,11 +2290,11 @@ font-style: inherit;">*=</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.mom</span></code></pre></div>
 </div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb42" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1">l <span class="op" style="color: #5E5E5E;
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb40" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1">l <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> MomentumLearner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics, DeviceSub(device)])</span>
-<span id="cb42-2">l.fit(<span class="dv" style="color: #AD0000;
+font-style: inherit;">=</span> MomentumLearner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics_s, device_s])</span>
+<span id="cb40-2">l.fit(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span>)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -2410,27 +2310,27 @@ font-style: inherit;">5</span>)</span></code></pre></div>
 {'epoch': 4, 'mode': 'eval', 'loss': '0.635', 'accuracy': '0.783'}</code></pre>
 </div>
 </div>
-<p>From which we see that the accuracy on the validation set is increasing (even with this simple linear model) from 66% with normal SGD to 78% with momentum.</p>
+<p>And this simple technique has a pretty good effect on training our model: the accuracy on the validation set is increasing (even with this simple linear model) from 66% with normal SGD to 78% with momentum.</p>
 </section>
 <section id="closing-remarks" class="level2">
 <h2 class="anchored" data-anchor-id="closing-remarks">Closing remarks</h2>
 <p>In this post we have again covered a lot of ground. We have created a very flexible Learner framework, making heavy use of a pubsub system to customize the training loop. As examples we have seen a Subscriber that enables training on the GPU, and another one that takes care of tracking the loss and the metrics while we are training. Additionally we have implement the learning rate finder as a Subscriber, and last but not least we have seen how we can subclass the Learner class to create custom learners that for example implement momentum. Below I have added one additional Subscriber that displays the progress of the loss a bit nicer in a graph, as well as puts the outputs in a table. It has been copied from the miniai library as is (with some minor changes to make it work for <code>nntrain</code>).</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb44" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"> <span class="co" style="color: #5E5E5E;
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb42" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
-<span id="cb44-2"></span>
-<span id="cb44-3"><span class="kw" style="color: #003B4F;
+<span id="cb42-2"></span>
+<span id="cb42-3"><span class="kw" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">class</span> ProgressSub(Subscriber):</span>
-<span id="cb44-4">    order <span class="op" style="color: #5E5E5E;
+font-style: inherit;">class</span> ProgressS(Subscriber):</span>
+<span id="cb42-4">    order <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> MetricsSub.order<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span></span>
-<span id="cb44-5">    <span class="kw" style="color: #003B4F;
+<span id="cb42-5">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -2445,26 +2345,26 @@ background-color: null;
 font-style: inherit;">self</span>.plot <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plot</span>
-<span id="cb44-6">    <span class="kw" style="color: #003B4F;
+<span id="cb42-6">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> before_fit(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>, learn):</span>
-<span id="cb44-7">        learn.epochs <span class="op" style="color: #5E5E5E;
+<span id="cb42-7">        learn.epochs <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.mbar <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> master_bar(learn.epochs)</span>
-<span id="cb44-8">        <span class="va" style="color: #111111;
+<span id="cb42-8">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.first <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">True</span></span>
-<span id="cb44-9">        <span class="cf" style="color: #003B4F;
+<span id="cb42-9">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> <span class="bu" style="color: null;
 background-color: null;
@@ -2475,28 +2375,28 @@ background-color: null;
 font-style: inherit;">=</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.output</span>
-<span id="cb44-10">        <span class="va" style="color: #111111;
+<span id="cb42-10">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.losses <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> []</span>
-<span id="cb44-11">        <span class="va" style="color: #111111;
+<span id="cb42-11">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.val_losses <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> []</span>
-<span id="cb44-12"></span>
-<span id="cb44-13">    <span class="kw" style="color: #003B4F;
+<span id="cb42-12"></span>
+<span id="cb42-13">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> output(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>, d):</span>
-<span id="cb44-14">        <span class="cf" style="color: #003B4F;
+<span id="cb42-14">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.first:</span>
-<span id="cb44-15">            <span class="va" style="color: #111111;
+<span id="cb42-15">            <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.mbar.write(<span class="bu" style="color: null;
 background-color: null;
@@ -2505,14 +2405,14 @@ background-color: null;
 font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">True</span>)</span>
-<span id="cb44-16">            <span class="va" style="color: #111111;
+<span id="cb42-16">            <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.first <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">False</span></span>
-<span id="cb44-17">        <span class="va" style="color: #111111;
+<span id="cb42-17">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.mbar.write(<span class="bu" style="color: null;
 background-color: null;
@@ -2521,8 +2421,8 @@ background-color: null;
 font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">True</span>)</span>
-<span id="cb44-18"></span>
-<span id="cb44-19">    <span class="kw" style="color: #003B4F;
+<span id="cb42-18"></span>
+<span id="cb42-19">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> before_epoch(<span class="va" style="color: #111111;
 background-color: null;
@@ -2537,13 +2437,13 @@ background-color: null;
 font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.mbar)</span>
-<span id="cb44-20">    </span>
-<span id="cb44-21">    <span class="kw" style="color: #003B4F;
+<span id="cb42-20">    </span>
+<span id="cb42-21">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> after_batch(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>, learn):</span>
-<span id="cb44-22">        learn.dl.comment <span class="op" style="color: #5E5E5E;
+<span id="cb42-22">        learn.dl.comment <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="ss" style="color: #20794D;
 background-color: null;
@@ -2556,7 +2456,7 @@ background-color: null;
 font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'</span></span>
-<span id="cb44-23">        <span class="cf" style="color: #003B4F;
+<span id="cb42-23">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> <span class="va" style="color: #111111;
 background-color: null;
@@ -2569,10 +2469,10 @@ background-color: null;
 font-style: inherit;">'metrics'</span>) <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">and</span> learn.model.training:</span>
-<span id="cb44-24">            <span class="va" style="color: #111111;
+<span id="cb42-24">            <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.losses.append(learn.loss.item())</span>
-<span id="cb44-25">            <span class="cf" style="color: #003B4F;
+<span id="cb42-25">            <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> <span class="va" style="color: #111111;
 background-color: null;
@@ -2601,18 +2501,18 @@ background-color: null;
 font-style: inherit;">len</span>(learn.dls.train)), <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.val_losses]])</span>
-<span id="cb44-26">    </span>
-<span id="cb44-27">    <span class="kw" style="color: #003B4F;
+<span id="cb42-26">    </span>
+<span id="cb42-27">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> after_epoch(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>, learn): </span>
-<span id="cb44-28">        <span class="cf" style="color: #003B4F;
+<span id="cb42-28">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">not</span> learn.model.training:</span>
-<span id="cb44-29">            <span class="cf" style="color: #003B4F;
+<span id="cb42-29">            <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> <span class="va" style="color: #111111;
 background-color: null;
@@ -2623,10 +2523,10 @@ background-color: null;
 font-style: inherit;">hasattr</span>(learn, <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'metrics'</span>): </span>
-<span id="cb44-30">                <span class="va" style="color: #111111;
+<span id="cb42-30">                <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.val_losses.append(learn.metrics.loss.compute())</span>
-<span id="cb44-31">                <span class="va" style="color: #111111;
+<span id="cb42-31">                <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.mbar.update_graph([[fc.L.<span class="bu" style="color: null;
 background-color: null;
@@ -2656,20 +2556,17 @@ font-style: inherit;">len</span>(learn.dls.train)), <span class="va" style="colo
 background-color: null;
 font-style: inherit;">self</span>.val_losses]])</span></code></pre></div>
 </div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb45" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1">progress <span class="op" style="color: #5E5E5E;
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb43" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1">progress_s <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> ProgressSub(<span class="va" style="color: #111111;
+font-style: inherit;">=</span> ProgressS(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">True</span>)</span>
-<span id="cb45-2">device <span class="op" style="color: #5E5E5E;
+<span id="cb43-2"></span>
+<span id="cb43-3">l <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> DeviceSub(device)</span>
-<span id="cb45-3"></span>
-<span id="cb45-4">l <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> MomentumLearner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics, progress, device])</span>
-<span id="cb45-5">l.fit(<span class="dv" style="color: #AD0000;
+font-style: inherit;">=</span> MomentumLearner(get_model(), dls, F.cross_entropy, torch.optim.SGD, lr, [metrics_s, device_s, progress_s])</span>
+<span id="cb43-4">l.fit(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span>)</span></code></pre></div>
 <div class="cell-output cell-output-display">
@@ -2765,7 +2662,7 @@ font-style: inherit;">5</span>)</span></code></pre></div>
 </table>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="https://lucasvw.github.io/posts/10_nntrain_learner/index_files/figure-html/cell-34-output-3.png" class="img-fluid"></p>
+<p><img src="https://lucasvw.github.io/posts/10_nntrain_learner/index_files/figure-html/cell-32-output-3.png" class="img-fluid"></p>
 </div>
 </div>
 
@@ -7929,7 +7826,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-23685"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-23685").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-48027"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-48027").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>
