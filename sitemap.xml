@@ -1,51 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://lucasvw.github.io/posts/05_crossentropy/index.html</loc>
-    <lastmod>2023-08-21T09:03:11.218Z</lastmod>
-  </url>
-  <url>
-    <loc>https://lucasvw.github.io/posts/04_matmul/index.html</loc>
-    <lastmod>2023-08-21T09:03:09.742Z</lastmod>
-  </url>
-  <url>
-    <loc>https://lucasvw.github.io/posts/01_blog_setup/index.html</loc>
-    <lastmod>2023-08-21T09:03:08.454Z</lastmod>
-  </url>
-  <url>
-    <loc>https://lucasvw.github.io/posts/07_stable_diffusion_code/index.html</loc>
-    <lastmod>2023-08-21T09:03:07.306Z</lastmod>
-  </url>
-  <url>
-    <loc>https://lucasvw.github.io/posts/10_nntrain_learner/index.html</loc>
-    <lastmod>2023-08-21T09:03:05.358Z</lastmod>
-  </url>
-  <url>
     <loc>https://lucasvw.github.io/about.html</loc>
-    <lastmod>2023-08-21T09:03:03.230Z</lastmod>
-  </url>
-  <url>
-    <loc>https://lucasvw.github.io/index.html</loc>
-    <lastmod>2023-08-21T09:03:02.602Z</lastmod>
-  </url>
-  <url>
-    <loc>https://lucasvw.github.io/posts/09_nntrain_ds/index.html</loc>
-    <lastmod>2023-08-21T09:03:04.050Z</lastmod>
-  </url>
-  <url>
-    <loc>https://lucasvw.github.io/posts/06_stable_diffusion_basics/index.html</loc>
-    <lastmod>2023-08-21T09:03:06.370Z</lastmod>
-  </url>
-  <url>
-    <loc>https://lucasvw.github.io/posts/03_aiornot/index.html</loc>
-    <lastmod>2023-08-21T09:03:07.710Z</lastmod>
-  </url>
-  <url>
-    <loc>https://lucasvw.github.io/posts/02_paperspace_setup/index.html</loc>
-    <lastmod>2023-08-21T09:03:09.094Z</lastmod>
+    <lastmod>2023-08-24T13:35:32.781Z</lastmod>
   </url>
   <url>
     <loc>https://lucasvw.github.io/posts/08_nntrain_setup/index.html</loc>
-    <lastmod>2023-08-21T09:03:10.710Z</lastmod>
+    <lastmod>2023-08-24T13:35:31.729Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/posts/06_stable_diffusion_basics/index.html</loc>
+    <lastmod>2023-08-24T13:35:29.533Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/posts/05_crossentropy/index.html</loc>
+    <lastmod>2023-08-24T13:35:27.721Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/posts/11_nntrain_activations/index.html</loc>
+    <lastmod>2023-08-24T13:35:26.685Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/posts/01_blog_setup/index.html</loc>
+    <lastmod>2023-08-24T13:35:24.309Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/index.html</loc>
+    <lastmod>2023-08-24T13:35:22.396Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/posts/02_paperspace_setup/index.html</loc>
+    <lastmod>2023-08-24T13:35:23.476Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/posts/09_nntrain_ds/index.html</loc>
+    <lastmod>2023-08-24T13:35:25.193Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/posts/03_aiornot/index.html</loc>
+    <lastmod>2023-08-24T13:35:27.137Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/posts/07_stable_diffusion_code/index.html</loc>
+    <lastmod>2023-08-24T13:35:28.757Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/posts/10_nntrain_learner/index.html</loc>
+    <lastmod>2023-08-24T13:35:30.613Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lucasvw.github.io/posts/04_matmul/index.html</loc>
+    <lastmod>2023-08-24T13:35:32.461Z</lastmod>
   </url>
 </urlset>

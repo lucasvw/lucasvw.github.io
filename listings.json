@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/11_nntrain_activations/index.html",
       "/posts/10_nntrain_learner/index.html",
       "/posts/09_nntrain_ds/index.html",
       "/posts/08_nntrain_setup/index.html",
