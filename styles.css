@@ -20,7 +20,15 @@
     margin-top: 0;
 }
   
-.sourceCode > .sourceCode {
+.cell > .sourceCode {
     margin-bottom: 0;
     font-size: 0.875em;
+}
+
+.sourceCode > .sourceCode {
+    margin-bottom: 0;
+}
+
+p {
+    margin-top: 1rem;
 }
