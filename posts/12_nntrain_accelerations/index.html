@@ -266,7 +266,7 @@ w_{wd} &amp;\leftarrow w_{wd} - lr \cdot grad_{wd}  \\
 &amp;= w_{wd}(1 - lr \cdot d) - lr \cdot grad
 \end{aligned}\]</span>
 <p>If we compare this expression to the regular update step: <span class="math inline">\(w \leftarrow w - lr \cdot grad^{w}\)</span>, we find that we can simply multiply the weights by <span class="math inline">\((1 - lr \cdot d)\)</span> before we do the step:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SGD:</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, params, lr, wd<span class="op">=</span><span class="fl">0.</span>):</span>
@@ -294,7 +294,7 @@ w_{wd} &amp;\leftarrow w_{wd} - lr \cdot grad_{wd}  \\
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>            p.grad.data.zero_()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s try it out:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset,load_dataset_builder</span>
@@ -304,7 +304,7 @@ w_{wd} &amp;\leftarrow w_{wd} - lr \cdot grad_{wd}  \\
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nntrain.activations <span class="im">import</span> <span class="op">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torchvision.transforms.functional <span class="im">as</span> TF</span>
@@ -321,7 +321,7 @@ w_{wd} &amp;\leftarrow w_{wd} - lr \cdot grad_{wd}  \\
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>name <span class="op">=</span> <span class="st">"fashion_mnist"</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>ds_builder <span class="op">=</span> load_dataset_builder(name)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>hf_dd <span class="op">=</span> load_dataset(name)</span>
@@ -540,7 +540,7 @@ grad\_avg \leftarrow (1 - \tau) grad + \mu \cdot grad\_avg
 <p><span class="math display">\[
 grad\_avg \leftarrow (1-c) grad + c \cdot grad\_avg
 \]</span></p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Momentum(SGD):</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, params, lr, wd<span class="op">=</span><span class="fl">0.</span>, mom<span class="op">=</span><span class="fl">0.9</span>):</span>
@@ -552,7 +552,7 @@ grad\_avg \leftarrow (1-c) grad + c \cdot grad\_avg
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        p.grad_avg <span class="op">=</span> p.grad_avg<span class="op">*</span><span class="va">self</span>.mom <span class="op">+</span> p.grad<span class="op">*</span>(<span class="dv">1</span><span class="op">-</span><span class="va">self</span>.mom)</span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        p <span class="op">-=</span> <span class="va">self</span>.lr <span class="op">*</span> p.grad_avg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>set_seed(<span class="dv">1</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> cnn_layers().<span class="bu">apply</span>(init_weights)</span>
@@ -673,7 +673,7 @@ w \leftarrow w - lr \cdot \frac{grad}{\sqrt{acc\_sqrd\_grad}}
 acc\_sqrd\_grad = c \cdot acc\_sqrd\_grad + (1-c) grad^2
 \]</span></p>
 <p>From which it should be clear that using RMSprop has a large impact on the weight updates, you will thus have to recalibrate your learning rate.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RMSProp(SGD):</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, params, lr, wd<span class="op">=</span><span class="fl">0.</span>, sqr_mom<span class="op">=</span><span class="fl">0.99</span>, eps<span class="op">=</span><span class="fl">1e-5</span>):</span>
@@ -687,7 +687,7 @@ acc\_sqrd\_grad = c \cdot acc\_sqrd\_grad + (1-c) grad^2
 <span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        p.sqr_avg <span class="op">=</span> p.sqr_avg<span class="op">*</span><span class="va">self</span>.sqr_mom <span class="op">+</span> (<span class="dv">1</span><span class="op">-</span><span class="va">self</span>.sqr_mom)<span class="op">*</span>p.grad<span class="op">**</span><span class="dv">2</span></span>
 <span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        p <span class="op">-=</span> <span class="va">self</span>.lr <span class="op">*</span> p.grad<span class="op">/</span>(p.sqr_avg.sqrt() <span class="op">+</span> <span class="va">self</span>.eps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>set_seed(<span class="dv">1</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> cnn_layers().<span class="bu">apply</span>(init_weights)</span>
@@ -799,7 +799,7 @@ acc\_sqrd\_grad = c \cdot acc\_sqrd\_grad + (1-c) grad^2
 <p><span class="math display">\[
 w \leftarrow w - lr \cdot \frac{avg\_grad}{\sqrt{acc\_sqrd\_grad}}
 \]</span></p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Adam(SGD):</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, params, lr, wd<span class="op">=</span><span class="fl">0.</span>, beta1<span class="op">=</span><span class="fl">0.9</span>, beta2<span class="op">=</span><span class="fl">0.99</span>, eps<span class="op">=</span><span class="fl">1e-5</span>):</span>
@@ -817,7 +817,7 @@ w \leftarrow w - lr \cdot \frac{avg\_grad}{\sqrt{acc\_sqrd\_grad}}
 <span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        unbias_sqr_avg <span class="op">=</span> p.sqr_avg <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> (<span class="va">self</span>.beta2<span class="op">**</span>(<span class="va">self</span>.i<span class="op">+</span><span class="dv">1</span>)))</span>
 <span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        p <span class="op">-=</span> <span class="va">self</span>.lr <span class="op">*</span> unbias_avg <span class="op">/</span> (unbias_sqr_avg <span class="op">+</span> <span class="va">self</span>.eps).sqrt()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>set_seed(<span class="dv">1</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> cnn_layers().<span class="bu">apply</span>(init_weights)</span>
@@ -927,7 +927,7 @@ w \leftarrow w - lr \cdot \frac{avg\_grad}{\sqrt{acc\_sqrd\_grad}}
 <h2 class="anchored" data-anchor-id="learning-rate-schedulers">Learning Rate Schedulers</h2>
 <p>Now let’s look at learning rate schedulers: these are objects that change important parameters such as the learning rate and momentum <strong>during training</strong>. The <code>OneCycleLR</code> scheduler for example starts with a low learning rate, then increases it to a maximum value and then anneales it back to the lower value.</p>
 <p>The idea being that initially, when our weights are random, we don’t want to take too large steps. As the weights are getting somewhat reasonable, we speed up the learning and once we arrive at a better solution because of this, we decrease the learning rate again to make sure we can squeeze out the last bit of performance gain:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> torch.optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">3e-3</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Every scheduler has the concept of steps. </span></span>
@@ -956,7 +956,7 @@ w \leftarrow w - lr \cdot \frac{avg\_grad}{\sqrt{acc\_sqrd\_grad}}
 </div>
 <p>Besides the cycling of the learning rate, the momentum is cycled inversely with the <code>OneCycleLr</code> scheduler</p>
 <p>Let’s see if we can create a Subscriber that enables the use of Schedulers in our framework:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SchedulerS(Subscriber):</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, scheduler_class):</span>
@@ -970,7 +970,7 @@ w \leftarrow w - lr \cdot \frac{avg\_grad}{\sqrt{acc\_sqrd\_grad}}
 <span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> after_step(<span class="va">self</span>, learn):</span>
 <span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.scheduler.step()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>set_seed(<span class="dv">1</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>epochs <span class="op">=</span> <span class="dv">5</span></span>
@@ -1084,7 +1084,7 @@ w \leftarrow w - lr \cdot \frac{avg\_grad}{\sqrt{acc\_sqrd\_grad}}
 <section id="resnet" class="level2">
 <h2 class="anchored" data-anchor-id="resnet">ResNet</h2>
 <p>Next, let’s see if we can increase the depth of the model even more: we can use a reduced stride (=1) in the first convolution so that we don’t reduce the pixel-grid. We can thus add one more convolution at the end, to end up with a 1x1 pixel grid:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cnn_layers_more_depth():</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> nn.Sequential(                               <span class="co"># 28x28  </span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        conv_block(<span class="dv">1</span> , <span class="dv">8</span>, stride<span class="op">=</span><span class="dv">1</span>),                    <span class="co"># 28x28</span></span>
@@ -1207,7 +1207,7 @@ w \leftarrow w - lr \cdot \frac{avg\_grad}{\sqrt{acc\_sqrd\_grad}}
 </figure>
 </div>
 <p>So instead of having a fully sequential model, they added these identity skip connections which connects both the input to and the output of the convolutional path. They argued that by doing so, it would be trivial for the model to forward the data without modifying it. This way, the model could use the convolutional path for the depth of “shallow” model, and use the skip connections for the remaining layers that only the “deep” model has.</p>
-<p>Why a double convolutional layer? For that we come back to the idea of adding stride 1 convolution to increase the depth of our model. In the architecture described above, the first convolutional layer is a stride 1 convolution (keeping the pixel grid constant) and increases the number of filters. The second convolution is a stride 2 convolution which reduces the pixel grid by a factor of 2, but keeps the number of filters constant. <strong>The first convolution is thus expanding the data, and the second convolution compresses it</strong>.</p>
+<p>Why a double convolutional layer? For that we come back to the idea of adding stride 1 convolution to increase the depth of our model. In the architecture described above, the first convolutional layer is a stride 1 convolution (keeping the pixel grid constant) and increases the number of filters. The second convolution is a stride 2 convolution which reduces the pixel grid by a factor of 2, but keeps the number of filters constant. <strong>The first convolution is thus expanding the data, and the second convolution compresses it, this is different from the standard ResBlock <a href="https://github.com/pytorch/vision/blob/1aef87d01eec2c0989458387fa04baebcc86ea7b/torchvision/models/resnet.py#L48-L51">implementation</a> in Pytorch and works significantly better in my experiments</strong>.</p>
 <p>The name for the block shown above is a ResBlock, and a model that is using them is called a ResNet. Res is short for residual, and that name becomes apparent when we look at this block in the following way:</p>
 <span class="math display">\[\begin{aligned}
 &amp; y &amp;&amp;= x + conv_2(conv_1(x)) \\
@@ -1215,7 +1215,7 @@ w \leftarrow w - lr \cdot \frac{avg\_grad}{\sqrt{acc\_sqrd\_grad}}
 &amp; residual &amp;&amp;= conv_2(conv_1(x))
 \end{aligned}\]</span>
 <p>The term <span class="math inline">\(y-x\)</span> is often called “the residual” in statistics. Now let’s see how we can create such a ResBlock, we start with the convolutional path:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> conv_conn(in_c, out_c, kernel_size<span class="op">=</span><span class="dv">3</span>, stride<span class="op">=</span><span class="dv">2</span>):</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> nn.Sequential(</span>
@@ -1232,7 +1232,7 @@ w \leftarrow w - lr \cdot \frac{avg\_grad}{\sqrt{acc\_sqrd\_grad}}
 </ul></li>
 <li>Note also that the second convolution doesn’t have an activation, this is because we want to apply the activation after summing both the contributions from the identity path and the convolutional path</li>
 </ul>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ResBlock(nn.Module):</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, in_c, out_c, stride<span class="op">=</span><span class="dv">2</span>):</span>
@@ -1265,10 +1265,10 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Although the final BatchNorm layer has a positive impact on performance, I don’t have a good intuition as to the reasons why. I would think that the distributions of logits would be very not normal in an ideal setting: the correct categories should get much higher outputs then the other ones. Perhaps this works in some second order effect as regularization. If anybody has a good intuition for this, please let me know🙏</p>
+<p>Although the final BatchNorm layer has a positive impact on performance, I don’t have a good intuition as to the reasons why. I would think that the distributions of logits would be not very gaussian in an ideal setting: the correct categories should get much higher outputs then the other ones. Perhaps this works in some second order effect as regularization, or perhaps it has to do with the scaling that the BatchNorm layer does after the normalization. If anybody has a good intuition for this, please let me know🙏</p>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> resnet():</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> nn.Sequential(                             <span class="co"># pixel grid input: 28x28  </span></span>
@@ -1283,7 +1283,7 @@ Note
 <span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>        nn.BatchNorm1d(<span class="dv">10</span>)                            <span class="co"># final batchnorm layer</span></span>
 <span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>set_seed(<span class="dv">1</span>)</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> resnet().<span class="bu">apply</span>(init_weights)</span>
@@ -1303,7 +1303,7 @@ Note
 <p><img src="index_files/figure-html/cell-19-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>set_seed(<span class="dv">1</span>)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> resnet().<span class="bu">apply</span>(init_weights)</span>
@@ -1416,7 +1416,7 @@ Note
 <section id="parameters-and-macs" class="level2">
 <h2 class="anchored" data-anchor-id="parameters-and-macs">Parameters and MACs</h2>
 <p>Now that we are able to create fairly deep models, it’s a good idea to be able to track the memory footprint and the amount of compute that is involved in doing a single forward pass. To track the memory, we can look at the amount of parameters of each layer, and for the compute we can try to estimate something equivalent to Multiply–accumulate operations (MACs). Let’s create a small Subscriber that tracks thes stats by running one single batch and then cancels the fit:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ModelMonitorS(Subscriber):</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    </span>
@@ -1456,7 +1456,7 @@ Note
 <span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>            total_mac <span class="op">+=</span> h.mac</span>
 <span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ss">f'</span><span class="sc">{</span><span class="st">"Total parameters:"</span><span class="sc">:&lt;20}{</span>total_params<span class="sc">:&gt;10d}</span><span class="ss"> </span><span class="ch">\n</span><span class="sc">{</span><span class="st">"Total MACs:"</span><span class="sc">:&lt;20}{</span>total_mac<span class="sc">:10.1f}</span><span class="ss"> </span><span class="ch">\n\n</span><span class="ss">'</span> <span class="op">+</span> out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> resnet().<span class="bu">apply</span>(init_weights)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>modules <span class="op">=</span> [module <span class="cf">for</span> module <span class="kw">in</span> model.modules() <span class="cf">if</span> <span class="bu">isinstance</span>(module, (ResBlock, nn.Linear, torch.nn.BatchNorm1d))]</span>
@@ -1491,7 +1491,7 @@ layer                : input                : output               :   # params 
 <h2 class="anchored" data-anchor-id="augmentation">Augmentation</h2>
 <p>We have finally come to the point of data augmentation. Once you have a good model, you would ideally train for much longer times. When doing so, the problem that arises is that of overfitting. Which we described before as the tendency of the model to start to memorize our training data and no longer generalize well to the validation set.</p>
 <p>To overcome this, data augmentation is used to increase the variety in the training data. For example we can rotate the images, or (horizontally or vertically) flip the image. For such augmentations the label stays the same, since a rotated image of a shoe is still a shoe, but there exist also augmentations that for example mix images, and thus also the labels are altereed. There are great libraries out there such as <a href="https://demo.albumentations.ai/">Albumentations</a> with a huge variety of transformations that can be applied to images, so we won’t be going into the full details. But let’s at least figure out how we can build this into our framework.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AugmentS(Subscriber):</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, transform):</span>
@@ -1501,13 +1501,13 @@ layer                : input                : output               :   # params 
 <span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> learn.model.training:                    <span class="co"># augmentations are only applied to the training data</span></span>
 <span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>            learn.batch[<span class="dv">0</span>] <span class="op">=</span> <span class="va">self</span>.transform(learn.batch[<span class="dv">0</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> transforms</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>augs <span class="op">=</span> nn.Sequential(transforms.RandomHorizontalFlip(), </span>
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>                     transforms.RandomCrop(size<span class="op">=</span><span class="dv">28</span>, padding<span class="op">=</span><span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>set_seed(<span class="dv">1</span>)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> resnet().<span class="bu">apply</span>(init_weights)</span>
