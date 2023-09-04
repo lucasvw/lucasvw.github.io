@@ -217,25 +217,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<p>In this series, I want to discuss the creation of a small library for training neural networks: <code>nntrain</code>. It’s based off the excellent <a href="https://course.fast.ai/">part 2</a> of Practical Deep Learning for Coders by Jeremy Howard, in which from lessons 13 to 18 (roughly) the development of the <code>miniai</code> library is discussed.</p>
-<p>The library will build upon PyTorch. We’ll try as much as possible to build from scratch to understand how it all works. Once the main functionality of components are implemented and verified, we can switch over to PyTorch’s version. This is similar to how things are done in the course. However, this is not just a “copy / paste” of the course: on many occasions I take a different route, and most of the code is my own. That is not to say that all of this is meant to be extremely innovative, instead I had the following goals:</p>
+<p>In this series, I want to discuss the creation of a small PyTorch based library for training neural networks: <code>nntrain</code>. It’s based off the excellent <a href="https://course.fast.ai/">part 2</a> of Practical Deep Learning for Coders by Jeremy Howard, in which from lessons 13 to 18 (roughly) the development of the <code>miniai</code> library is discussed.</p>
+<p>We’ll try to build everything as much as possible from scratch to understand how things work. Once the main functionality of components is implemented and verified, we can switch over to PyTorch’s version. This is similar to how things are done in the course. However, this is not just a “copy / paste” of the course: on many occasions I take a different route, and most of the code is my own. That is not to say that all of this is meant to be extremely innovative, instead I had the following goals:</p>
 <ul>
 <li>Deeply understand the training of neural networks with a focus on PyTorch</li>
 <li>Try to create an even better narrative then what’s presented in FastAI 🙉🤷‍♂️🙈</li>
 <li>Get hands-on experience with creating a library with <a href="https://nbdev.fast.ai/"><code>nb_dev</code></a></li>
 </ul>
-<p><code>nb_dev</code> is another great project from the fastai community, which allows python libraries to be written in jupyter notebooks. This may sound a bit weird since the mainstream paradigm is to only do experimental work in notebooks. It has the advantage though that we can create the source code for our library in the very same environment in which we want to experiment and interact with our methods, objects and structure <strong>while we are building the library</strong>. For more details on why this is a good idea and other nice features of <code>nb_dev</code>, see <a href="https://www.fast.ai/posts/2022-07-28-nbdev2.html">here</a>.</p>
+<p><code>nb_dev</code> is another great project from the fastai community, which allows python libraries to be written in jupyter notebooks. This may sound a bit weird and controversial, but it has the advantage that we can create the source code for our library in the very same environment in which we want to experiment and interact with our methods, objects and structure <strong>while we are building the library</strong>. For more details on why this is a good idea and other nice features of <code>nb_dev</code>, see <a href="https://www.fast.ai/posts/2022-07-28-nbdev2.html">here</a>.</p>
 <p>So without further ado, let’s start with where we left off in the previous <a href="https://lucasvw.github.io/posts/10_nntrain_learner/">post</a>:</p>
 <section id="end-of-last-post" class="level2">
 <h2 class="anchored" data-anchor-id="end-of-last-post">End of last post:</h2>
 <p>In the last two posts we build up the <code>learner</code> and <code>dataloader</code> module. In this post, we are going to use everything we have build so far to build and train a new model. From the naive MLP model we have been using so far, we will switch to a convolutional neural network (CNN). We will investigate performance and go into the fine print of making sure the networks trains well. We will do this by looking at the activations throughout the network.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset,load_dataset_builder</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nntrain.dataloaders <span class="im">import</span> DataLoaders, hf_ds_collate_fn</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nntrain.learner <span class="im">import</span> <span class="op">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torchvision.transforms.functional <span class="im">as</span> TF</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
@@ -250,7 +250,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> set_seed(seed, deterministic<span class="op">=</span><span class="va">False</span>):</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    torch.use_deterministic_algorithms(deterministic)</span>
@@ -259,7 +259,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    np.random.seed(seed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Since a CNN operates on a pixel grid instead of a flat array of pixel values, we have to load the data differently. For this we can use the <code>Dataloaders</code> module we have created in an earlier <a href="https://lucasvw.github.io/posts/09_nntrain_ds/">post</a>. By using the <code>hf_ds_collate_fn</code> with <code>flatten=False</code>, we keep the pixel grid and end up with data have a shape of <code>[batch, channels, height, width]</code>:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>name <span class="op">=</span> <span class="st">"fashion_mnist"</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>ds_builder <span class="op">=</span> load_dataset_builder(name)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>hf_dd <span class="op">=</span> load_dataset(name)</span>
@@ -339,7 +339,7 @@ Dataset fashion_mnist downloaded and prepared to /root/.cache/huggingface/datase
 <section id="convolutional-neural-network" class="level2">
 <h2 class="anchored" data-anchor-id="convolutional-neural-network">Convolutional Neural Network</h2>
 <p>Next, let’s create a simple CNN consisting of a couple of convolutions with ReLU activations in between:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> conv_block(in_c, out_c, kernel_size<span class="op">=</span><span class="dv">3</span>, act<span class="op">=</span><span class="va">True</span>):</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    padding <span class="op">=</span> kernel_size <span class="op">//</span> <span class="dv">2</span>    <span class="co"># don't lose pixels of the edges</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    stride <span class="op">=</span> <span class="dv">2</span>                    <span class="co"># reduce the image size by factor of 2 in x and y directions</span></span>
@@ -349,7 +349,7 @@ Dataset fashion_mnist downloaded and prepared to /root/.cache/huggingface/datase
 </div>
 <p>The model will receive images of shape 28x28 and since we use a stride of 2 in each convolution, the pixel grid will be reduced by a factor of 2 in both the x and y direction (a factor of 4 in total). At the same time we increase the number of filters by a factor of 2 so that the overall data-reduction of a single convolution is roughly a factor of 2.</p>
 <p>In the very first convolution we go from 1 input channel to 8 output channels. To do that, we increase the kernel size from 3 to 5. For kernel size 3, we would have 3x3 pixels (x 1 input channel) that would map to single position in the output grid. The output grid has 8 channels, so we would go from 9 (3x3x1) to 8 (1x1x8) values. Going from 9 to 8 values is practically no reduction, which doesn’t allow the convolution to learn anything. So instead we take a kernel of size 5 so that we go from 25 (5x5x1) to 9 values and have roughly a 2x reduction.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cnn_layers():</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> nn.Sequential(                  <span class="co"># input image grid=28x28</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        conv_block(<span class="dv">1</span> , <span class="dv">8</span>, kernel_size<span class="op">=</span><span class="dv">5</span>),  <span class="co"># pixel grid: 14x14</span></span>
@@ -383,7 +383,7 @@ Dataset fashion_mnist downloaded and prepared to /root/.cache/huggingface/datase
 </div>
 </div>
 <p>Let’s see how this trains:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>set_seed(<span class="dv">1</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>subs <span class="op">=</span> [ProgressS(<span class="va">True</span>),</span>
@@ -493,7 +493,7 @@ Dataset fashion_mnist downloaded and prepared to /root/.cache/huggingface/datase
 <section id="iterative-matrix-multiplications" class="level2">
 <h2 class="anchored" data-anchor-id="iterative-matrix-multiplications">Iterative matrix multiplications</h2>
 <p>But before we do, it’s important to realize that in the forward pass of neural networks we iteratively multiply the inputs to the model many times with (different) weight matrices. Let’s see how that works by using some artificial data, we generate 1000 random samples of data each with 10 features taken from a unit gaussian (mean=0 and standard deviation=1)</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.randn(<span class="dv">10000</span>, <span class="dv">10</span>) </span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span>x<span class="sc">.</span>mean()<span class="op">=</span><span class="sc">:.3f}</span><span class="ss">, </span><span class="sc">{</span>x<span class="sc">.</span>std()<span class="op">=</span><span class="sc">:.3f}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -501,7 +501,7 @@ Dataset fashion_mnist downloaded and prepared to /root/.cache/huggingface/datase
 </div>
 </div>
 <p>Now let’s iteratively multiply these inputs with a unit gausian weight matrix mapping from 10 input features to 10 output features and record the mean and standard deviation (std) after each iteration. Theoretically the mean of the outputs should remain 0, since <span class="math inline">\(\mathbb{E}[XY] = \mathbb{E}[X]\mathbb{E}[Y] = 0 * 0 = 0\)</span> if <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are independant. But what happens to the std?</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'"x" multiplied </span><span class="sc">{</span>i<span class="sc">:02d}</span><span class="ss"> times: mean=</span><span class="sc">{</span>x<span class="sc">.</span>mean()<span class="sc">.</span>item()<span class="sc">:10.3f}</span><span class="ss">,   std=</span><span class="sc">{</span>x<span class="sc">.</span>std()<span class="sc">.</span>item()<span class="sc">:15.3f}</span><span class="ss">'</span>)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    w <span class="op">=</span> torch.randn(<span class="dv">10</span>, <span class="dv">10</span>)</span>
@@ -526,7 +526,7 @@ Dataset fashion_mnist downloaded and prepared to /root/.cache/huggingface/datase
 </ul>
 <p>This is a big problem for the training of neural networks as input data is passing through the network. When activations are ever increasing so are the gradients which causes the updates to the weights to explode.</p>
 <p>Let’s try the same with a weight matrix that has a smaller standard deviation:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.randn(<span class="dv">10000</span>, <span class="dv">10</span>) </span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):    </span>
@@ -570,7 +570,7 @@ Note
 <h2 class="anchored" data-anchor-id="activations">Activations</h2>
 <p>From the above it follows that it’s important to keep track of the activations as data flows through the network. Let’s try to build this into our framework.</p>
 <p>To track the activations we can make use of PyTorch hooks: a function that you can attach to any <code>nn.Module</code> and which will be called after the module is being called either during the forward (<code>register_forward_hook()</code>) or backward pass (<code>register_backward_hook()</code>). Let’s create a small <code>Hook</code> class that wraps this logic and which can remove the hook after we are done with it. We will also store the tracked metrics as attributes on this class.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Hook():</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, nr, layer, func):</span>
@@ -587,7 +587,7 @@ Note
 <li>keep track of the histogram counts for additional visibility into the activations</li>
 <li>keep track of the average firing rate per activation over the batch, but more about that later</li>
 </ul>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ActivationStatsS(Subscriber):</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    </span>
@@ -614,7 +614,7 @@ Note
 <span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> after_fit(<span class="va">self</span>, learn):</span>
 <span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> h <span class="kw">in</span> <span class="va">self</span>.hooks: h.remove()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This code is folded by default to not clutter the blog</span></span>
@@ -659,7 +659,7 @@ Note
 <span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>        axs[i].set_title(hook.layer_name)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>set_seed(<span class="dv">1</span>)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> cnn_layers()</span>
@@ -675,7 +675,7 @@ Note
 <span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>l.fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s have a look at the mean and std’s of the layers as we progressively train the model. On the horizontal axis the number of batches are displayed and the coloured lines depict the mean and std respectively of the activations in the layers we are tracking (all the ReLU layers in our model):</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>act_stats.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-16-output-1.png" class="img-fluid"></p>
@@ -683,7 +683,7 @@ Note
 </div>
 <p>These plots show a similar problem to what we saw in the loss plots: two large spikes during training. In the beginning the means are nice and small (around 0), but the std’s are way too small (also around 0). There is thus very little variation in our activations. The std then increases exponentially (<em>exactly as we have seen in the iterative matrix multiplication example above!</em>) and crashes back to zero. This patterns repeats once again, and then finally the std’s stabilize around a value somewhat in the range of 1.</p>
 <p>Let’s also have a look at the histogram plots, these plots show a single histogram <strong>vertically</strong>. On the horizontal axis we have again number of batches. Vertically we display a histogram as a heatmap (to help with the colorscale, we actually display the log of the histogram counts): high counts in a bin correspond to a dark blue color. The histogram records values on the vertical axis from -10 to 10. Since we are tracking the stats of ReLU layers there are no counts below zero.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>act_stats.plot_hist()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-17-output-1.png" class="img-fluid"></p>
@@ -693,7 +693,7 @@ Note
 <p>In principle it’s not a problem when for some samples the ReLU output is zero, this is actually totally normal and part of what the ReLY should do. Wowever when this happens for all batches in a the (training) epoch, we have a neuron which never activates for any of our data-points, and thus never passes any gradient to upstream components. This is what Andrej Karpathy calls a “dead neuron”, and signals some kind of “permanent brain damage of a neural net”.</p>
 <p>We are tracking this by <strong>computing the “none-firing-rate” per ReLU activation</strong> over the batch: if none of the samples in a batch have a positive ReLU output we record a value of 1.0, if for 50% of the samples the ReLU output is positive we record a value of 0.5.</p>
 <p>With the following plots, we display those neurons that don’t fire a single time in a minibatch (black) vs those neurons that fire at least for one sample in the batch (white). Horizontally the batches, vertically the activations per layer (CxHxW)</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>act_stats.plot_dead(binary<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-18-output-1.png" class="img-fluid"></p>
@@ -706,7 +706,7 @@ Note
 <p>We have seen the importance of keeping the activations stable throughout training, and we have seen how we can monitor these activations.</p>
 <p>A first effort at stabilizing the activations, is by taking care of the initialization of the network, which is the process of setting the weights <em>before</em> they are trained. Above we showed that if the std of the weights is too large, our activations explode over time and if the std is too small the activations vanish. Can we set the std to a value that is just right, and makes sure the std of the activations stays roughly 1?</p>
 <p>With Xavier initialization, the weight matrices are initialized in such a way that activations taken from a unit gaussian don’t explode or vanish as we have seen above. It turns out, that we have to scale the standard deviation by <span class="math inline">\(1/\sqrt{n_{in}}\)</span></p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.randn(<span class="dv">10000</span>, <span class="dv">10</span>) </span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co"># reduce the standard deviation by a factor of 1/sqrt(10)</span></span>
@@ -720,7 +720,7 @@ Note
 </div>
 </div>
 <p>However, this doesn’t cover the full story. During training of a neural network we also have <em>activation functions</em> sitting in between our matrix mulitplies. And activations typically squash the activations coming out of the (linear, convolutional..) layer. See for example what happens to our activations, after multiplying with Xavier initialized weights and adding a ReLU non-linearity:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.randn(<span class="dv">10000</span>, <span class="dv">10</span>) </span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="co"># reduce the standard deviation by a factor of 1/sqrt(10)</span></span>
@@ -734,7 +734,7 @@ Note
 </div>
 </div>
 <p>And as expected, everyhing has imploded to zero. It turns out that we can correct for this squashing by adding a gain. This is called Kaiming initialization. For example the gain for ReLU is <span class="math inline">\(\sqrt{2}\)</span>:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.randn(<span class="dv">10000</span>, <span class="dv">10</span>)</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co"># add a gain of sqrt(2)</span></span>
@@ -748,12 +748,12 @@ Note
 </div>
 </div>
 <p>So let’s apply Kaiming initialization to our model, and see how it performs:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> init_weights(m):</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">isinstance</span>(m, nn.Conv2d): torch.nn.init.kaiming_normal_(m.weight)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>set_seed(<span class="dv">1</span>)</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> cnn_layers().<span class="bu">apply</span>(init_weights)</span>
@@ -865,19 +865,19 @@ Note
 </div>
 </div>
 <p>Propper initialization increases the performance from 82% to around 87%, also the loss graph looks a bit better. Let’s have a look at our activation plots:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>act_stats.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-24-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>act_stats.plot_hist()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-25-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>act_stats.plot_dead(binary<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-26-output-1.png" class="img-fluid"></p>
@@ -888,12 +888,12 @@ Note
 <section id="normalisation" class="level2">
 <h2 class="anchored" data-anchor-id="normalisation">Normalisation</h2>
 <p>Besides initializing the weight matrices properly, we can also normalize the data itself. Since the batch size is quite large (1024) let’s do so by taking the statistics of the first batch:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>xb_mean <span class="op">=</span> xb.mean()</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>xb_std <span class="op">=</span> xb.std()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Create a small Subscriber that normalizes our inputs before a batch:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NormalizationS(Subscriber):</span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, mean, std):</span>
@@ -903,7 +903,7 @@ Note
 <span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> before_batch(<span class="va">self</span>, learn):</span>
 <span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>        learn.batch <span class="op">=</span> [(learn.batch[<span class="dv">0</span>] <span class="op">-</span> <span class="va">self</span>.mean) <span class="op">/</span> <span class="va">self</span>.std, learn.batch[<span class="dv">1</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>set_seed(<span class="dv">1</span>)</span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> cnn_layers().<span class="bu">apply</span>(init_weights)</span>
@@ -1017,19 +1017,19 @@ Note
 <p><img src="index_files/figure-html/cell-29-output-3.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>act_stats.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-30-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>act_stats.plot_hist()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-31-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>act_stats.plot_dead(binary<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-32-output-1.png" class="img-fluid"></p>
@@ -1042,7 +1042,7 @@ Note
 <p>So far we have tried to tackle the problems around activations from two sides: weight initialization and normalization of the input data. These are effective measures, but don’t cover the full problem: the weights are updated during training after which they are no longer normalized. Additionally, after we normalize our data we just “have to send it through the network” and see what happens with the activations.</p>
 <p>The idea behind batch normalization is remarkably simple: if we know that we need unit gaussian activations <strong>throughout the network</strong>, let’s just make them unit gaussian🤓. This might sound a bit weird, but in fact the normalization operation is perfectly differentiable, and thus the gradients can be backpropagated through a normalization operation. Batch normalization takes the form of a layer and normalizes each batch during training.</p>
 <p>Let’s start with the basic functionality, a layer that normalizes a batch of data. Note that Batchnorm normalizes the batch across the batch, height and width but not across the channels. So when passing RGB images through your network, the mean and std would have 3 values each (for a Batchnorm layer that would act directly upon the inputs)</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BatchNorm(nn.Module):</span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
 <span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
@@ -1052,13 +1052,13 @@ Note
 <span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>        std <span class="op">=</span> xb.std(dim<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">2</span>,<span class="dv">3</span>), keepdim<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (xb <span class="op">-</span> mean) <span class="op">/</span> std</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>xb.mean(dim<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">2</span>,<span class="dv">3</span>)), xb.std(dim<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">2</span>,<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>(tensor([0.2859]), tensor([0.3539]))</code></pre>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> BatchNorm().forward(xb)</span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>out.mean(dim<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">2</span>,<span class="dv">3</span>)), out.std(dim<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">2</span>,<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -1067,7 +1067,7 @@ Note
 </div>
 <p>An interesting and somewhat remarkable consequence of this layer, is that the activations of a single sample in the batch are getting coupled to the activations of the other samples in the batch, since the mean and std of the batch are computed across all the samples. This leads to all sort of strange behavior and after batch normalization other normalization layers have been developed which don’t have this property: such as layer, group or instance normalization. But as it turns out, this coupling also has a regularizing effect. Since the coupling of samples acts somewhat similarly to data augmentation.</p>
 <p>Additionally, batchnorm defines two parameters <code>mult</code> and <code>add</code> by which the outputs are multiplied by and added to. These parameters are initialized at 1 and 0, meaning that at the very start of training these layers are in fact normalizing the data. However, they are <em>learnable</em> parameters, so during training these values can be changed if the model sees fit. This means that a Batchnorm layer can in fact do something totally different then normalizing the data!</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BatchNorm(nn.Module):</span>
 <span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, nf):</span>
 <span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
@@ -1080,7 +1080,7 @@ Note
 <span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.mult <span class="op">*</span> (xb <span class="op">-</span> mean) <span class="op">/</span> std <span class="op">+</span> <span class="va">self</span>.add</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>One problem with this, is that during inference we would like to be able to pass in just a single sample. But because of the batchnorm layer which is expecting a full batch of data, it’s no longer clear how to get sensible predictions out of the model. One way to solve this, is to keep <em>running statistics</em> of the mean and std during training and just use these when performing inference. Let’s add that as well:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BatchNorm(nn.Module):</span>
 <span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, nf, mom<span class="op">=</span><span class="fl">0.1</span>):</span>
 <span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
@@ -1102,7 +1102,7 @@ Note
 <span id="cb47-19"><a href="#cb47-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.mult <span class="op">*</span> ((xb <span class="op">-</span> <span class="va">self</span>.mean) <span class="op">/</span> (<span class="va">self</span>.var <span class="op">+</span> <span class="fl">1e-5</span>).sqrt()) <span class="op">+</span> <span class="va">self</span>.add</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>To add this to our model we have to redefine some functions:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> conv_block(in_c, out_c, kernel_size<span class="op">=</span><span class="dv">3</span>, act<span class="op">=</span><span class="va">True</span>, norm<span class="op">=</span><span class="va">True</span>):</span>
 <span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    padding <span class="op">=</span> kernel_size <span class="op">//</span> <span class="dv">2</span></span>
@@ -1112,7 +1112,7 @@ Note
 <span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> act: layers.append(torch.nn.ReLU())</span>
 <span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> nn.Sequential(<span class="op">*</span>layers) <span class="cf">if</span> <span class="bu">len</span>(layers)<span class="op">&gt;</span><span class="dv">1</span> <span class="cf">else</span> layers[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a> <span class="co">#| export</span></span>
 <span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cnn_layers(act<span class="op">=</span><span class="va">True</span>):</span>
 <span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> nn.Sequential(                  </span>
@@ -1123,7 +1123,7 @@ Note
 <span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>        conv_block(<span class="dv">64</span>,<span class="dv">10</span>, norm<span class="op">=</span><span class="va">False</span>, act<span class="op">=</span><span class="va">False</span>),</span>
 <span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>        nn.Flatten())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>set_seed(<span class="dv">1</span>)</span>
 <span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> cnn_layers().<span class="bu">apply</span>(init_weights)</span>
@@ -1250,19 +1250,19 @@ Note
 <p>I must be missing something in the Batchnorm layer defined above, because it doesn’t train as well as the Batchnorm2d layer from PyTorch. Let me know if anybody knows what I’m missing</p>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>act_stats.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-41-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>act_stats.plot_hist()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-42-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>act_stats.plot_dead(binary<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-43-output-1.png" class="img-fluid"></p>
@@ -1271,13 +1271,13 @@ Note
 <p>And this is all looking very good, no more spikes in the loss, histograms are looking good and no or very little permanently dead neurons.</p>
 <p>Let’s have a final look at the “dead plot”. Without the <code>binary=True</code> it displays the average dead rate across the samples in in the minibatch.</p>
 <p>Additionally we can plot the average firing rate across all neurons:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>act_stats.plot_dead()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-44-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>act_stats.plot(average_firing_rate<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-45-output-1.png" class="img-fluid"></p>
