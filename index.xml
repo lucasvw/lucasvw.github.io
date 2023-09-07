@@ -47,7 +47,7 @@ Note
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
 <p>Everything starts with training data:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> functools <span class="im" style="color: #00769E;
@@ -116,7 +116,7 @@ font-style: inherit;">import</span> <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span></span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">path <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Path(<span class="st" style="color: #20794D;
@@ -148,7 +148,7 @@ font-style: inherit;">'https://raw.githubusercontent.com/karpathy/makemore/maste
 background-color: null;
 font-style: inherit;">=</span> urlretrieve(url, path)</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">with</span> <span class="bu" style="color: null;
@@ -202,7 +202,7 @@ len(lines)=32033</code></pre>
 <section id="bi-gram-count-model" class="level2">
 <h2 class="anchored" data-anchor-id="bi-gram-count-model">Bi-gram count model</h2>
 <p>Let’s build the bi-gram count model outlined above:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">unique_chars <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
@@ -254,7 +254,7 @@ len(dictionary)=27</code></pre>
 </div>
 </div>
 <p>From the dictionary we create a mapping from token to integer. We will use this mapping to encode our tokens (characters) into integers. This is called <strong>numericalisation</strong>:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">c2i <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> {c:i <span class="cf" style="color: #003B4F;
@@ -275,7 +275,7 @@ background-color: null;
 font-style: inherit;">enumerate</span>(dictionary)}</span></code></pre></div>
 </div>
 <p>And just for clarity, let’s have a look at the bi-grams for the first name in the dataset:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">cutoff <span class="op" style="color: #5E5E5E;
@@ -396,7 +396,7 @@ a --&gt; .      numericalized:  0 --&gt; 26</code></pre>
 </div>
 </div>
 <p>To keep track of the occurrences we will use a matrix of size <img src="https://latex.codecogs.com/png.latex?%5B27,%2027%5D"> (the size of the dictionary). The rows reflect the possible values of the context and the columns reflect any possible character following this context. We will initialize this matrix with zeros, and “add 1” to the cell matching any n-gram we encounter:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">counts <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.zeros([<span class="dv" style="color: #AD0000;
@@ -467,7 +467,7 @@ font-style: inherit;"># increase the counts in the matrix for the encountered bi
 <li>Looking at the first row: an “a” is followed very often either by an “n” or even more often by a “.”. Names often end with an “a”!</li>
 <li>Looking at the last row: names also start pretty often with an “a”</li>
 </ul>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">fig, ax <span class="op" style="color: #5E5E5E;
@@ -534,7 +534,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 </div>
 </div>
 <p>Let’s use this language model to generate some new names:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Normalize over the rows</span></span>
@@ -554,7 +554,7 @@ font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">True</span>)</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">g <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.Generator().manual_seed(<span class="dv" style="color: #AD0000;
@@ -675,7 +675,7 @@ Note
 <p>If we create an embedding layer with (embedding) dimensions equal to that of the dictionary, the outputs of this layer will also conform to the size of our dictionary, e.g.&nbsp;<code>[batch_size * 26]</code>. These raw outputs of our model are referred to as logits, and they can be anything: positive, negative, small or large. We can exponentiate these logits to get numbers that are always positive, and these values are equivalent to values in the “counts” matrix. We can then normalize these exponentiated logits row-wise, to get to probabilities. And finally adding a negative log-likelihood loss on these probabilities is guiding the network to establish an embedding matrix with weights that are practically identical to the (log transformed) counts matrix from above. The combined operation of exponentiating, normalizing and negative log-likelihood is what we call cross-entropy loss. See also an earlier blog <a href="https://lucasvw.github.io/posts/05_crossentropy/">post</a>.</p>
 <p>We are going to train this model using <a href="https://lucasvw.github.io/posts/08_nntrain_setup/"><code>nntrain</code></a>, the small neural network training library we have been created before.</p>
 <p>Let’s start with the data, the datasets and the dataloaders. And let’s make the dataset generic so that it can create datasets for any n-gram model we wish. To do so, let’s have a quick look how 2-grams, 3-grams and 4-grams look for the first name in the data <em>Emma</em>:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">name <span class="op" style="color: #5E5E5E;
@@ -731,7 +731,7 @@ m ---&gt; a
 a ---&gt; .</code></pre>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1">name <span class="op" style="color: #5E5E5E;
@@ -795,7 +795,7 @@ m m ---&gt; a
 m a ---&gt; .</code></pre>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">name <span class="op" style="color: #5E5E5E;
@@ -873,7 +873,7 @@ m m a ---&gt; .</code></pre>
 <li>when we increase the context to n=3 and n=4, we need to add additional start-word tokens to make sure we don’t skip the first sample(s)</li>
 </ul>
 <p>Let’s create a dataset in which we can set the value of <code>n</code>:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> NgramDataset():</span>
@@ -1004,7 +1004,7 @@ background-color: null;
 font-style: inherit;">self</span>.x)</span></code></pre></div>
 </div>
 <p>Next, let’s create the model, which should also be able to deal with n-grams. Instead of using PyTorch’s <code>nn.Embedding</code> layer, we will use a custom weight matrix which we will use as weight matrix for the embedding layer. The reason for this, is that <code>nn.Embedding</code> is only two dimensional. For an n-gram of n &gt; 2, we would then have to stack-up all the different possible character combinations of the context in the row dimension. This is a bit tedious to implement, so instead we will use an explicit n-dimensional weight tensor. For the trigram this means: the first (second) dimension is for the first (second) character in the context, and the last dimension is for the label.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> NgramNet(nn.Module):</span>
@@ -1070,7 +1070,7 @@ font-style: inherit;">1</span>)]]</span>
 background-color: null;
 font-style: inherit;">return</span> logits</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1">train_ds <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> NgramDataset(train_lines)</span>
@@ -1105,7 +1105,7 @@ font-style: inherit;">2</span>)</span>
 background-color: null;
 font-style: inherit;">=</span> DataLoaders(train_loader, val_loader)</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1">m <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> NgramNet()</span>
@@ -1221,7 +1221,7 @@ font-style: inherit;">1e-1</span>)</span></code></pre></div>
 </div>
 </div>
 <p>Now, let’s patch our model with a <code>generate()</code> method, returning names sampled from the learned representation. We can pass in a generator to make sure we get the same random behavior as we have seen above when generating names with the counts model:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@fc.patch</span></span>
@@ -1331,7 +1331,7 @@ font-style: inherit;">break</span></span>
 background-color: null;
 font-style: inherit;">return</span> names</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1">m.generate(generator<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>torch.Generator().manual_seed(<span class="dv" style="color: #AD0000;
@@ -1353,7 +1353,7 @@ font-style: inherit;">42</span>))</span></code></pre></div>
 <p>As you can see, these names are extremely similar to the ones we created above with the counts based model, and this is actually pretty surprising. One model was based on common sense, logic and simple counting. The other model on neural networks, embedding layers, loss functions, training loops, backward passes etc etc. Nonetheless, the results are the same!</p>
 <p>The reason for this, is that the network architecture (and the loss) implies mathematical equivalence between both approaches. This can probably be shown explicitly with lots of complicated math, which I am not even going to try.</p>
 <p>We can also have a look at both the weight matrices to see that the embedding matrix is extremely similar to the counts matrix:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1">fig, axs <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
@@ -1408,7 +1408,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 <section id="next-steps" class="level2">
 <h2 class="anchored" data-anchor-id="next-steps">Next steps</h2>
 <p>This extremely cool equivalence means we can forget the count model alltogether and use the neural network paradigm to improve performance. In other words, we can use any trick in the book for training neural networks! In the next post, I’ll discuss a first improvement: a simple MLP model from Y. Bengio et al described in the paper “A Neural Probabilistic Language Model”. But let’s quickly train a couple of networks with higher n-grams to see how that goes.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb29" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1">ngram <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
@@ -1566,7 +1566,7 @@ font-style: inherit;">1e-1</span>)</span></code></pre></div>
 </div>
 </div>
 <p>Evaluation Loss went down from 2.595 for the bi-gram model to 2.437 for the tri-gram model, an improvement! Let’s try a 4-gram model as well:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1">ngram <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
@@ -1724,7 +1724,7 @@ font-style: inherit;">1e-1</span>)</span></code></pre></div>
 </div>
 </div>
 <p>And here, we start to see problems. The train loss is still getting better (1.894 for 4-gram vs 2.163 for 3-gram) but the evaluation loss is worse (2.442 for 4-gram vs 2.435 for 3-gram). Let’s also quickly compare the number of elements in the embedding layer for the 2, 3 and 4-gram models:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb31" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1">fig, ax <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
@@ -1794,7 +1794,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 </section>
 <section id="final-remarks-on-language-models" class="level2">
 <h2 class="anchored" data-anchor-id="final-remarks-on-language-models">Final remarks on language models</h2>
-<p>After reading this blog post, I was just thinking about <em>what exactly makes this neural network a language model</em>? The neural network obviously doesn’t know it’s a language model. It doesn’t know that the inputs are letters and that it’s predicting the next word in the sequence. Here are some closing thoughts:</p>
+<p>After reading this blog post, I was just thinking about <em>what exactly makes this neural network a language model</em>? The neural network obviously doesn’t know it’s a language model. It doesn’t know that the inputs are letters and that it’s predicting the next token in the sequence. Here are some closing thoughts:</p>
 <ol type="1">
 <li><p>Many samples in the training data have the same context (features), but a different next character (label). Consider a bi-gram model and two names: “Emma”, “Esmeralda”. The first bi-grams for each of these names (skipping the start name token) are (e, m) for emma and (e, s) for Esmeralda. They have the same context (e) but a different label (m and s respectively). This happens of course quite often in the data, and shows there is not a 1:1 relation from inputs to outputs. The model thus needs to learn a <em>probability distribution</em> over the possible labels. This learned probability distribution is what makes the model <em>generative</em>, since we can sample iteratively from it to create new names.</p></li>
 <li><p>The point above is formalized in the models we created, by setting up a loss function that is used for multi-class classification (cross entropy loss). In non-generative models, this loss is used to predict the correct (single!) class for any input. During inference, the class that has the largest logit will be our prediction for the input. However, for generative models we don’t look at the class with the largest logit, instead we look at all the logits and turn it into a probability distribution (by taking the softmax) to sample over it.</p></li>
@@ -15251,7 +15251,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-63506"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-63506").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-11804"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-11804").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>
