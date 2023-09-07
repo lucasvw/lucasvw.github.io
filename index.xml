@@ -32,16 +32,16 @@ Note
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>token</strong>: When creating language models, we have to decide on the granularity of the data. We can for example build a model that deals with single characters (a-z), entire words or word-parts. This decision is formalized by the use of a <strong>dictionary</strong>, which is the list of unique elements occuring in the data. For the character level model we are building, the dictionary will consist of all letters (a-z). The elements of the dictionary are referred to as tokens. Besides the letters a-z, we will also add a <strong>token</strong> to the <strong>dictionary</strong> reflecting the start and end of names.</li>
+<li><strong>token</strong>: When creating language models, we have to decide on the granularity of the data. We can for example build a model that deals with single characters (a-z), entire words or word-parts. This decision is formalized by the use of a <strong>dictionary</strong>, which is the list of unique elements occurring in the data. For the character level model we are building, the dictionary will consist of all letters (a-z). The elements of the dictionary are referred to as tokens. Besides the letters a-z, we will also add a token to the dictionary reflecting the start and end of names (we will use a “.” token).</li>
 <li><strong>context</strong>: Analog to the <em>features</em> (<img src="https://latex.codecogs.com/png.latex?X">) concept in machine learning, as opposed to the <em>labels</em> (<img src="https://latex.codecogs.com/png.latex?y">). The <strong>context</strong> thus relates to the data that is used as input to the model and from which a prediction is made (for the next character in a sequence).</li>
 </ul>
 </div>
 </div>
-<p>Let’s clearify what we mean with <em>prediction of the next token</em>: an n-gram model learns a probability distribution over any of the tokens that can follow from any of the possible contexts. A bi-gram character-level model has thus a learned probability distribition over all the characters (<em>a</em> through <em>z</em>, and let’s add a token to denote the <em>end of a word</em>, so 26+1 tokens) that can follow from any character.</p>
+<p>Let’s clarify what we mean with <em>prediction of the next token</em>: an n-gram model learns a probability distribution over any of the tokens that can follow from any of the possible contexts. A bi-gram character-level model has thus a learned probability distribution over all the characters (<em>a</em> through <em>z</em>, and let’s add a token to denote the <em>end of a word</em>, so 26+1 tokens) that can follow from any character.</p>
 <p>The simplest possible way to <em>learn</em> a probability distribution from training data, is by simply keeping track of the statistics in the training corpus:</p>
 <ul>
 <li>iterate through all the n-grams in the data</li>
-<li>count the occurences of each n-gram.</li>
+<li>count the occurrences of each n-gram.</li>
 </ul>
 <p>If we then normalize these counts (by dividing through the sum) we have a probability distribution!</p>
 <section id="data" class="level2">
@@ -201,7 +201,7 @@ len(lines)=32033</code></pre>
 </section>
 <section id="bi-gram-count-model" class="level2">
 <h2 class="anchored" data-anchor-id="bi-gram-count-model">Bi-gram count model</h2>
-<p>Let’s build the bigram count model outlined above:</p>
+<p>Let’s build the bi-gram count model outlined above:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">unique_chars <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -274,7 +274,7 @@ font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">enumerate</span>(dictionary)}</span></code></pre></div>
 </div>
-<p>And just for clarity, let’s have a look at the bigrams for the first name in the dataset:</p>
+<p>And just for clarity, let’s have a look at the bi-grams for the first name in the dataset:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
@@ -395,7 +395,7 @@ m --&gt; a      numericalized: 12 --&gt;  0
 a --&gt; .      numericalized:  0 --&gt; 26</code></pre>
 </div>
 </div>
-<p>To keep track of the occurences we will use a matrix of size <img src="https://latex.codecogs.com/png.latex?%5B27,%2027%5D"> (the size of the dictionary). The rows reflect the possible values of the context and the columns reflect any possible character following this context. We will initialize this matrix with zeros, and “add 1” to the cell matching any n-gram we encounter:</p>
+<p>To keep track of the occurrences we will use a matrix of size <img src="https://latex.codecogs.com/png.latex?%5B27,%2027%5D"> (the size of the dictionary). The rows reflect the possible values of the context and the columns reflect any possible character following this context. We will initialize this matrix with zeros, and “add 1” to the cell matching any n-gram we encounter:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">counts <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -462,7 +462,7 @@ font-style: inherit;">1</span>    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># increase the counts in the matrix for the encountered bigram</span></span></code></pre></div>
 </div>
-<p>The count matrix is visualized below. On the vertical axis (the rows of the matrix) we have the <em>context</em> characters and on the horizontal axis (the columns of the matrix) the characters that follow from this context are shown. Bright (white) colors mean low counts, and dark blue colors means high counts. The first observation is that the matrix is actually quite sparse. Many bigrams appear very few times, and a couple of ones occur very frequently. We further observe:</p>
+<p>The count matrix is visualized below. On the vertical axis (the rows of the matrix) we have the <em>context</em> characters and on the horizontal axis (the columns of the matrix) the characters that follow from this context are shown. Bright (white) colors mean low counts, and dark blue colors means high counts. The first observation is that the matrix is actually quite sparse. Many bi-grams appear very few times, and a couple of ones occur very frequently. We further observe:</p>
 <ul>
 <li>Looking at the first row: an “a” is followed very often either by an “n” or even more often by a “.”. Names often end with an “a”!</li>
 <li>Looking at the last row: names also start pretty often with an “a”</li>
@@ -636,10 +636,9 @@ background-color: null;
 font-style: inherit;"># store away sampled name</span></span>
 <span id="cb13-14">            <span class="cf" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">break</span></span></code></pre></div>
-</div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">names</span></code></pre></div>
+font-style: inherit;">break</span></span>
+<span id="cb13-15"></span>
+<span id="cb13-16">names</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>['.akyleloniatanacaroleynn.',
  '.con.',
@@ -679,12 +678,12 @@ Note
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">name <span class="op" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">name <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> lines[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>]</span>
-<span id="cb16-2">name <span class="op" style="color: #5E5E5E;
+<span id="cb15-2">name <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
 background-color: null;
@@ -695,12 +694,12 @@ background-color: null;
 font-style: inherit;">+</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'.'</span></span>
-<span id="cb16-3"><span class="bu" style="color: null;
+<span id="cb15-3"><span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'2-grams:'</span>)</span>
-<span id="cb16-4"><span class="cf" style="color: #003B4F;
+<span id="cb15-4"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
 background-color: null;
@@ -713,7 +712,7 @@ background-color: null;
 font-style: inherit;">1</span>], name[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>:]):</span>
-<span id="cb16-5">    <span class="bu" style="color: null;
+<span id="cb15-5">    <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(i[<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -735,12 +734,12 @@ a ---&gt; .</code></pre>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1">name <span class="op" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1">name <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> lines[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>]</span>
-<span id="cb18-2">name <span class="op" style="color: #5E5E5E;
+<span id="cb17-2">name <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
 background-color: null;
@@ -751,12 +750,12 @@ background-color: null;
 font-style: inherit;">+</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'.'</span></span>
-<span id="cb18-3"><span class="bu" style="color: null;
+<span id="cb17-3"><span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'3-grams:'</span>)</span>
-<span id="cb18-4"><span class="cf" style="color: #003B4F;
+<span id="cb17-4"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
 background-color: null;
@@ -775,7 +774,7 @@ background-color: null;
 font-style: inherit;">1</span>], name[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span>:]):</span>
-<span id="cb18-5">    <span class="bu" style="color: null;
+<span id="cb17-5">    <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(i[<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -799,12 +798,12 @@ m a ---&gt; .</code></pre>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1">name <span class="op" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">name <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> lines[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>]</span>
-<span id="cb20-2">name <span class="op" style="color: #5E5E5E;
+<span id="cb19-2">name <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
 background-color: null;
@@ -815,12 +814,12 @@ background-color: null;
 font-style: inherit;">+</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'.'</span></span>
-<span id="cb20-3"><span class="bu" style="color: null;
+<span id="cb19-3"><span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'4-grams:'</span>)</span>
-<span id="cb20-4"><span class="cf" style="color: #003B4F;
+<span id="cb19-4"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
 background-color: null;
@@ -845,7 +844,7 @@ background-color: null;
 font-style: inherit;">1</span>], name[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">3</span>:]):</span>
-<span id="cb20-5">    <span class="bu" style="color: null;
+<span id="cb19-5">    <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(i[<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -875,10 +874,10 @@ m m a ---&gt; .</code></pre>
 </ul>
 <p>Let’s create a dataset in which we can set the value of <code>n</code>:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><span class="kw" style="color: #003B4F;
+<div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> NgramDataset():</span>
-<span id="cb22-2">    <span class="kw" style="color: #003B4F;
+<span id="cb21-2">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -889,26 +888,26 @@ background-color: null;
 font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span>):</span>
-<span id="cb22-3">        <span class="va" style="color: #111111;
+<span id="cb21-3">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.x <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> []    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># store the xs, the context, the left hand side of the bigram</span></span>
-<span id="cb22-4">        <span class="va" style="color: #111111;
+<span id="cb21-4">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.y <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> []    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># store the ys, the labels, the right hand side of the bigram</span></span>
-<span id="cb22-5">        <span class="cf" style="color: #003B4F;
+<span id="cb21-5">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> line <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> lines:           </span>
-<span id="cb22-6">            x <span class="op" style="color: #5E5E5E;
+<span id="cb21-6">            x <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
 background-color: null;
@@ -921,7 +920,7 @@ background-color: null;
 font-style: inherit;">1</span>)         <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># the first x is always full of start word tokens</span></span>
-<span id="cb22-7">            <span class="cf" style="color: #003B4F;
+<span id="cb21-7">            <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> y <span class="kw" style="color: #003B4F;
 background-color: null;
@@ -932,7 +931,7 @@ background-color: null;
 font-style: inherit;">'.'</span>:  <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># the first y is always the first letter of the name</span></span>
-<span id="cb22-8">                <span class="va" style="color: #111111;
+<span id="cb21-8">                <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.x.append([c2i[xi] <span class="cf" style="color: #003B4F;
 background-color: null;
@@ -941,12 +940,12 @@ background-color: null;
 font-style: inherit;">in</span> x])  <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># convert to int and store</span></span>
-<span id="cb22-9">                <span class="va" style="color: #111111;
+<span id="cb21-9">                <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.y.append(c2i[y])                 <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># convert to int and store</span></span>
-<span id="cb22-10">                x <span class="op" style="color: #5E5E5E;
+<span id="cb21-10">                x <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> (x <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -955,7 +954,7 @@ background-color: null;
 font-style: inherit;">1</span>:]                       <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># update x</span></span>
-<span id="cb22-11">        <span class="va" style="color: #111111;
+<span id="cb21-11">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.x <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -964,7 +963,7 @@ background-color: null;
 font-style: inherit;">self</span>.x)                 <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># from list to tensor </span></span>
-<span id="cb22-12">        <span class="va" style="color: #111111;
+<span id="cb21-12">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.y <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -973,30 +972,30 @@ background-color: null;
 font-style: inherit;">self</span>.y).squeeze()       <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># from list to tensor</span></span>
-<span id="cb22-13">    </span>
-<span id="cb22-14">    <span class="kw" style="color: #003B4F;
+<span id="cb21-13">    </span>
+<span id="cb21-14">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">__getitem__</span>(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>, i):</span>
-<span id="cb22-15">        <span class="cf" style="color: #003B4F;
+<span id="cb21-15">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.x[i], <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.y[i]</span>
-<span id="cb22-16"></span>
-<span id="cb22-17">    <span class="kw" style="color: #003B4F;
+<span id="cb21-16"></span>
+<span id="cb21-17">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">__len__</span>(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>):</span>
-<span id="cb22-18">        <span class="cf" style="color: #003B4F;
+<span id="cb21-18">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> <span class="bu" style="color: null;
 background-color: null;
@@ -1006,10 +1005,10 @@ font-style: inherit;">self</span>.x)</span></code></pre></div>
 </div>
 <p>Next, let’s create the model, which should also be able to deal with n-grams. Instead of using PyTorch’s <code>nn.Embedding</code> layer, we will use a custom weight matrix which we will use as weight matrix for the embedding layer. The reason for this, is that <code>nn.Embedding</code> is only two dimensional. For an n-gram of n &gt; 2, we would then have to stack-up all the different possible character combinations of the context in the row dimension. This is a bit tedious to implement, so instead we will use an explicit n-dimensional weight tensor. For the trigram this means: the first (second) dimension is for the first (second) character in the context, and the last dimension is for the label.</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><span class="kw" style="color: #003B4F;
+<div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> NgramNet(nn.Module):</span>
-<span id="cb23-2">    <span class="kw" style="color: #003B4F;
+<span id="cb22-2">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -1020,17 +1019,17 @@ background-color: null;
 font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span>):</span>
-<span id="cb23-3">        <span class="bu" style="color: null;
+<span id="cb22-3">        <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">super</span>().<span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">__init__</span>()</span>
-<span id="cb23-4">        <span class="va" style="color: #111111;
+<span id="cb22-4">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.n <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> n</span>
-<span id="cb23-5">        <span class="va" style="color: #111111;
+<span id="cb22-5">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.embedding <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -1039,16 +1038,16 @@ background-color: null;
 font-style: inherit;">27</span>,)<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span>n).requires_grad_())</span>
-<span id="cb23-6">        </span>
-<span id="cb23-7">    <span class="kw" style="color: #003B4F;
+<span id="cb22-6">        </span>
+<span id="cb22-7">    <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>, x):</span>
-<span id="cb23-8">        <span class="co" style="color: #5E5E5E;
+<span id="cb22-8">        <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># logits are obtained by indexing into the embedding matrix</span></span>
-<span id="cb23-9">        logits <span class="op" style="color: #5E5E5E;
+<span id="cb22-9">        logits <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="va" style="color: #111111;
 background-color: null;
@@ -1067,24 +1066,24 @@ background-color: null;
 font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>)]]</span>
-<span id="cb23-10">        <span class="cf" style="color: #003B4F;
+<span id="cb22-10">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> logits</span></code></pre></div>
 </div>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1">train_ds <span class="op" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1">train_ds <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> NgramDataset(train_lines)</span>
-<span id="cb24-2">val_ds <span class="op" style="color: #5E5E5E;
+<span id="cb23-2">val_ds <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> NgramDataset(val_lines)</span>
-<span id="cb24-3"></span>
-<span id="cb24-4">bs <span class="op" style="color: #5E5E5E;
+<span id="cb23-3"></span>
+<span id="cb23-4">bs <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">10000</span></span>
-<span id="cb24-5">train_loader <span class="op" style="color: #5E5E5E;
+<span id="cb23-5">train_loader <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.utils.data.DataLoader(train_ds, shuffle<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -1093,7 +1092,7 @@ background-color: null;
 font-style: inherit;">True</span>, batch_size<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>bs)</span>
-<span id="cb24-6">val_loader <span class="op" style="color: #5E5E5E;
+<span id="cb23-6">val_loader <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.utils.data.DataLoader(val_ds, batch_size<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -1102,34 +1101,34 @@ background-color: null;
 font-style: inherit;">*</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span>)</span>
-<span id="cb24-7">dls <span class="op" style="color: #5E5E5E;
+<span id="cb23-7">dls <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> DataLoaders(train_loader, val_loader)</span></code></pre></div>
 </div>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1">m <span class="op" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1">m <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> NgramNet()</span>
-<span id="cb25-2">n_2gram <span class="op" style="color: #5E5E5E;
+<span id="cb24-2">n_2gram <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> m.embedding.numel()</span>
-<span id="cb25-3"></span>
-<span id="cb25-4">subs <span class="op" style="color: #5E5E5E;
+<span id="cb24-3"></span>
+<span id="cb24-4">subs <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> [ProgressS(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">True</span>),</span>
-<span id="cb25-5">        MetricsS(),</span>
-<span id="cb25-6">        DeviceS(device)]</span>
-<span id="cb25-7"></span>
-<span id="cb25-8">l <span class="op" style="color: #5E5E5E;
+<span id="cb24-5">        MetricsS(),</span>
+<span id="cb24-6">        DeviceS(device)]</span>
+<span id="cb24-7"></span>
+<span id="cb24-8">l <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Learner(m, dls, F.cross_entropy, torch.optim.Adam, <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">None</span>, subs<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>subs)</span>
-<span id="cb25-9">l.fit(<span class="dv" style="color: #AD0000;
+<span id="cb24-9">l.fit(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span>, lr<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -1218,15 +1217,15 @@ font-style: inherit;">1e-1</span>)</span></code></pre></div>
 </table>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="https://lucasvw.github.io/posts/13_ngram/index_files/figure-html/cell-19-output-3.png" class="img-fluid"></p>
+<p><img src="https://lucasvw.github.io/posts/13_ngram/index_files/figure-html/cell-18-output-3.png" class="img-fluid"></p>
 </div>
 </div>
 <p>Now, let’s patch our model with a <code>generate()</code> method, returning names sampled from the learned representation. We can pass in a generator to make sure we get the same random behavior as we have seen above when generating names with the counts model:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><span class="at" style="color: #657422;
+<div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@fc.patch</span></span>
-<span id="cb26-2"><span class="kw" style="color: #003B4F;
+<span id="cb25-2"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> generate(<span class="va" style="color: #111111;
 background-color: null;
@@ -1239,17 +1238,17 @@ background-color: null;
 font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">None</span>):</span>
-<span id="cb26-3">    names <span class="op" style="color: #5E5E5E;
+<span id="cb25-3">    names <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> []</span>
-<span id="cb26-4">    <span class="cf" style="color: #003B4F;
+<span id="cb25-4">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">range</span>(n):</span>
-<span id="cb26-5">        name <span class="op" style="color: #5E5E5E;
+<span id="cb25-5">        name <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
 background-color: null;
@@ -1262,21 +1261,21 @@ background-color: null;
 font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>)</span>
-<span id="cb26-6">        <span class="cf" style="color: #003B4F;
+<span id="cb25-6">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">while</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">True</span>:</span>
-<span id="cb26-7">            <span class="co" style="color: #5E5E5E;
+<span id="cb25-7">            <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># the following 2 lines are a bit ugly, but couldn't find a better way</span></span>
-<span id="cb26-8">            <span class="co" style="color: #5E5E5E;
+<span id="cb25-8">            <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># cleaner way to make this work for both n=2 and n&gt;2, indexing performs </span></span>
-<span id="cb26-9">            <span class="co" style="color: #5E5E5E;
+<span id="cb25-9">            <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># differently for both cases</span></span>
-<span id="cb26-10">            idx <span class="op" style="color: #5E5E5E;
+<span id="cb25-10">            idx <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> [c2i[i] <span class="cf" style="color: #003B4F;
 background-color: null;
@@ -1291,7 +1290,7 @@ background-color: null;
 font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>):]]</span>
-<span id="cb26-11">            logits <span class="op" style="color: #5E5E5E;
+<span id="cb25-11">            logits <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -1300,7 +1299,7 @@ background-color: null;
 font-style: inherit;">lambda</span> emb, i: emb[i], idx, <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.embedding).detach().cpu()</span>
-<span id="cb26-12">            s <span class="op" style="color: #5E5E5E;
+<span id="cb25-12">            s <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.multinomial(F.softmax(logits, dim<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -1311,29 +1310,29 @@ background-color: null;
 font-style: inherit;">1</span>, generator<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>generator)</span>
-<span id="cb26-13">            c <span class="op" style="color: #5E5E5E;
+<span id="cb25-13">            c <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> i2c[s.item()]</span>
-<span id="cb26-14">            name <span class="op" style="color: #5E5E5E;
+<span id="cb25-14">            name <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+=</span> c</span>
-<span id="cb26-15">            <span class="cf" style="color: #003B4F;
+<span id="cb25-15">            <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> c <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">==</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'.'</span>:</span>
-<span id="cb26-16">                names.append(name)</span>
-<span id="cb26-17">                <span class="cf" style="color: #003B4F;
+<span id="cb25-16">                names.append(name)</span>
+<span id="cb25-17">                <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">break</span></span>
-<span id="cb26-18">    <span class="cf" style="color: #003B4F;
+<span id="cb25-18">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> names</span></code></pre></div>
 </div>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1">m.generate(generator<span class="op" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1">m.generate(generator<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>torch.Generator().manual_seed(<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -1355,7 +1354,7 @@ font-style: inherit;">42</span>))</span></code></pre></div>
 <p>The reason for this, is that the network architecture (and the loss) implies mathematical equivalence between both approaches. This can probably be shown explicitly with lots of complicated math, which I am not even going to try.</p>
 <p>We can also have a look at both the weight matrices to see that the embedding matrix is extremely similar to the counts matrix:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb29" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1">fig, axs <span class="op" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1">fig, axs <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -1368,8 +1367,8 @@ background-color: null;
 font-style: inherit;">10</span>,<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span>))</span>
-<span id="cb29-2"></span>
-<span id="cb29-3">axs[<span class="dv" style="color: #AD0000;
+<span id="cb28-2"></span>
+<span id="cb28-3">axs[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>].imshow(F.softmax(m.embedding.detach().cpu(), dim<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -1378,7 +1377,7 @@ background-color: null;
 font-style: inherit;">1</span>).numpy())<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">;</span></span>
-<span id="cb29-4">axs[<span class="dv" style="color: #AD0000;
+<span id="cb28-4">axs[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>].set_title(<span class="st" style="color: #20794D;
 background-color: null;
@@ -1389,12 +1388,12 @@ background-color: null;
 font-style: inherit;"> turning logits into probabilities'</span>)<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">;</span></span>
-<span id="cb29-5">axs[<span class="dv" style="color: #AD0000;
+<span id="cb28-5">axs[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>].imshow(probs)<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">;</span></span>
-<span id="cb29-6">axs[<span class="dv" style="color: #AD0000;
+<span id="cb28-6">axs[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>].set_title(<span class="st" style="color: #20794D;
 background-color: null;
@@ -1402,7 +1401,7 @@ font-style: inherit;">'Probs matrix from the count model'</span>)<span class="op
 background-color: null;
 font-style: inherit;">;</span></span></code></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="https://lucasvw.github.io/posts/13_ngram/index_files/figure-html/cell-22-output-1.png" class="img-fluid"></p>
+<p><img src="https://lucasvw.github.io/posts/13_ngram/index_files/figure-html/cell-21-output-1.png" class="img-fluid"></p>
 </div>
 </div>
 </section>
@@ -1410,24 +1409,24 @@ font-style: inherit;">;</span></span></code></pre></div>
 <h2 class="anchored" data-anchor-id="next-steps">Next steps</h2>
 <p>This extremely cool equivalence means we can forget the count model alltogether and use the neural network paradigm to improve performance. In other words, we can use any trick in the book for training neural networks! In the next post, I’ll discuss a first improvement: a simple MLP model from Y. Bengio et al described in the paper “A Neural Probabilistic Language Model”. But let’s quickly train a couple of networks with higher n-grams to see how that goes.</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1">ngram <span class="op" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb29" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1">ngram <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">3</span></span>
-<span id="cb30-2"></span>
-<span id="cb30-3">train_ds <span class="op" style="color: #5E5E5E;
+<span id="cb29-2"></span>
+<span id="cb29-3">train_ds <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> NgramDataset(train_lines, n<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>ngram)</span>
-<span id="cb30-4">val_ds <span class="op" style="color: #5E5E5E;
+<span id="cb29-4">val_ds <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> NgramDataset(val_lines, n<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>ngram)</span>
-<span id="cb30-5"></span>
-<span id="cb30-6">train_loader <span class="op" style="color: #5E5E5E;
+<span id="cb29-5"></span>
+<span id="cb29-6">train_loader <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.utils.data.DataLoader(train_ds, shuffle<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -1436,7 +1435,7 @@ background-color: null;
 font-style: inherit;">True</span>, batch_size<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>bs)</span>
-<span id="cb30-7">val_loader <span class="op" style="color: #5E5E5E;
+<span id="cb29-7">val_loader <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.utils.data.DataLoader(val_ds, batch_size<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -1445,36 +1444,36 @@ background-color: null;
 font-style: inherit;">*</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span>)</span>
-<span id="cb30-8"></span>
-<span id="cb30-9">dls <span class="op" style="color: #5E5E5E;
+<span id="cb29-8"></span>
+<span id="cb29-9">dls <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> DataLoaders(train_loader, val_loader)</span>
-<span id="cb30-10"></span>
-<span id="cb30-11">m <span class="op" style="color: #5E5E5E;
+<span id="cb29-10"></span>
+<span id="cb29-11">m <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> NgramNet(n<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>ngram)</span>
-<span id="cb30-12">n_3gram <span class="op" style="color: #5E5E5E;
+<span id="cb29-12">n_3gram <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> m.embedding.numel()</span>
-<span id="cb30-13"></span>
-<span id="cb30-14">subs <span class="op" style="color: #5E5E5E;
+<span id="cb29-13"></span>
+<span id="cb29-14">subs <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> [ProgressS(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">True</span>),</span>
-<span id="cb30-15">        MetricsS(),</span>
-<span id="cb30-16">        DeviceS(device)]</span>
-<span id="cb30-17"></span>
-<span id="cb30-18">l <span class="op" style="color: #5E5E5E;
+<span id="cb29-15">        MetricsS(),</span>
+<span id="cb29-16">        DeviceS(device)]</span>
+<span id="cb29-17"></span>
+<span id="cb29-18">l <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Learner(m, dls, F.cross_entropy, torch.optim.Adam, <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">None</span>, subs<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>subs)</span>
-<span id="cb30-19">l.fit(<span class="dv" style="color: #AD0000;
+<span id="cb29-19">l.fit(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span>, lr<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -1563,29 +1562,29 @@ font-style: inherit;">1e-1</span>)</span></code></pre></div>
 </table>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="https://lucasvw.github.io/posts/13_ngram/index_files/figure-html/cell-23-output-3.png" class="img-fluid"></p>
+<p><img src="https://lucasvw.github.io/posts/13_ngram/index_files/figure-html/cell-22-output-3.png" class="img-fluid"></p>
 </div>
 </div>
 <p>Evaluation Loss went down from 2.595 for the bi-gram model to 2.437 for the tri-gram model, an improvement! Let’s try a 4-gram model as well:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb31" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1">ngram <span class="op" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1">ngram <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">4</span></span>
-<span id="cb31-2"></span>
-<span id="cb31-3">train_ds <span class="op" style="color: #5E5E5E;
+<span id="cb30-2"></span>
+<span id="cb30-3">train_ds <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> NgramDataset(train_lines, n<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>ngram)</span>
-<span id="cb31-4">val_ds <span class="op" style="color: #5E5E5E;
+<span id="cb30-4">val_ds <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> NgramDataset(val_lines, n<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>ngram)</span>
-<span id="cb31-5"></span>
-<span id="cb31-6">train_loader <span class="op" style="color: #5E5E5E;
+<span id="cb30-5"></span>
+<span id="cb30-6">train_loader <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.utils.data.DataLoader(train_ds, shuffle<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -1594,7 +1593,7 @@ background-color: null;
 font-style: inherit;">True</span>, batch_size<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>bs)</span>
-<span id="cb31-7">val_loader <span class="op" style="color: #5E5E5E;
+<span id="cb30-7">val_loader <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.utils.data.DataLoader(val_ds, batch_size<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -1603,36 +1602,36 @@ background-color: null;
 font-style: inherit;">*</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span>)</span>
-<span id="cb31-8"></span>
-<span id="cb31-9">dls <span class="op" style="color: #5E5E5E;
+<span id="cb30-8"></span>
+<span id="cb30-9">dls <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> DataLoaders(train_loader, val_loader)</span>
-<span id="cb31-10"></span>
-<span id="cb31-11">m <span class="op" style="color: #5E5E5E;
+<span id="cb30-10"></span>
+<span id="cb30-11">m <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> NgramNet(n<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>ngram)</span>
-<span id="cb31-12">n_4gram <span class="op" style="color: #5E5E5E;
+<span id="cb30-12">n_4gram <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> m.embedding.numel()</span>
-<span id="cb31-13"></span>
-<span id="cb31-14">subs <span class="op" style="color: #5E5E5E;
+<span id="cb30-13"></span>
+<span id="cb30-14">subs <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> [ProgressS(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">True</span>),</span>
-<span id="cb31-15">        MetricsS(),</span>
-<span id="cb31-16">        DeviceS(device)]</span>
-<span id="cb31-17"></span>
-<span id="cb31-18">l <span class="op" style="color: #5E5E5E;
+<span id="cb30-15">        MetricsS(),</span>
+<span id="cb30-16">        DeviceS(device)]</span>
+<span id="cb30-17"></span>
+<span id="cb30-18">l <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Learner(m, dls, F.cross_entropy, torch.optim.Adam, <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">None</span>, subs<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>subs)</span>
-<span id="cb31-19">l.fit(<span class="dv" style="color: #AD0000;
+<span id="cb30-19">l.fit(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span>, lr<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -1721,24 +1720,24 @@ font-style: inherit;">1e-1</span>)</span></code></pre></div>
 </table>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="https://lucasvw.github.io/posts/13_ngram/index_files/figure-html/cell-24-output-3.png" class="img-fluid"></p>
+<p><img src="https://lucasvw.github.io/posts/13_ngram/index_files/figure-html/cell-23-output-3.png" class="img-fluid"></p>
 </div>
 </div>
 <p>And here, we start to see problems. The train loss is still getting better (1.894 for 4-gram vs 2.163 for 3-gram) but the evaluation loss is worse (2.442 for 4-gram vs 2.435 for 3-gram). Let’s also quickly compare the number of elements in the embedding layer for the 2, 3 and 4-gram models:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb32" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1">fig, ax <span class="op" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb31" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1">fig, ax <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>)</span>
-<span id="cb32-2">ax.bar(<span class="bu" style="color: null;
+<span id="cb31-2">ax.bar(<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">3</span>), [n_2gram, n_3gram, n_4gram])</span>
-<span id="cb32-3">ax.set_xticks(<span class="bu" style="color: null;
+<span id="cb31-3">ax.set_xticks(<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -1783,13 +1782,13 @@ background-color: null;
 font-style: inherit;">'</span>])<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">;</span></span>
-<span id="cb32-4">ax.set_title(<span class="st" style="color: #20794D;
+<span id="cb31-4">ax.set_title(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'Exponential increase in parameters'</span>)<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">;</span></span></code></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="https://lucasvw.github.io/posts/13_ngram/index_files/figure-html/cell-25-output-1.png" class="img-fluid"></p>
+<p><img src="https://lucasvw.github.io/posts/13_ngram/index_files/figure-html/cell-24-output-1.png" class="img-fluid"></p>
 </div>
 </div>
 
@@ -1799,7 +1798,6 @@ font-style: inherit;">;</span></span></code></pre></div>
  ]]></description>
   <category>code</category>
   <category>neural network</category>
-  <category>deep learning</category>
   <category>nlp</category>
   <guid>https://lucasvw.github.io/posts/13_ngram/index.html</guid>
   <pubDate>Wed, 06 Sep 2023 00:00:00 GMT</pubDate>
@@ -15243,7 +15241,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-94969"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-94969").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-95018"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-95018").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>
