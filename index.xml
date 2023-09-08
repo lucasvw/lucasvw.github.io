@@ -12,7 +12,7 @@
 <generator>quarto-1.3.450</generator>
 <lastBuildDate>Wed, 06 Sep 2023 00:00:00 GMT</lastBuildDate>
 <item>
-  <title>N-grams language models</title>
+  <title>N-gram language models</title>
   <dc:creator>Lucas van Walstijn</dc:creator>
   <link>https://lucasvw.github.io/posts/13_ngram/index.html</link>
   <description><![CDATA[ 
@@ -418,7 +418,7 @@ font-style: inherit;">=</span><span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">int</span>)              <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># intialize counts matrix</span></span>
+font-style: inherit;"># initialize counts matrix</span></span>
 <span id="cb8-2"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> name <span class="kw" style="color: #003B4F;
@@ -451,14 +451,14 @@ font-style: inherit;">1</span>], name[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>:])                <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># create all bigrams for the name (list of tuples)</span></span>
+font-style: inherit;"># create all bi-grams for the name (list of tuples)</span></span>
 <span id="cb8-5">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> bigram <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> bigrams:                            <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># iterate through bigrams</span></span>
+font-style: inherit;"># iterate through bi-grams</span></span>
 <span id="cb8-6">        counts[c2i[bigram[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>]], c2i[bigram[<span class="dv" style="color: #AD0000;
@@ -469,7 +469,7 @@ font-style: inherit;">+=</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># increase the counts in the matrix for the encountered bigram</span></span></code></pre></div>
+font-style: inherit;"># increase the counts in the matrix for the encountered bi-gram</span></span></code></pre></div>
 </div>
 <p>The count matrix is visualized below. On the vertical axis (the rows of the matrix) we have the <em>context</em> characters and on the horizontal axis (the columns of the matrix) the characters that follow from this context are shown. Bright (white) colors represent low counts, and dark blue colors represent high counts. The first observation is that the matrix is actually quite sparse. Many bi-grams appear very few times, and a couple of b-grams occur very frequently. We further observe:</p>
 <ul>
@@ -1278,13 +1278,13 @@ background-color: null;
 font-style: inherit;">True</span>:</span>
 <span id="cb22-7">            <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># the following 2 lines are a bit ugly, but couldn't find a better way</span></span>
+font-style: inherit;"># the following 2 lines are a involved, but I couldn't find a cleaner way</span></span>
 <span id="cb22-8">            <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># cleaner way to make this work for both n=2 and n&gt;2, indexing performs </span></span>
+font-style: inherit;"># to make this work for both n=2 and n&gt;2, </span></span>
 <span id="cb22-9">            <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># differently for both cases</span></span>
+font-style: inherit;"># since indexing works differently for both cases</span></span>
 <span id="cb22-10">            idx <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> [c2i[i] <span class="cf" style="color: #003B4F;
@@ -1309,7 +1309,8 @@ background-color: null;
 font-style: inherit;">lambda</span> emb, i: emb[i], idx, <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.embedding).detach().cpu()</span>
-<span id="cb22-12">            s <span class="op" style="color: #5E5E5E;
+<span id="cb22-12"></span>
+<span id="cb22-13">            s <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.multinomial(F.softmax(logits, dim<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -1320,24 +1321,24 @@ background-color: null;
 font-style: inherit;">1</span>, generator<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>generator)</span>
-<span id="cb22-13">            c <span class="op" style="color: #5E5E5E;
+<span id="cb22-14">            c <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> i2c[s.item()]</span>
-<span id="cb22-14">            name <span class="op" style="color: #5E5E5E;
+<span id="cb22-15">            name <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+=</span> c</span>
-<span id="cb22-15">            <span class="cf" style="color: #003B4F;
+<span id="cb22-16">            <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> c <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">==</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'.'</span>:</span>
-<span id="cb22-16">                names.append(name)</span>
-<span id="cb22-17">                <span class="cf" style="color: #003B4F;
+<span id="cb22-17">                names.append(name)</span>
+<span id="cb22-18">                <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">break</span></span>
-<span id="cb22-18">    <span class="cf" style="color: #003B4F;
+<span id="cb22-19">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> names</span></code></pre></div>
 </div>
@@ -15262,7 +15263,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-91232"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-91232").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-59918"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-59918").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>

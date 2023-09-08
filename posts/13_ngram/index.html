@@ -9,7 +9,7 @@
 <meta name="author" content="Lucas van Walstijn">
 <meta name="dcterms.date" content="2023-09-06">
 
-<title>Lucas van Walstijn - N-grams language models</title>
+<title>Lucas van Walstijn - N-gram language models</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -181,7 +181,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">N-grams language models</h1>
+<h1 class="title">N-gram language models</h1>
   <div class="quarto-categories">
     <div class="quarto-category">code</div>
     <div class="quarto-category">neural network</div>
@@ -322,12 +322,12 @@ a --&gt; .      numericalized:  0 --&gt; 26</code></pre>
 </div>
 <p>To keep track of the occurrences we will use a matrix of size <span class="math inline">\([27, 27]\)</span> (the size of the dictionary). The rows reflect the possible values of the context and the columns reflect any possible character following this context. We will initialize this matrix with zeros, and increase the value of the associated cell by one, every time we encounter an n-gram:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> torch.zeros([<span class="dv">27</span>,<span class="dv">27</span>], dtype<span class="op">=</span><span class="bu">int</span>)              <span class="co"># intialize counts matrix</span></span>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> torch.zeros([<span class="dv">27</span>,<span class="dv">27</span>], dtype<span class="op">=</span><span class="bu">int</span>)              <span class="co"># initialize counts matrix</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> train_lines:                              <span class="co"># iterate through all the names</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    name <span class="op">=</span> <span class="st">"."</span> <span class="op">+</span> name <span class="op">+</span> <span class="st">"."</span>                           <span class="co"># add start and end token to the name</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    bigrams <span class="op">=</span> <span class="bu">zip</span>(name[:<span class="op">-</span><span class="dv">1</span>], name[<span class="dv">1</span>:])                <span class="co"># create all bigrams for the name (list of tuples)</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> bigram <span class="kw">in</span> bigrams:                            <span class="co"># iterate through bigrams</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        counts[c2i[bigram[<span class="dv">0</span>]], c2i[bigram[<span class="dv">1</span>]]] <span class="op">+=</span><span class="dv">1</span>    <span class="co"># increase the counts in the matrix for the encountered bigram</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    bigrams <span class="op">=</span> <span class="bu">zip</span>(name[:<span class="op">-</span><span class="dv">1</span>], name[<span class="dv">1</span>:])                <span class="co"># create all bi-grams for the name (list of tuples)</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> bigram <span class="kw">in</span> bigrams:                            <span class="co"># iterate through bi-grams</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        counts[c2i[bigram[<span class="dv">0</span>]], c2i[bigram[<span class="dv">1</span>]]] <span class="op">+=</span><span class="dv">1</span>    <span class="co"># increase the counts in the matrix for the encountered bi-gram</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The count matrix is visualized below. On the vertical axis (the rows of the matrix) we have the <em>context</em> characters and on the horizontal axis (the columns of the matrix) the characters that follow from this context are shown. Bright (white) colors represent low counts, and dark blue colors represent high counts. The first observation is that the matrix is actually quite sparse. Many bi-grams appear very few times, and a couple of b-grams occur very frequently. We further observe:</p>
 <ul>
@@ -610,18 +610,19 @@ m m a ---&gt; .</code></pre>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n):</span>
 <span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>        name <span class="op">=</span> <span class="st">'.'</span> <span class="op">*</span> (<span class="va">self</span>.n<span class="op">-</span><span class="dv">1</span>)</span>
 <span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="va">True</span>:</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>            <span class="co"># the following 2 lines are a bit ugly, but couldn't find a better way</span></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>            <span class="co"># cleaner way to make this work for both n=2 and n&gt;2, indexing performs </span></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>            <span class="co"># differently for both cases</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>            <span class="co"># the following 2 lines are a involved, but I couldn't find a cleaner way</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>            <span class="co"># to make this work for both n=2 and n&gt;2, </span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>            <span class="co"># since indexing works differently for both cases</span></span>
 <span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>            idx <span class="op">=</span> [c2i[i] <span class="cf">for</span> i <span class="kw">in</span> name[<span class="op">-</span>(<span class="va">self</span>.n<span class="op">-</span><span class="dv">1</span>):]]</span>
 <span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>            logits <span class="op">=</span> <span class="bu">reduce</span>(<span class="kw">lambda</span> emb, i: emb[i], idx, <span class="va">self</span>.embedding).detach().cpu()</span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>            s <span class="op">=</span> torch.multinomial(F.softmax(logits, dim<span class="op">=</span><span class="dv">0</span>), <span class="dv">1</span>, generator<span class="op">=</span>generator)</span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>            c <span class="op">=</span> i2c[s.item()]</span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>            name <span class="op">+=</span> c</span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> c <span class="op">==</span> <span class="st">'.'</span>:</span>
-<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>                names.append(name)</span>
-<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
-<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> names</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>            s <span class="op">=</span> torch.multinomial(F.softmax(logits, dim<span class="op">=</span><span class="dv">0</span>), <span class="dv">1</span>, generator<span class="op">=</span>generator)</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>            c <span class="op">=</span> i2c[s.item()]</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>            name <span class="op">+=</span> c</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> c <span class="op">==</span> <span class="st">'.'</span>:</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>                names.append(name)</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> names</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>m.generate(generator<span class="op">=</span>torch.Generator().manual_seed(<span class="dv">42</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
