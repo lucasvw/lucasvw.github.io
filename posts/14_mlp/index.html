@@ -270,13 +270,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>random.seed(<span class="dv">42</span>)</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>random.shuffle(lines)</span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">### Create dictionary and mappings </span><span class="al">###</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">### Create vocabulary and mappings </span><span class="al">###</span></span>
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>unique_chars <span class="op">=</span> <span class="bu">list</span>(<span class="bu">set</span>(<span class="st">""</span>.join(lines)))</span>
 <span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>unique_chars.sort()</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>dictionary <span class="op">=</span> [<span class="st">'.'</span>] <span class="op">+</span> unique_chars</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>vocabulary <span class="op">=</span> [<span class="st">'.'</span>] <span class="op">+</span> unique_chars</span>
 <span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>c2i <span class="op">=</span> {c:i <span class="cf">for</span> i, c <span class="kw">in</span> <span class="bu">enumerate</span>(dictionary)}</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>i2c <span class="op">=</span> {i:c <span class="cf">for</span> i, c <span class="kw">in</span> <span class="bu">enumerate</span>(dictionary)}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>c2i <span class="op">=</span> {c:i <span class="cf">for</span> i, c <span class="kw">in</span> <span class="bu">enumerate</span>(vocabulary)}</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>i2c <span class="op">=</span> {i:c <span class="cf">for</span> i, c <span class="kw">in</span> <span class="bu">enumerate</span>(vocabulary)}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="embeddings-relation-to-integer-and-one-hot-encoding" class="level2">
@@ -294,11 +294,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <figcaption class="figure-caption">Matrix multiplication of one sample consisting of 1 token (blue matrix) with a 4 neuron linear layer (green matrix). On the bottom: the simple multiplication associated with the activation of the first neuron</figcaption>
 </figure>
 </div>
-<p>As you can see, the integer values are just being multiplied by the weights of the linear layer. This establishes an implicit relation between our inputs (blue matrix) in terms of the activation (yellow matrix). Consider a context <em>e</em> (numericalized 4) and another context <em>a</em> (numericalized 1). Because of the linearity, the activations of the former will always be 4 times as large as the activations of the latter. No matter how we change the weights in our network, this implicit relation will always be there, and there is no good reason why this should be the case. Moreover, the factor (4) is a result from the ordering of our dictionary. If instead we would have <span class="math inline">\(a\)</span> in 10<sup>th</sup> position, and <span class="math inline">\(e\)</span> in 20<sup>th</sup> position, the difference would have been a factor of 2. It should be clear that these kind of implicit linear relations don’t fit to our (<em>nominal</em>) data, and should only be used for <em>ratio</em>, <em>interval</em> and possibly <em>ordinal</em> data.</p>
+<p>As you can see, the integer values are just being multiplied by the weights of the linear layer. This establishes an implicit relation between our inputs (blue matrix) in terms of the activation (yellow matrix). Consider a context <em>e</em> (numericalized 4) and another context <em>a</em> (numericalized 1). Because of the linearity, the activations of the former will always be 4 times as large as the activations of the latter. No matter how we change the weights in our network, this implicit relation will always be there, and there is no good reason why this should be the case. Moreover, the factor (4) is a result from the ordering of our vocabulary. If instead we would have <span class="math inline">\(a\)</span> in 10<sup>th</sup> position, and <span class="math inline">\(e\)</span> in 20<sup>th</sup> position, the difference would have been a factor of 2. It should be clear that these kind of implicit linear relations don’t fit to our (<em>nominal</em>) data, and should only be used for <em>ratio</em>, <em>interval</em> and possibly <em>ordinal</em> data.</p>
 </section>
 <section id="one-hot-encoding" class="level3">
 <h3 class="anchored" data-anchor-id="one-hot-encoding">One-hot encoding</h3>
-<p>So how then should we treat these variables? If you are familiar with linear regression you have probably heard of <em>one hot encoding</em>. This is a technique in which we replace integer values with a vector. This vector will be of length equal to the amount of possible values the integer can take on and consists of zeros in all but one position, in that nonzero position the value will be <code>1</code>. Each integer will have this <code>1</code> in a different position. For a dictionary of length 4, the 4 vectors will be:</p>
+<p>So how then should we treat these variables? If you are familiar with linear regression you have probably heard of <em>one hot encoding</em>. This is a technique in which we replace integer values with a vector. This vector will be of length equal to the amount of possible values the integer can take on and consists of zeros in all but one position, in that nonzero position the value will be <code>1</code>. Each integer will have this <code>1</code> in a different position. For a vocabulary of length 4, the 4 vectors will be:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">4</span>):</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(F.one_hot(torch.tensor(i), <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -392,7 +392,7 @@ tensor([-0.5065, -0.5940])</code></pre>
 </section>
 <section id="embeddings-mapping-inputs-into-n-dimensional-space" class="level2">
 <h2 class="anchored" data-anchor-id="embeddings-mapping-inputs-into-n-dimensional-space">Embeddings: mapping inputs into n-dimensional space</h2>
-<p>These different <em>attributes</em> is also what we refer to when saying that embedding layers <em>map inputs into an n-dimensional space</em>. With n being the amount of attributes, generally smaller then the size of the dictionary. For example, if we would create an embedding layer with depth of (number of <em>attributes</em>) 4 we would have:</p>
+<p>These different <em>attributes</em> is also what we refer to when saying that embedding layers <em>map inputs into an n-dimensional space</em>. With n being the amount of attributes, generally smaller then the size of the vocabulary. For example, if we would create an embedding layer with depth of (number of <em>attributes</em>) 4 we would have:</p>
 <ul>
 <li>integer encoded tokens: 1D (27 possible values)</li>
 <li>one-hot encoding: 27D (binary values: either zero or one)</li>
@@ -417,7 +417,7 @@ tensor([-0.5065, -0.5940])</code></pre>
 <h2 class="anchored" data-anchor-id="using-embeddings-effectively">Using Embeddings effectively</h2>
 <p>Now that we have a better understanding of embeddings both mathematically and conceptually, let’s turn to the paper of Bengio et al.&nbsp;Where they make smart use of embeddings to circumvent the problems with huge weight matrices for n-grams with large n.</p>
 <p>The following (simplified) architecture diagram is from that paper and describes pretty well what’s going on.</p>
-<p>On the bottom we see three inputs, so we are using a context of length 3. These inputs are feeded into <em>the same</em> embedding layer C. Also, this embedding layer as a depth <em>smaller then the size of the dictionary</em></p>
+<p>On the bottom we see three inputs, so we are using a context of length 3. These inputs are feeded into <em>the same</em> embedding layer C. Also, this embedding layer as a depth <em>smaller then the size of the vocabulary</em></p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -428,12 +428,12 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>For the n-gram neural network model we actually also used an embedding layer, but it has a depth equal to the size of the dictionary. We were thus mapping our integers into a 27D space, you can imagine that with just 27 integers that space was super sparse!</p>
+<p>For the n-gram neural network model we actually also used an embedding layer, but it has a depth equal to the size of the vocabulary. We were thus mapping our integers into a 27D space, you can imagine that with just 27 integers that space was super sparse!</p>
 </div>
 </div>
-<p>For an n-gram model we would have already <span class="math inline">\(27^3\)</span> parameters to accomodate all the different possibilities in the context. However, here we just have <code>dictionary length x embedding depth</code> parameters. Since all the elements of the context are feed through the same embedding layer, it’s not dependant on the context length, which allows us to increase the context length without having a penalty on the amount of parameters. This implicitly means, <em>that the position of the token is ignored as far as the embedding layer is concerned</em>. That is, a letter <em>e</em> in first or second position will give the same embedding activation.</p>
+<p>For an n-gram model we would have already <span class="math inline">\(27^3\)</span> parameters to accomodate all the different possibilities in the context. However, here we just have <code>vocabulary length x embedding depth</code> parameters. Since all the elements of the context are feed through the same embedding layer, it’s not dependant on the context length, which allows us to increase the context length without having a penalty on the amount of parameters. This implicitly means, <em>that the position of the token is ignored as far as the embedding layer is concerned</em>. That is, a letter <em>e</em> in first or second position will give the same embedding activation.</p>
 <p>Next, the three embedding vectors are concatenated and passed through a hidden linear layer with a tanh activation function. This is thus where the <em>positional information</em> is dealt with in this model.</p>
-<p>Finally the activations get passed through another linear layer, which maps the activations to the correct amount of classes (i.e.&nbsp;the number of tokens in the dictionary).</p>
+<p>Finally the activations get passed through another linear layer, which maps the activations to the correct amount of classes (i.e.&nbsp;the number of tokens in the vocabulary).</p>
 <p><img src="arch.png" class="img-fluid" width="600"></p>
 <p>Let’s build this model and train it with <code>nntrain</code>:</p>
 <div class="cell">

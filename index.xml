@@ -180,7 +180,7 @@ font-style: inherit;">42</span>)</span>
 <span id="cb2-14"></span>
 <span id="cb2-15"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">### Create dictionary and mappings </span><span class="al" style="color: #AD0000;
+font-style: inherit;">### Create vocabulary and mappings </span><span class="al" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">###</span></span>
 <span id="cb2-16">unique_chars <span class="op" style="color: #5E5E5E;
@@ -193,7 +193,7 @@ font-style: inherit;">set</span>(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">""</span>.join(lines)))</span>
 <span id="cb2-17">unique_chars.sort()</span>
-<span id="cb2-18">dictionary <span class="op" style="color: #5E5E5E;
+<span id="cb2-18">vocabulary <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> [<span class="st" style="color: #20794D;
 background-color: null;
@@ -209,7 +209,7 @@ font-style: inherit;">for</span> i, c <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
-font-style: inherit;">enumerate</span>(dictionary)}</span>
+font-style: inherit;">enumerate</span>(vocabulary)}</span>
 <span id="cb2-21">i2c <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> {i:c <span class="cf" style="color: #003B4F;
@@ -218,7 +218,7 @@ font-style: inherit;">for</span> i, c <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
-font-style: inherit;">enumerate</span>(dictionary)}</span></code></pre></div>
+font-style: inherit;">enumerate</span>(vocabulary)}</span></code></pre></div>
 </div>
 </section>
 <section id="embeddings-relation-to-integer-and-one-hot-encoding" class="level2">
@@ -236,11 +236,11 @@ font-style: inherit;">enumerate</span>(dictionary)}</span></code></pre></div>
 <figcaption class="figure-caption">Matrix multiplication of one sample consisting of 1 token (blue matrix) with a 4 neuron linear layer (green matrix). On the bottom: the simple multiplication associated with the activation of the first neuron</figcaption>
 </figure>
 </div>
-<p>As you can see, the integer values are just being multiplied by the weights of the linear layer. This establishes an implicit relation between our inputs (blue matrix) in terms of the activation (yellow matrix). Consider a context <em>e</em> (numericalized 4) and another context <em>a</em> (numericalized 1). Because of the linearity, the activations of the former will always be 4 times as large as the activations of the latter. No matter how we change the weights in our network, this implicit relation will always be there, and there is no good reason why this should be the case. Moreover, the factor (4) is a result from the ordering of our dictionary. If instead we would have <img src="https://latex.codecogs.com/png.latex?a"> in 10<sup>th</sup> position, and <img src="https://latex.codecogs.com/png.latex?e"> in 20<sup>th</sup> position, the difference would have been a factor of 2. It should be clear that these kind of implicit linear relations don’t fit to our (<em>nominal</em>) data, and should only be used for <em>ratio</em>, <em>interval</em> and possibly <em>ordinal</em> data.</p>
+<p>As you can see, the integer values are just being multiplied by the weights of the linear layer. This establishes an implicit relation between our inputs (blue matrix) in terms of the activation (yellow matrix). Consider a context <em>e</em> (numericalized 4) and another context <em>a</em> (numericalized 1). Because of the linearity, the activations of the former will always be 4 times as large as the activations of the latter. No matter how we change the weights in our network, this implicit relation will always be there, and there is no good reason why this should be the case. Moreover, the factor (4) is a result from the ordering of our vocabulary. If instead we would have <img src="https://latex.codecogs.com/png.latex?a"> in 10<sup>th</sup> position, and <img src="https://latex.codecogs.com/png.latex?e"> in 20<sup>th</sup> position, the difference would have been a factor of 2. It should be clear that these kind of implicit linear relations don’t fit to our (<em>nominal</em>) data, and should only be used for <em>ratio</em>, <em>interval</em> and possibly <em>ordinal</em> data.</p>
 </section>
 <section id="one-hot-encoding" class="level3">
 <h3 class="anchored" data-anchor-id="one-hot-encoding">One-hot encoding</h3>
-<p>So how then should we treat these variables? If you are familiar with linear regression you have probably heard of <em>one hot encoding</em>. This is a technique in which we replace integer values with a vector. This vector will be of length equal to the amount of possible values the integer can take on and consists of zeros in all but one position, in that nonzero position the value will be <code>1</code>. Each integer will have this <code>1</code> in a different position. For a dictionary of length 4, the 4 vectors will be:</p>
+<p>So how then should we treat these variables? If you are familiar with linear regression you have probably heard of <em>one hot encoding</em>. This is a technique in which we replace integer values with a vector. This vector will be of length equal to the amount of possible values the integer can take on and consists of zeros in all but one position, in that nonzero position the value will be <code>1</code>. Each integer will have this <code>1</code> in a different position. For a vocabulary of length 4, the 4 vectors will be:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="cf" style="color: #003B4F;
 background-color: null;
@@ -430,7 +430,7 @@ tensor([-0.5065, -0.5940])</code></pre>
 </section>
 <section id="embeddings-mapping-inputs-into-n-dimensional-space" class="level2">
 <h2 class="anchored" data-anchor-id="embeddings-mapping-inputs-into-n-dimensional-space">Embeddings: mapping inputs into n-dimensional space</h2>
-<p>These different <em>attributes</em> is also what we refer to when saying that embedding layers <em>map inputs into an n-dimensional space</em>. With n being the amount of attributes, generally smaller then the size of the dictionary. For example, if we would create an embedding layer with depth of (number of <em>attributes</em>) 4 we would have:</p>
+<p>These different <em>attributes</em> is also what we refer to when saying that embedding layers <em>map inputs into an n-dimensional space</em>. With n being the amount of attributes, generally smaller then the size of the vocabulary. For example, if we would create an embedding layer with depth of (number of <em>attributes</em>) 4 we would have:</p>
 <ul>
 <li>integer encoded tokens: 1D (27 possible values)</li>
 <li>one-hot encoding: 27D (binary values: either zero or one)</li>
@@ -455,7 +455,7 @@ tensor([-0.5065, -0.5940])</code></pre>
 <h2 class="anchored" data-anchor-id="using-embeddings-effectively">Using Embeddings effectively</h2>
 <p>Now that we have a better understanding of embeddings both mathematically and conceptually, let’s turn to the paper of Bengio et al.&nbsp;Where they make smart use of embeddings to circumvent the problems with huge weight matrices for n-grams with large n.</p>
 <p>The following (simplified) architecture diagram is from that paper and describes pretty well what’s going on.</p>
-<p>On the bottom we see three inputs, so we are using a context of length 3. These inputs are feeded into <em>the same</em> embedding layer C. Also, this embedding layer as a depth <em>smaller then the size of the dictionary</em></p>
+<p>On the bottom we see three inputs, so we are using a context of length 3. These inputs are feeded into <em>the same</em> embedding layer C. Also, this embedding layer as a depth <em>smaller then the size of the vocabulary</em></p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -466,12 +466,12 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>For the n-gram neural network model we actually also used an embedding layer, but it has a depth equal to the size of the dictionary. We were thus mapping our integers into a 27D space, you can imagine that with just 27 integers that space was super sparse!</p>
+<p>For the n-gram neural network model we actually also used an embedding layer, but it has a depth equal to the size of the vocabulary. We were thus mapping our integers into a 27D space, you can imagine that with just 27 integers that space was super sparse!</p>
 </div>
 </div>
-<p>For an n-gram model we would have already <img src="https://latex.codecogs.com/png.latex?27%5E3"> parameters to accomodate all the different possibilities in the context. However, here we just have <code>dictionary length x embedding depth</code> parameters. Since all the elements of the context are feed through the same embedding layer, it’s not dependant on the context length, which allows us to increase the context length without having a penalty on the amount of parameters. This implicitly means, <em>that the position of the token is ignored as far as the embedding layer is concerned</em>. That is, a letter <em>e</em> in first or second position will give the same embedding activation.</p>
+<p>For an n-gram model we would have already <img src="https://latex.codecogs.com/png.latex?27%5E3"> parameters to accomodate all the different possibilities in the context. However, here we just have <code>vocabulary length x embedding depth</code> parameters. Since all the elements of the context are feed through the same embedding layer, it’s not dependant on the context length, which allows us to increase the context length without having a penalty on the amount of parameters. This implicitly means, <em>that the position of the token is ignored as far as the embedding layer is concerned</em>. That is, a letter <em>e</em> in first or second position will give the same embedding activation.</p>
 <p>Next, the three embedding vectors are concatenated and passed through a hidden linear layer with a tanh activation function. This is thus where the <em>positional information</em> is dealt with in this model.</p>
-<p>Finally the activations get passed through another linear layer, which maps the activations to the correct amount of classes (i.e.&nbsp;the number of tokens in the dictionary).</p>
+<p>Finally the activations get passed through another linear layer, which maps the activations to the correct amount of classes (i.e.&nbsp;the number of tokens in the vocabulary).</p>
 <p><img src="https://lucasvw.github.io/posts/14_mlp/arch.png" class="img-fluid" width="600"></p>
 <p>Let’s build this model and train it with <code>nntrain</code>:</p>
 <div class="cell">
@@ -17117,7 +17117,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-60858"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-60858").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-75205"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-75205").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>
