@@ -31,7 +31,7 @@
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
 <p>Everything starts with training data, for a description see the previous <a href="https://lucasvw.github.io/posts/13_ngram/">post</a></p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -125,7 +125,7 @@ background-color: null;
 font-style: inherit;">*</span></span></code></pre></div>
 </details>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">########### Load the data ###########</span></span>
@@ -241,7 +241,7 @@ font-style: inherit;">enumerate</span>(dictionary)}</span></code></pre></div>
 <section id="one-hot-encoding" class="level3">
 <h3 class="anchored" data-anchor-id="one-hot-encoding">One-hot encoding</h3>
 <p>So how then should we treat these variables? If you are familiar with linear regression you have probably heard of <em>one hot encoding</em>. This is a technique in which we replace integer values with a vector. This vector will be of length equal to the amount of possible values the integer can take on and consists of zeros in all but one position, in that nonzero position the value will be <code>1</code>. Each integer will have this <code>1</code> in a different position. For a dictionary of length 4, the 4 vectors will be:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
@@ -270,7 +270,7 @@ tensor([0, 0, 0, 1])</code></pre>
 <section id="embedding-encoding" class="level3">
 <h3 class="anchored" data-anchor-id="embedding-encoding">Embedding encoding</h3>
 <p>For a neural network, something very similar happens. Here an example when we feed these 4 vectors into a linear layer consisting of <strong>2 neurons</strong>:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">integer_value <span class="op" style="color: #5E5E5E;
@@ -371,7 +371,7 @@ tensor([0.1354, 0.9329])</code></pre>
 </div>
 <p>We conclude: <strong>multiplying a one-hot encoded vector with a weight matrix, simply returns the weights of the associated row of that weight matrix</strong>.</p>
 <p>Mathematically this is thus equivalent to indexing into the weight matrix at the row equal to the integer value:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">linear[integer_value]</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>tensor([0.1354, 0.9329])</code></pre>
@@ -379,7 +379,7 @@ tensor([0.1354, 0.9329])</code></pre>
 </div>
 <p>If we compare now the inputs (integer values) with the outputs (vector of floats), we have verified the statement we made earlier: <em>However, instead of feeding integers into our network, we can also employ an embedding layer, which will basically create a vector out of our integers</em>.</p>
 <p>And now let’s also do this explicitly with an <code>nn.Embedding</code> layer:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">emb <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> nn.Embedding(<span class="dv" style="color: #AD0000;
@@ -474,7 +474,7 @@ Note
 <p>Finally the activations get passed through another linear layer, which maps the activations to the correct amount of classes (i.e.&nbsp;the number of tokens in the dictionary).</p>
 <p><img src="https://lucasvw.github.io/posts/14_mlp/arch.png" class="img-fluid" width="600"></p>
 <p>Let’s build this model and train it with <code>nntrain</code>:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Datasets and loaders</span></span>
@@ -570,7 +570,7 @@ background-color: null;
 font-style: inherit;">=</span> DataLoaders(train_loader, val_loader)</span></code></pre></div>
 </div>
 <p>As a reminder, let’s have a look at the samples for the first name in the dataset (“Yuheng”)</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">xb, yb <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> train_ds[<span class="dv" style="color: #AD0000;
@@ -605,7 +605,7 @@ font-style: inherit;">'--&gt;'</span> ,i2c[y.item()])</span></code></pre></div>
 ['h', 'e', 'n'] --&gt; g</code></pre>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> MLP(nn.Module):</span>
@@ -692,7 +692,7 @@ background-color: null;
 font-style: inherit;">return</span> out</span></code></pre></div>
 </div>
 <p>Let’s find a good learning rate:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">mlp <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> MLP(c2i, emb_dim<span class="op" style="color: #5E5E5E;
@@ -738,7 +738,7 @@ font-style: inherit;">1e-4</span>)</span>
 </div>
 </div>
 <p>Let’s take a learning rate of <code>3e-2</code>, and use the <code>OneCycleLR</code> scheduler together with an <code>Adam</code> optimizer:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">epochs <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
@@ -887,7 +887,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 </div>
 </div>
 <p>Next, let’s see if we can tweak the hyperparameters to get the best performance. Below I show the result of trying for around 10 minutes to get the best results:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> get_dls(bs, context_length):</span>
@@ -942,7 +942,7 @@ font-style: inherit;">=</span> DataLoaders(train_loader, val_loader)</span>
 background-color: null;
 font-style: inherit;">return</span> dls</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Train parameters</span></span>
@@ -1101,7 +1101,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <section id="tanh-activation-function" class="level2">
 <h2 class="anchored" data-anchor-id="tanh-activation-function">Tanh activation function</h2>
 <p>The MLP model we have used, is employing a tanh activation function which we haven’t encountered so far. So let’s have a quick look at it:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">x <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> np.linspace(<span class="op" style="color: #5E5E5E;
@@ -1160,7 +1160,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 </div>
 <p>Observe that the tanh activation function has y limits at -1 and 1: however large or small the input, the output is always between -1 and 1. These asymptotes are very flat, meaning that the derivatives in these areas are extremely small. Thinking back at the learning mechanism of neural networks, and remembering that gradients are flowing back through the network by making use of the chain rule: having very small local gradients of a tanh activation function leads to the cancelling-out of whatever gradient has been accumulated so far. This means that the weight updates of all upstream weights is impacted. Previously, this behavior was mentioned in terms of the ReLU activation function, see <a href="https://lucasvw.github.io/posts/11_nntrain_activations/#activations">here</a>.</p>
 <p>This becomes a serious problem, if for all our data (in a batch, or even worse in an epoch) this is the case. So let’s check how we are doing by creating a <a href="https://github.com/lucasvw/nntrain/blob/main/nntrain/activations.py#L39"><code>ActivationStatsS</code></a> subclass tailored towards tracking stats for the tanh activation.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> TanhActivationS(ActivationStatsS):</span>
@@ -1241,7 +1241,7 @@ font-style: inherit;"># compute not firing rate per activations (so across the s
 background-color: null;
 font-style: inherit;">1</span>].append(nf_rate_p_act)   </span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Train parameters</span></span>
@@ -1409,7 +1409,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 </div>
 </div>
 <p>And, let’s now plot all histograms of the activations during training as a heatmap:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1">fig, ax <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
@@ -1526,7 +1526,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 </div>
 </div>
 <p>On the top, the histograms are shown for all of training (800+ batches), and on the bottom the histograms for the first 20 batches are shown. We observe that during the beginning of training, we don’t have over-saturated tanh activations, but as training progresses the activations become more and more saturated. We can also look at the dead rate per neuron: which is the amount of activations with absolute value &gt; 0.99 across a batch per neuron:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1">fig, ax <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
@@ -1568,7 +1568,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 </div>
 </div>
 <p>However, this doesn’t seem to be problematic. Foremost, we need to make sure that we don’t initialize in a way that causes over-saturated tanh activations. And as mentioned, during the beginning of training, this is not the case. Also, when looking at a histogram of the dead rate per neuron across the very last training batch we see that most neurons have a low dead-rate, and we don’t have any neuron for which the dead-rate is higher then 75%:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1">plt.hist(dead_rate[:,<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
@@ -1586,9 +1586,9 @@ font-style: inherit;">;</span></span></code></pre></div>
 </div>
 </section>
 <section id="sampling-names" class="level2">
-<h2 class="anchored" data-anchor-id="sampling-names">Sampling names:</h2>
+<h2 class="anchored" data-anchor-id="sampling-names">Sampling names</h2>
 <p>To conclude, let’s sample from this model:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@fc.patch</span></span>
@@ -1677,7 +1677,7 @@ font-style: inherit;">break</span></span>
 background-color: null;
 font-style: inherit;">return</span> names</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1">names <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> mlp.generate()</span>
@@ -17117,7 +17117,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-40208"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-40208").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-60858"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-60858").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>

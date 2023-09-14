@@ -179,7 +179,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#embeddings-the-key-to-generalization" id="toc-embeddings-the-key-to-generalization" class="nav-link" data-scroll-target="#embeddings-the-key-to-generalization">Embeddings: the key to generalization</a></li>
   <li><a href="#using-embeddings-effectively" id="toc-using-embeddings-effectively" class="nav-link" data-scroll-target="#using-embeddings-effectively">Using Embeddings effectively</a></li>
   <li><a href="#tanh-activation-function" id="toc-tanh-activation-function" class="nav-link" data-scroll-target="#tanh-activation-function">Tanh activation function</a></li>
-  <li><a href="#sampling-names" id="toc-sampling-names" class="nav-link" data-scroll-target="#sampling-names">Sampling names:</a></li>
+  <li><a href="#sampling-names" id="toc-sampling-names" class="nav-link" data-scroll-target="#sampling-names">Sampling names</a></li>
   </ul>
 </nav>
     </div>
@@ -233,7 +233,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
 <p>Everything starts with training data, for a description see the previous <a href="https://lucasvw.github.io/posts/13_ngram/">post</a></p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
@@ -255,7 +255,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nntrain.ngram <span class="im">import</span> <span class="op">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">########### Load the data ###########</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> Path(<span class="st">'./data'</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>path.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
@@ -299,7 +299,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="one-hot-encoding" class="level3">
 <h3 class="anchored" data-anchor-id="one-hot-encoding">One-hot encoding</h3>
 <p>So how then should we treat these variables? If you are familiar with linear regression you have probably heard of <em>one hot encoding</em>. This is a technique in which we replace integer values with a vector. This vector will be of length equal to the amount of possible values the integer can take on and consists of zeros in all but one position, in that nonzero position the value will be <code>1</code>. Each integer will have this <code>1</code> in a different position. For a dictionary of length 4, the 4 vectors will be:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">4</span>):</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(F.one_hot(torch.tensor(i), <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -326,7 +326,7 @@ y &amp;= \left.
 <section id="embedding-encoding" class="level3">
 <h3 class="anchored" data-anchor-id="embedding-encoding">Embedding encoding</h3>
 <p>For a neural network, something very similar happens. Here an example when we feed these 4 vectors into a linear layer consisting of <strong>2 neurons</strong>:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>integer_value <span class="op">=</span> <span class="dv">0</span></span>
@@ -361,7 +361,7 @@ tensor([0.1354, 0.9329])</code></pre>
 </div>
 <p>We conclude: <strong>multiplying a one-hot encoded vector with a weight matrix, simply returns the weights of the associated row of that weight matrix</strong>.</p>
 <p>Mathematically this is thus equivalent to indexing into the weight matrix at the row equal to the integer value:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>linear[integer_value]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>tensor([0.1354, 0.9329])</code></pre>
@@ -369,7 +369,7 @@ tensor([0.1354, 0.9329])</code></pre>
 </div>
 <p>If we compare now the inputs (integer values) with the outputs (vector of floats), we have verified the statement we made earlier: <em>However, instead of feeding integers into our network, we can also employ an embedding layer, which will basically create a vector out of our integers</em>.</p>
 <p>And now let’s also do this explicitly with an <code>nn.Embedding</code> layer:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>emb <span class="op">=</span> nn.Embedding(<span class="dv">4</span>, <span class="dv">2</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'weight matrix of embedding layer:'</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(emb.weight.data)<span class="op">;</span> <span class="bu">print</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">'</span>)</span>
@@ -436,7 +436,7 @@ Note
 <p>Finally the activations get passed through another linear layer, which maps the activations to the correct amount of classes (i.e.&nbsp;the number of tokens in the dictionary).</p>
 <p><img src="arch.png" class="img-fluid" width="600"></p>
 <p>Let’s build this model and train it with <code>nntrain</code>:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Datasets and loaders</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>train_size<span class="op">=</span><span class="fl">0.8</span></span>
@@ -454,7 +454,7 @@ Note
 <span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> DataLoaders(train_loader, val_loader)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>As a reminder, let’s have a look at the samples for the first name in the dataset (“Yuheng”)</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> train_ds[<span class="dv">0</span>:<span class="dv">6</span>]</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> x,y <span class="kw">in</span> <span class="bu">zip</span>(xb, yb):</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="bu">list</span>(i2c[i.item()] <span class="cf">for</span> i <span class="kw">in</span> x), <span class="st">'--&gt;'</span> ,i2c[y.item()])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -467,7 +467,7 @@ Note
 ['h', 'e', 'n'] --&gt; g</code></pre>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MLP(nn.Module):</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, c2i, emb_dim, ctx_len, n_hidden):</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
@@ -486,7 +486,7 @@ Note
 <span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s find a good learning rate:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>mlp <span class="op">=</span> MLP(c2i, emb_dim<span class="op">=</span><span class="dv">2</span>, ctx_len<span class="op">=</span><span class="dv">3</span>, n_hidden<span class="op">=</span><span class="dv">50</span>)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>subs <span class="op">=</span> [DeviceS(device)]</span>
@@ -500,7 +500,7 @@ Note
 </div>
 </div>
 <p>Let’s take a learning rate of <code>3e-2</code>, and use the <code>OneCycleLR</code> scheduler together with an <code>Adam</code> optimizer:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>epochs <span class="op">=</span> <span class="dv">5</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="bu">len</span>(train_loader)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> <span class="fl">3e-2</span></span>
@@ -601,7 +601,7 @@ Note
 </div>
 </div>
 <p>Next, let’s see if we can tweak the hyperparameters to get the best performance. Below I show the result of trying for around 10 minutes to get the best results:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_dls(bs, context_length):</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    train_ds <span class="op">=</span> NgramDataset(train_lines, c2i, n<span class="op">=</span>context_length<span class="op">+</span><span class="dv">1</span>)</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    val_ds <span class="op">=</span> NgramDataset(val_lines, c2i, n<span class="op">=</span>context_length<span class="op">+</span><span class="dv">1</span>)</span>
@@ -610,7 +610,7 @@ Note
 <span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    dls <span class="op">=</span> DataLoaders(train_loader, val_loader)</span>
 <span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dls</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Train parameters</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>epochs <span class="op">=</span> <span class="dv">5</span></span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>lr     <span class="op">=</span> <span class="fl">3e-2</span></span>
@@ -717,7 +717,7 @@ Note
 <section id="tanh-activation-function" class="level2">
 <h2 class="anchored" data-anchor-id="tanh-activation-function">Tanh activation function</h2>
 <p>The MLP model we have used, is employing a tanh activation function which we haven’t encountered so far. So let’s have a quick look at it:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">5</span>,<span class="dv">5</span>,<span class="dv">100</span>)</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.tanh(x)</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -732,7 +732,7 @@ Note
 </div>
 <p>Observe that the tanh activation function has y limits at -1 and 1: however large or small the input, the output is always between -1 and 1. These asymptotes are very flat, meaning that the derivatives in these areas are extremely small. Thinking back at the learning mechanism of neural networks, and remembering that gradients are flowing back through the network by making use of the chain rule: having very small local gradients of a tanh activation function leads to the cancelling-out of whatever gradient has been accumulated so far. This means that the weight updates of all upstream weights is impacted. Previously, this behavior was mentioned in terms of the ReLU activation function, see <a href="https://lucasvw.github.io/posts/11_nntrain_activations/#activations">here</a>.</p>
 <p>This becomes a serious problem, if for all our data (in a batch, or even worse in an epoch) this is the case. So let’s check how we are doing by creating a <a href="https://github.com/lucasvw/nntrain/blob/main/nntrain/activations.py#L39"><code>ActivationStatsS</code></a> subclass tailored towards tracking stats for the tanh activation.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TanhActivationS(ActivationStatsS):</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> record_stats(<span class="va">self</span>, learn, hook, layer, inp, outp):</span>
@@ -747,7 +747,7 @@ Note
 <span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>            nf_rate_p_act <span class="op">=</span> (flat.<span class="bu">abs</span>() <span class="op">&gt;</span> <span class="fl">0.99</span>).<span class="bu">sum</span>(dim<span class="op">=</span><span class="dv">0</span>) <span class="op">/</span> N   <span class="co"># compute not firing rate per activations (so across the samples)</span></span>
 <span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>            hook.stats[<span class="dv">1</span>].append(nf_rate_p_act)   </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Train parameters</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>epochs <span class="op">=</span> <span class="dv">5</span></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>lr     <span class="op">=</span> <span class="fl">3e-2</span></span>
@@ -851,7 +851,7 @@ Note
 </div>
 </div>
 <p>And, let’s now plot all histograms of the activations during training as a heatmap:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">2</span>,<span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">15</span>,<span class="dv">10</span>))</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>hist <span class="op">=</span> torch.stack(tanhS.hooks[<span class="dv">0</span>].stats[<span class="dv">0</span>]).T</span>
@@ -864,7 +864,7 @@ Note
 </div>
 </div>
 <p>On the top, the histograms are shown for all of training (800+ batches), and on the bottom the histograms for the first 20 batches are shown. We observe that during the beginning of training, we don’t have over-saturated tanh activations, but as training progresses the activations become more and more saturated. We can also look at the dead rate per neuron: which is the amount of activations with absolute value &gt; 0.99 across a batch per neuron:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>,<span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">15</span>,<span class="dv">5</span>))</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>dead_rate <span class="op">=</span> torch.stack(tanhS.hooks[<span class="dv">0</span>].stats[<span class="dv">1</span>]).T</span>
@@ -874,7 +874,7 @@ Note
 </div>
 </div>
 <p>However, this doesn’t seem to be problematic. Foremost, we need to make sure that we don’t initialize in a way that causes over-saturated tanh activations. And as mentioned, during the beginning of training, this is not the case. Also, when looking at a histogram of the dead rate per neuron across the very last training batch we see that most neurons have a low dead-rate, and we don’t have any neuron for which the dead-rate is higher then 75%:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>plt.hist(dead_rate[:,<span class="op">-</span><span class="dv">1</span>], bins<span class="op">=</span><span class="dv">20</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-20-output-1.png" class="img-fluid"></p>
@@ -882,9 +882,9 @@ Note
 </div>
 </section>
 <section id="sampling-names" class="level2">
-<h2 class="anchored" data-anchor-id="sampling-names">Sampling names:</h2>
+<h2 class="anchored" data-anchor-id="sampling-names">Sampling names</h2>
 <p>To conclude, let’s sample from this model:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="at">@fc.patch</span></span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate(<span class="va">self</span>:MLP, n<span class="op">=</span><span class="dv">10</span>, generator<span class="op">=</span><span class="va">None</span>):</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    names <span class="op">=</span> []</span>
@@ -901,7 +901,7 @@ Note
 <span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
 <span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> names</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>names <span class="op">=</span> mlp.generate()</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>[name[<span class="dv">15</span>:<span class="op">-</span><span class="dv">1</span>] <span class="cf">for</span> name <span class="kw">in</span> names]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
