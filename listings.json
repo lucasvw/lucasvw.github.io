@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/15_rnn/index.html",
       "/posts/14_mlp/index.html",
       "/posts/13_ngram/index.html",
       "/posts/12_nntrain_accelerations/index.html",
