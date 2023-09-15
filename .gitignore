@@ -134,3 +134,6 @@ _site/
 
 # Mac files
 .DS_Store
+posts/15_rnn/data/names.txt
+posts/14_mlp/data/names.txt
+posts/13_ngram/data/names.txt
