@@ -886,8 +886,8 @@ Note
 <span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>        hs, h <span class="op">=</span> <span class="va">self</span>.rnn(inputs, <span class="va">self</span>.h)</span>
 <span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># hs : [bs, context_length, hidden_size]</span></span>
 <span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># h  : [1, bs, hidden_size]</span></span>
-<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.h <span class="op">=</span> h.detach()</span>
-<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.hidden2out(hs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.h <span class="op">=</span> h.detach()                      <span class="co"># detach the computational graph</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.hidden2out(hs)               <span class="co"># pass all hidden states to the output layer</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>And finally, we have to create a custom loss function that can deal with the multiple output activations and multiple labels:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
@@ -907,8 +907,8 @@ Note
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    train_ds <span class="op">=</span> SequentialDataset(train_lines, c2i, context_length)</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    valid_ds <span class="op">=</span> SequentialDataset(val_lines, c2i, context_length)</span>
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    train_dl <span class="op">=</span> torch.utils.data.DataLoader(train_ds, shuffle<span class="op">=</span><span class="va">False</span>, sampler<span class="op">=</span>Sampler(train_ds, batch_size), batch_size<span class="op">=</span>batch_size)</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    valid_dl <span class="op">=</span> torch.utils.data.DataLoader(valid_ds, shuffle<span class="op">=</span><span class="va">False</span>, sampler<span class="op">=</span>Sampler(valid_ds, batch_size), batch_size<span class="op">=</span>batch_size)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    train_dl <span class="op">=</span> torch.utils.data.DataLoader(train_ds, shuffle<span class="op">=</span><span class="va">False</span>, sampler<span class="op">=</span>VerticalSampler(train_ds, batch_size), batch_size<span class="op">=</span>batch_size)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    valid_dl <span class="op">=</span> torch.utils.data.DataLoader(valid_ds, shuffle<span class="op">=</span><span class="va">False</span>, sampler<span class="op">=</span>VerticalSampler(valid_ds, batch_size), batch_size<span class="op">=</span>batch_size)</span>
 <span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> DataLoaders(train_dl, valid_dl)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
