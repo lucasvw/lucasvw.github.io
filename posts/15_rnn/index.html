@@ -101,6 +101,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -170,7 +172,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#from-mlp-to-rnn-a-small-change" id="toc-from-mlp-to-rnn-a-small-change" class="nav-link" data-scroll-target="#from-mlp-to-rnn-a-small-change">From MLP to RNN, a small change</a></li>
   <li><a href="#combing-data-addition-or-concatenation" id="toc-combing-data-addition-or-concatenation" class="nav-link" data-scroll-target="#combing-data-addition-or-concatenation">Combing data: addition or concatenation</a></li>
   <li><a href="#pytorch-rnn" id="toc-pytorch-rnn" class="nav-link" data-scroll-target="#pytorch-rnn">PyTorch RNN</a></li>
-  <li><a href="#optimizing-dataloading-and-model-for-sequential-data" id="toc-optimizing-dataloading-and-model-for-sequential-data" class="nav-link" data-scroll-target="#optimizing-dataloading-and-model-for-sequential-data">Optimizing dataloading and model for sequential data</a></li>
+  <li><a href="#optimizing-dataloading-and-model-for-sequential-data-bptt" id="toc-optimizing-dataloading-and-model-for-sequential-data-bptt" class="nav-link" data-scroll-target="#optimizing-dataloading-and-model-for-sequential-data-bptt">Optimizing dataloading and model for sequential data (BPTT)</a></li>
   <li><a href="#sampling-names" id="toc-sampling-names" class="nav-link" data-scroll-target="#sampling-names">Sampling names</a></li>
   <li><a href="#outlook" id="toc-outlook" class="nav-link" data-scroll-target="#outlook">Outlook</a></li>
   </ul>
@@ -281,22 +283,34 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="from-mlp-to-rnn-a-small-change" class="level2">
 <h2 class="anchored" data-anchor-id="from-mlp-to-rnn-a-small-change">From MLP to RNN, a small change</h2>
-<p>The MLP model we encountered last post, used an embedding layer to turn the tokens from the context (in the image below of length 3) into vectors. These vectors then got concatenated, and passed through a hidden layer and an output layer (mapping the activations to the size of the vocabulary):</p>
+<p>The MLP model encountered in the last post, used an embedding layer to turn the tokens from the context (in the image below of length 3) into vectors. These vectors then got concatenated, and passed through a hidden layer. After that, the activations were mapped to the size of the vocabulary in the output layer:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="arch.png" class="img-fluid figure-img" width="600"></p>
 <figcaption class="figure-caption">MLP architecture</figcaption>
 </figure>
 </div>
-<p>For an RNN, we also start-off by turning our integers into vectors making use of a single embedding layer. However, instead of concatenating the result and passing it through a single hidden layer, we <em>iteratively feed the embedding activations through a single hidden layer</em>. Each time moving on to (the embedding activations of) the next token and adding the activations obtained from the previous iteration. The first time I learned about the fact that we are simply summing these activations together, I was pretty surprised: how can you expect to get anything meaningful by simple adding activations from two layers together? As it turns out, in neural network literature it happens quite often that the combination / merging of activations simply happens by element-wise addition.</p>
-<p>Once all the context has been processed in this way, we finalize with an output layer similar to what we did for the MLP model.</p>
+<p>For an RNN, we also start-off by turning our integers into vectors making use of an embedding layer. However, instead of concatenating the result and passing it through a hidden layer, we <em>iteratively feed the embedding activations through a single hidden layer</em>. Each time moving on to (the embedding activations of) the next token and adding the hidden activations obtained from the previous iteration. Once all the context has been processed in this way, we finalize with an output layer similar to what we did for the MLP model.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="rnn.drawio.png" class="img-fluid figure-img" width="400"></p>
 <figcaption class="figure-caption">RNN architecture</figcaption>
 </figure>
 </div>
-<p>Let’s put this into code:</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The first time I learned about the summing of embedding activations and hidden activations, I was pretty surprised: how can you expect to get anything meaningful by simple adding activations from two layers together? As it turns out, in neural network literature it happens quite often that the combination / merging of activations simply happens by element-wise addition. In a section below, we will also shortly discuss another way of combining information: by concatenation.</p>
+</div>
+</div>
+<p>Let’s put this RNN architecture into code:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FixedContextRNN(nn.Module):</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    </span>
@@ -318,12 +332,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        </span>
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.hidden2out(out)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Observe that both the embedding dimension and the size of the hidden layer need to be equal (<code>hidden_size</code>). This is because the activations from both these layers are added together and thus need to be of equal shape. This also means that there is just one hyperparameter influencing the amount of parameters in this network.</p>
+<p>Observe that both the embedding dimension and the size of the hidden layer need to be equal (<code>hidden_size</code>) because the activations from both these layers are added together and thus need to be of equal shape. This also means that there is just one hyperparameter influencing the amount of parameters in this network.</p>
 <p>We can generalize this model, so that it accepts data of arbitrary context length. Also, we will make use of a <em>dummy hidden-layer activation tensor</em> (initialized to zeros) so that we can do the addition for all iterations (and not just for the second iteration onward):</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> VariableContextRNN(nn.Module):</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, c2i, context_length, hidden_size):</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, c2i, hidden_size):</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.c2i <span class="op">=</span> c2i</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.hidden_size <span class="op">=</span> hidden_size</span>
@@ -337,12 +351,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># create dummy hidden-layer activations for the very first token </span></span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        h <span class="op">=</span> torch.zeros((x.shape[<span class="dv">0</span>], <span class="va">self</span>.hidden_size)).to(device)</span>
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(x.shape[<span class="dv">1</span>]):</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(x.shape[<span class="dv">1</span>]):             <span class="co"># iterate through the tokens (context length)</span></span>
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>            h <span class="op">=</span> F.relu(<span class="va">self</span>.hidden2hidden(h <span class="op">+</span> inputs[:,i,:])) <span class="co"># [bs, hidden_size]</span></span>
 <span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>            </span>
 <span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.hidden2out(h)               <span class="co"># [bs, classes]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Let’s see how well this model trains with a similar configuration to the first MLP we build in the previous <a href="https://lucasvw.github.io/posts/14_mlp/#using-embeddings-effectively">post</a> (context length of 3 and a hidden size of 50):</p>
+<p>Let’s see how this model performs with a similar configuration to the first MLP we build in the previous <a href="https://lucasvw.github.io/posts/14_mlp/#using-embeddings-effectively">post</a> (context length of 3 and a hidden size of 50):</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Train parameters</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>epochs <span class="op">=</span> <span class="dv">5</span></span>
@@ -354,7 +368,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>n_h            <span class="op">=</span> <span class="dv">50</span></span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> get_dls(bs, context_length)</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>rnn <span class="op">=</span> VariableContextRNN(c2i, context_length, n_h)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>rnn <span class="op">=</span> VariableContextRNN(c2i, n_h)</span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>subs <span class="op">=</span> [ProgressS(<span class="va">True</span>),</span>
 <span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        MetricsS(),</span>
@@ -457,7 +471,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> VariableContextRNNConcat(nn.Module):</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, c2i, context_length, hidden_size):</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, c2i, hidden_size):</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.c2i <span class="op">=</span> c2i</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.hidden_size <span class="op">=</span> hidden_size</span>
@@ -477,7 +491,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.hidden2out(h)                    <span class="co"># [bs, classes]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>rnn <span class="op">=</span> VariableContextRNNConcat(c2i, context_length, n_h)</span>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>rnn <span class="op">=</span> VariableContextRNNConcat(c2i, n_h)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> Learner(rnn, dls, F.cross_entropy, torch.optim.Adam, <span class="va">None</span>, subs<span class="op">=</span>subs <span class="op">+</span> [SchedulerS(scheduler)])</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>l.fit(epochs, lr<span class="op">=</span>lr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -570,13 +584,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="pytorch-rnn" class="level2">
 <h2 class="anchored" data-anchor-id="pytorch-rnn">PyTorch RNN</h2>
-<p>Let’s now see how we can use PyTorch’s <code>nn.RNN</code>. As you can see, this module replaces our <code>hidden2hidden</code> layer, and will take care of the loop in our forward pass.</p>
+<p>Let’s use PyTorch’s <code>nn.RNN</code>, in the <code>PyTorchRNN</code> class defined below, we can see that this module replaces our <code>hidden2hidden</code> layer, and also takes care of the loop over the tokens in the context in our forward pass.</p>
 <p>Some notes:</p>
 <ul>
 <li><code>nn.RNN</code> uses a tanh activation by default, we can use a relu activation instead by setting the <code>nonlinearity</code> argument</li>
 <li>the (dummy) activations that we add for the processing of the first token need to have an additional empty dimension in first position (for the non bidirectional case) according to the <a href="https://pytorch.org/docs/stable/generated/torch.nn.RNN.html">documentation</a></li>
-<li>when forwarding data through the rnn module, it expects the input data to have the context_length as first dimension. By setting <code>batch_first=True</code> we change this behavior to having batch as first dimension</li>
-<li><code>nn.RNN</code> returns two parameters. The first parameter is a tensor containing all the hidden activation (from each iteration), the second parameter has the final hidden activation. For the moment we are only interested in the last hidden activations and pass it to the output layer</li>
+<li>when forwarding data through the rnn module, it expects the input data to have the context_length as first dimension. We can alter this by setting <code>batch_first=True</code></li>
+<li><code>nn.RNN</code> returns two parameters. The first parameter is a tensor containing the hidden activation from each iteration, the second parameter has the final hidden activation. For the moment we are only interested in the last hidden activations and pass it to the output layer but we will use the aggregated hidden activations in a section below</li>
 </ul>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PyTorchRNN(nn.Module):</span>
@@ -595,8 +609,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        h <span class="op">=</span> torch.zeros((<span class="dv">1</span>, x.shape[<span class="dv">0</span>], <span class="va">self</span>.hidden_size)).to(device)</span>
 <span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        </span>
 <span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        hs, h <span class="op">=</span> <span class="va">self</span>.rnn(inputs, h)</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># hs : [bs, context_length, hidden_size]</span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># h  : [1, bs, hidden_size]</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># hs : [bs, context_length, hidden_size] -&gt; all hidden states</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># h  : [1, bs, hidden_size]              -&gt; final hidden state</span></span>
 <span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.hidden2out(h.squeeze(<span class="dv">0</span>)) <span class="co"># squeeze out the first empty dimension</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -691,8 +705,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="optimizing-dataloading-and-model-for-sequential-data" class="level2">
-<h2 class="anchored" data-anchor-id="optimizing-dataloading-and-model-for-sequential-data">Optimizing dataloading and model for sequential data</h2>
+<section id="optimizing-dataloading-and-model-for-sequential-data-bptt" class="level2">
+<h2 class="anchored" data-anchor-id="optimizing-dataloading-and-model-for-sequential-data-bptt">Optimizing dataloading and model for sequential data (BPTT)</h2>
 <p>Although the previous RNN’s are perfectly valid models, there is a pretty big improvement we can make for the training of these models. To realize that, let’s have a look at the samples for the first name <em>Yuheng</em> in our dataset:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> dls.train.dataset[<span class="dv">0</span>:<span class="dv">6</span>]</span>
@@ -707,22 +721,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ['h', 'e', 'n'] --&gt; g</code></pre>
 </div>
 </div>
-<p>Let’s say we do a forward pass on these samples <em>in order</em> with a batch size of 1. For each forward pass, we reinitialize the dummy hidden layer activations, and the first two tokens we process are in fact already processed in the previous sample. We could be more efficient by just using the hidden activations we computed on the previous sample and have one iteration over the new token in the context:</p>
+<p>Consider what happens when we process this data <em>in order</em> with a batch size of 1. In the very first batch (forward pass) we start with an empty hidden state and compute the final hidden state <span class="math inline">\(h_0\)</span> from processing the three <code>'.'</code> tokens sequentially. These final activations are mapped to output activations and the loss is computed by comparing to the label <code>'y'</code>.</p>
+<p>When moving to the second batch we start again with an empty hidden state, and since we have moved one letter forward we will process 2 <code>'.'</code> tokens and the <code>'y</code> token sequentially to get to the final hidden activation <span class="math inline">\(h_1\)</span> of this sample. But this is a bit silly, we could have just remembered our hidden activations <span class="math inline">\(h_0\)</span> from the first batch and process the next token (<code>'y'</code>) to get to the same result!</p>
+<p>In other words: for each forward pass, we reinitialize the dummy hidden layer activations, and the first two tokens we process are in fact already processed in the previous sample. We could be more efficient by just using the hidden activations we computed on the previous sample and have one iteration over the new token in the context:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="rnn2.drawio.png" class="img-fluid figure-img" width="600"></p>
 <figcaption class="figure-caption">More efficient data-processing for sequential data</figcaption>
 </figure>
 </div>
-<p>Since this assymetry for the very first sample is not practical, let’s simplify things and make the architecture symmetrical. At the same time, this means we can get rid of the triple start symbol (<code>...</code>) and replace it with a single start symbol (<code>.</code>).</p>
+<p>Let’s simplify things and make the architecture symmetrical by not treating the very first sample in a different way. This also means we can get rid of the triple start symbol (<code>...</code>) and replace it with a single start symbol (<code>.</code>).</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="rnn3.drawio.png" class="img-fluid figure-img" width="600"></p>
 <figcaption class="figure-caption">Symmetric architecture for efficient data-processing</figcaption>
 </figure>
 </div>
-<p>Now, how are we going to change the dataloader and dataset to feed this into a neural network?</p>
-<p>First, we need to go from samples (combinations of <code>X</code> and <code>y</code>) that look like this:</p>
+<p>With these changes, there are two practical problems we need to address:</p>
+<ol type="1">
+<li>How are we going to change the dataloader and dataset to feed this into a neural network?</li>
+<li>Feeding the hidden activations into the processing of the next token means that the computational graph of the loss is getting more and more complex. If we do this for the entirety of our dataset, the backward pass will become intractable. We thus have to cut it off at some point.</li>
+</ol>
+<p>We need to go from samples (combinations of <code>X</code> and <code>y</code>) that look like this (and don’t pass over the hidden state from sample to sample):</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
@@ -740,7 +760,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ['e', 'n', 'g'] --&gt; .</code></pre>
 </div>
 </div>
-<p>to samples that simply look like this:</p>
+<p>to samples that simply look like this (and <em>do</em> pass the hidden state from sample to sample):</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
@@ -758,7 +778,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ['g'] --&gt; .</code></pre>
 </div>
 </div>
-<p>However, we want to keep the sequence length (context length) dimension and thus create a dataset that looks like this:</p>
+<p>However, we want to keep the sequence length dimension since we will use that as the maximal amount of tokens through which we will backpropagate. This addresses the second issue mentioned above. We thus need a dataset that looks like this (for a sequence length of 3):</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
@@ -770,7 +790,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ['h', 'e', 'n'] --&gt; ['e', 'n', 'g']</code></pre>
 </div>
 </div>
-<p>So let’s create a new dataset for this purpose:</p>
+<p>For the above example, we would still pass the hidden state computed in the first sample to the second sample, but only the values are passed and not the computational history. This is essentially what’s referred to as (truncated) backpropagation through time. Also, note that this means that one single sample (<code>['.', 'y', 'u']</code>) will create 3 outputs (for the 3 labels <code>['y', 'u', 'h']</code>). This means we will have to update our loss function as well.</p>
+<p>Let’s create a new dataset for this purpose:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SequentialDataset():</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, lines, c2i, sequence_length):</span>
@@ -800,8 +821,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ['h', 'e', 'n'] --&gt; ['e', 'n', 'g']</code></pre>
 </div>
 </div>
-<p>Furthermore, we need to order our data in a different way. We need to be very careful with shuffling: we certainly can’t shuffle individual samples anymore in our Dataloader, since we need to maintain the sequence of our data. We could however shuffle the order of the (complete) names, at the beginning of each epoch. But let’s not be concerned with that for now, and just disable shuffling altogether.</p>
-<p>Also, we need to make sure that the stream <em>continues from sample to sample across batches</em>, so that we can pass the (final) hidden states from the samples in a batch to the samples in the next batch.</p>
+<p>Furthermore, we need to order our data in a different way. We need to be very careful with shuffling: we certainly can’t shuffle individual samples anymore in our Dataloader, since we need to maintain the sequence of our data.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We could however shuffle the order of the <strong>complete</strong> names, at the beginning of each epoch. But let’s not be concerned with that for now, and just disable shuffling altogether.</p>
+</div>
+</div>
+<p>Also, we need to make sure that the stream <em>continues from sample to sample across batches</em>, so that we can pass the (final) hidden states from the samples in a batch to the samples in the next batch. Consider a dataset consisting of 100 sequential samples:</p>
 <p><img src="rnn5.drawio.png" class="img-fluid" width="600"></p>
 <p>If we order the data in this way, only the very first batch of each epoch will be using a dummy hidden state equal to zero, all other iterations in all the batches will be using the correct (previously computed and sequentially passed) hidden state.</p>
 <p>To get these batches into the model during training, we need to order the data <em>vertically</em>, so 1, 21, 41, 61, 81, 2, 22, 42, etc. Let’s do so with a custom Sampler (for details on samplers, check out this earlier blog <a href="https://lucasvw.github.io/posts/09_nntrain_ds/#next-up-shuffling-the-data">post</a>):</p>
@@ -836,7 +870,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PyTorchRNNMultiOutput(nn.Module):</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, c2i, context_length, hidden_size, bs):</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, c2i, hidden_size, bs):</span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
 <span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.c2i <span class="op">=</span> c2i</span>
 <span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.bs <span class="op">=</span> bs</span>
@@ -890,7 +924,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>n_h            <span class="op">=</span> <span class="dv">100</span></span>
 <span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> get_dls(context_length, bs)</span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>rnn <span class="op">=</span> PyTorchRNNMultiOutput(c2i, context_length, n_h, bs)</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>rnn <span class="op">=</span> PyTorchRNNMultiOutput(c2i, n_h, bs)</span>
 <span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>subs <span class="op">=</span> [ProgressS(<span class="va">True</span>),</span>
 <span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>        MetricsS(),</span>
@@ -1139,7 +1173,7 @@ Note
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PyTorchRNNMultiOutput(nn.Module):</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, c2i, context_length, embedding_dim, hidden_size, bs):</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, c2i, embedding_dim, hidden_size, bs):</span>
 <span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
 <span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.c2i <span class="op">=</span> c2i</span>
 <span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.bs <span class="op">=</span> bs</span>
@@ -1177,7 +1211,7 @@ Note
 <span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>embedding_dim  <span class="op">=</span> <span class="dv">100</span></span>
 <span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> get_dls(context_length, bs)</span>
-<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>rnn <span class="op">=</span> PyTorchRNNMultiOutput(c2i, context_length, embedding_dim, n_h, bs)</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>rnn <span class="op">=</span> PyTorchRNNMultiOutput(c2i, embedding_dim, n_h, bs)</span>
 <span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>subs <span class="op">=</span> [ProgressS(<span class="va">True</span>),</span>
 <span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>        MetricsS(),</span>
