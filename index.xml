@@ -24,7 +24,7 @@
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
 <p>Everything starts with training data, for a description see the earlier <a href="https://lucasvw.github.io/posts/13_ngram/">post</a></p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -118,7 +118,7 @@ background-color: null;
 font-style: inherit;">*</span></span></code></pre></div>
 </details>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">########### Load the data ###########</span></span>
@@ -338,7 +338,7 @@ Note
 </div>
 </div>
 <p>Let’s put this RNN architecture into code:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> FixedContextRNN(nn.Module):</span>
@@ -439,7 +439,7 @@ font-style: inherit;">self</span>.hidden2out(out)</span></code></pre></div>
 </div>
 <p>Observe that both the embedding dimension and the size of the hidden layer need to be equal (<code>hidden_size</code>) because the activations from both these layers are added together and thus need to be of equal shape. This also means that there is just one hyperparameter influencing the amount of parameters in this network.</p>
 <p>We can generalize this model, so that it accepts data of arbitrary context length. Also, we will make use of a <em>dummy hidden-layer activation tensor</em> (initialized to zeros) so that we can do the addition for all iterations (and not just for the second iteration onward):</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> VariableContextRNN(nn.Module):</span>
@@ -540,7 +540,7 @@ background-color: null;
 font-style: inherit;"># [bs, classes]</span></span></code></pre></div>
 </div>
 <p>Let’s see how this model performs with a similar configuration to the first MLP we build in the previous <a href="https://lucasvw.github.io/posts/14_mlp/#using-embeddings-effectively">post</a> (context length of 3 and a hidden size of 50):</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Train parameters</span></span>
@@ -644,22 +644,22 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <tr class="odd">
 <td>0</td>
 <td>train</td>
-<td>2.636</td>
+<td>2.623</td>
 </tr>
 <tr class="even">
 <td>0</td>
 <td>eval</td>
-<td>2.300</td>
+<td>2.304</td>
 </tr>
 <tr class="odd">
 <td>1</td>
 <td>train</td>
-<td>2.271</td>
+<td>2.270</td>
 </tr>
 <tr class="even">
 <td>1</td>
 <td>eval</td>
-<td>2.247</td>
+<td>2.240</td>
 </tr>
 <tr class="odd">
 <td>2</td>
@@ -669,7 +669,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <tr class="even">
 <td>2</td>
 <td>eval</td>
-<td>2.214</td>
+<td>2.209</td>
 </tr>
 <tr class="odd">
 <td>3</td>
@@ -679,17 +679,17 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <tr class="even">
 <td>3</td>
 <td>eval</td>
-<td>2.185</td>
+<td>2.187</td>
 </tr>
 <tr class="odd">
 <td>4</td>
 <td>train</td>
-<td>2.171</td>
+<td>2.174</td>
 </tr>
 <tr class="even">
 <td>4</td>
 <td>eval</td>
-<td>2.178</td>
+<td>2.180</td>
 </tr>
 </tbody>
 </table>
@@ -703,7 +703,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <section id="combing-data-addition-or-concatenation" class="level2">
 <h2 class="anchored" data-anchor-id="combing-data-addition-or-concatenation">Combing data: addition or concatenation</h2>
 <p>As mentioned, the first time I learned about the fact that we are simply adding activations from the hidden layer and the embedding layer, I was pretty surprised. Instead of simple addition of the activations we could also concatenate these activations instead. This means that our <code>hidden2hidden</code> layer shape needs to be updated:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> VariableContextRNNConcat(nn.Module):</span>
@@ -809,7 +809,7 @@ font-style: inherit;">self</span>.hidden2out(h)                    <span class="
 background-color: null;
 font-style: inherit;"># [bs, classes]</span></span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">rnn <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> VariableContextRNNConcat(c2i, n_h)</span>
@@ -857,42 +857,42 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <tr class="odd">
 <td>0</td>
 <td>train</td>
-<td>2.595</td>
+<td>2.608</td>
 </tr>
 <tr class="even">
 <td>0</td>
 <td>eval</td>
-<td>2.287</td>
+<td>2.285</td>
 </tr>
 <tr class="odd">
 <td>1</td>
 <td>train</td>
-<td>2.259</td>
+<td>2.261</td>
 </tr>
 <tr class="even">
 <td>1</td>
 <td>eval</td>
-<td>2.234</td>
+<td>2.229</td>
 </tr>
 <tr class="odd">
 <td>2</td>
 <td>train</td>
-<td>2.217</td>
+<td>2.215</td>
 </tr>
 <tr class="even">
 <td>2</td>
 <td>eval</td>
-<td>2.194</td>
+<td>2.199</td>
 </tr>
 <tr class="odd">
 <td>3</td>
 <td>train</td>
-<td>2.182</td>
+<td>2.181</td>
 </tr>
 <tr class="even">
 <td>3</td>
 <td>eval</td>
-<td>2.173</td>
+<td>2.175</td>
 </tr>
 <tr class="odd">
 <td>4</td>
@@ -902,7 +902,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <tr class="even">
 <td>4</td>
 <td>eval</td>
-<td>2.166</td>
+<td>2.167</td>
 </tr>
 </tbody>
 </table>
@@ -923,7 +923,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <li>when forwarding data through the rnn module, it expects the input data to have the context_length as first dimension. We can alter this by setting <code>batch_first=True</code></li>
 <li><code>nn.RNN</code> returns two parameters. The first parameter is a tensor containing the hidden activation from each iteration, the second parameter has the final hidden activation. For the moment we are only interested in the last hidden activations and pass it to the output layer but we will use the aggregated hidden activations in a section below</li>
 </ul>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> PyTorchRNN(nn.Module):</span>
@@ -1023,7 +1023,7 @@ font-style: inherit;">0</span>)) <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># squeeze out the first empty dimension</span></span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">rnn <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> PyTorchRNN(c2i, context_length, n_h)</span>
@@ -1071,12 +1071,12 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <tr class="odd">
 <td>0</td>
 <td>train</td>
-<td>2.601</td>
+<td>2.610</td>
 </tr>
 <tr class="even">
 <td>0</td>
 <td>eval</td>
-<td>2.285</td>
+<td>2.293</td>
 </tr>
 <tr class="odd">
 <td>1</td>
@@ -1086,37 +1086,37 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <tr class="even">
 <td>1</td>
 <td>eval</td>
-<td>2.228</td>
+<td>2.232</td>
 </tr>
 <tr class="odd">
 <td>2</td>
 <td>train</td>
-<td>2.216</td>
+<td>2.218</td>
 </tr>
 <tr class="even">
 <td>2</td>
 <td>eval</td>
-<td>2.195</td>
+<td>2.205</td>
 </tr>
 <tr class="odd">
 <td>3</td>
 <td>train</td>
-<td>2.182</td>
+<td>2.183</td>
 </tr>
 <tr class="even">
 <td>3</td>
 <td>eval</td>
-<td>2.173</td>
+<td>2.183</td>
 </tr>
 <tr class="odd">
 <td>4</td>
 <td>train</td>
-<td>2.157</td>
+<td>2.159</td>
 </tr>
 <tr class="even">
 <td>4</td>
 <td>eval</td>
-<td>2.163</td>
+<td>2.172</td>
 </tr>
 </tbody>
 </table>
@@ -1129,7 +1129,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <section id="optimizing-dataloading-and-model-for-sequential-data-bptt" class="level2">
 <h2 class="anchored" data-anchor-id="optimizing-dataloading-and-model-for-sequential-data-bptt">Optimizing dataloading and model for sequential data (BPTT)</h2>
 <p>Although the previous RNN’s are perfectly valid models, there is a pretty big improvement we can make for the training of these models. To realize that, let’s have a look at the samples for the first name <em>Yuheng</em> in our dataset:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">xb, yb <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> dls.train.dataset[<span class="dv" style="color: #AD0000;
@@ -1186,7 +1186,7 @@ font-style: inherit;">'--&gt;'</span> ,i2c[y.item()])</span></code></pre></div>
 <li>Feeding the hidden activations into the processing of the next token means that the computational graph of the loss is getting more and more complex. If we do this for the entirety of our dataset, the backward pass will become intractable. We thus have to cut it off at some point.</li>
 </ol>
 <p>We need to go from samples (combinations of <code>X</code> and <code>y</code>) that look like this (and don’t pass over the hidden state from sample to sample):</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">xb, yb <span class="op" style="color: #5E5E5E;
@@ -1226,7 +1226,7 @@ font-style: inherit;">'--&gt;'</span> ,i2c[y.item()])</span></code></pre></div>
 </div>
 </div>
 <p>to samples that simply look like this (and <em>do</em> pass the hidden state from sample to sample):</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">name <span class="op" style="color: #5E5E5E;
@@ -1280,7 +1280,7 @@ font-style: inherit;">"</span>)</span></code></pre></div>
 </div>
 </div>
 <p>However, we want to keep the sequence length dimension since we will use that as the maximal amount of tokens through which we will backpropagate. This addresses the second issue mentioned above. We thus need a dataset that looks like this (for a sequence length of 3):</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><span class="bu" style="color: null;
@@ -1309,7 +1309,7 @@ font-style: inherit;">"['e', 'n', 'g']"</span>)</span></code></pre></div>
 </div>
 <p>For the above example, we would still pass the hidden state computed in the first sample to the second sample, but only the values are passed and not the computational history. This is essentially what’s referred to as (truncated) backpropagation through time. Also, note that this means that one single sample (<code>['.', 'y', 'u']</code>) will create 3 outputs (for the 3 labels <code>['y', 'u', 'h']</code>). This means we will have to update our loss function as well.</p>
 <p>Let’s create a new dataset for this purpose:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> SequentialDataset():</span>
@@ -1442,7 +1442,7 @@ font-style: inherit;">=</span> SequentialDataset(val_lines, c2i, <span class="dv
 background-color: null;
 font-style: inherit;">3</span>)</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
@@ -1498,7 +1498,7 @@ Note
 <figcaption class="figure-caption">“Vertical” sampling order</figcaption>
 </figure>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> VerticalSampler():</span>
@@ -1579,7 +1579,7 @@ background-color: null;
 font-style: inherit;">self</span>.batch_size</span></code></pre></div>
 </div>
 <p>With this sampler we can then create a dataloader with the associated batch size to load exactly the batches into the model as described!</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1">train_dl <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.utils.data.DataLoader(train_ds, shuffle<span class="op" style="color: #5E5E5E;
@@ -1608,7 +1608,7 @@ background-color: null;
 font-style: inherit;">=</span> DataLoaders(train_dl, valid_dl)</span></code></pre></div>
 </div>
 <p>Now let’s update our model to pass all the hidden states to the output layer:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> PyTorchRNNMultiOutput(nn.Module):</span>
@@ -1717,7 +1717,7 @@ background-color: null;
 font-style: inherit;"># pass all hidden states to the output layer</span></span></code></pre></div>
 </div>
 <p>And finally, we have to create a custom loss function that can deal with the multiple output activations and multiple labels:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> multi_output_cross_entropy(logits, targets):</span>
@@ -1751,7 +1751,7 @@ font-style: inherit;">1</span>, output_classes)</span>
 background-color: null;
 font-style: inherit;">return</span> F.cross_entropy(logits, targets)</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> get_dls(context_length, batch_size):</span>
@@ -1790,7 +1790,7 @@ background-color: null;
 font-style: inherit;">return</span> DataLoaders(train_dl, valid_dl)</span></code></pre></div>
 </div>
 <p>Note that we drop the batch size to a value of 300 (1/3 of 1000). We do this, to roughly keep the amount of weight updates per batch constant. Previously, we had 1000 sequences in the batch, and from each sequence we would receive one “weight update”. Now, we have 3 times the amount of sequences in a batch, so we have to reduce the batch size by 3 to keep the amount of “weight updates” roughly equal.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Train parameters</span></span>
@@ -1894,52 +1894,52 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <tr class="odd">
 <td>0</td>
 <td>train</td>
-<td>2.518</td>
+<td>2.533</td>
 </tr>
 <tr class="even">
 <td>0</td>
 <td>eval</td>
-<td>2.226</td>
+<td>2.222</td>
 </tr>
 <tr class="odd">
 <td>1</td>
 <td>train</td>
-<td>2.175</td>
+<td>2.178</td>
 </tr>
 <tr class="even">
 <td>1</td>
 <td>eval</td>
-<td>2.164</td>
+<td>2.165</td>
 </tr>
 <tr class="odd">
 <td>2</td>
 <td>train</td>
-<td>2.115</td>
+<td>2.117</td>
 </tr>
 <tr class="even">
 <td>2</td>
 <td>eval</td>
-<td>2.128</td>
+<td>2.131</td>
 </tr>
 <tr class="odd">
 <td>3</td>
 <td>train</td>
-<td>2.063</td>
+<td>2.066</td>
 </tr>
 <tr class="even">
 <td>3</td>
 <td>eval</td>
-<td>2.101</td>
+<td>2.099</td>
 </tr>
 <tr class="odd">
 <td>4</td>
 <td>train</td>
-<td>2.024</td>
+<td>2.028</td>
 </tr>
 <tr class="even">
 <td>4</td>
 <td>eval</td>
-<td>2.091</td>
+<td>2.090</td>
 </tr>
 </tbody>
 </table>
@@ -1949,7 +1949,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 </div>
 </div>
 <p>Performance is pretty good, however what’s up with the spikes in the loss? These spikes occur at the beginning of every epoch and they happen because moving from the last batch in an epoch, to the first batch in the next epoch is not a sequential step in the data. Looking at the image above in which we laid out the “vertical ordering of the data”, wee see that for the first batch in any epoch &gt; 1, we would feed the hidden state originating from samples (20, 40, 60, 80, 100) into the samples (1, 21, 41, 61, 81), e.g.:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1">frm <span class="op" style="color: #5E5E5E;
@@ -2026,7 +2026,7 @@ Note
 <p>Based on the observation that we could realign the hidden activations by moving them one row down, I implemented this solution but was surprised to see that this doesn’t improve things at all. I then found that we generally don’t have a fully connected sequential dataset that fits exactly into a whole number of batches, we thus lose some data in the end, and the data doesn’t connect easily by shifting it “one row down”. In terms of the sample ordering diagram above: we generally don’t have (20, 40, 60, 80, 100) as final batch of an epoch but instead something like (18, 38, 58, 78, 98).</p>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb29" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> HiddenStateResetterS(Subscriber):</span>
@@ -2058,7 +2058,7 @@ font-style: inherit;">=</span> torch.zeros_like(<span class="va" style="color: #
 background-color: null;
 font-style: inherit;">self</span>.h).to(device)</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Train parameters</span></span>
@@ -2097,7 +2097,7 @@ background-color: null;
 font-style: inherit;">=</span> get_dls(context_length, bs)</span>
 <span id="cb30-11">rnn <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> PyTorchRNNMultiOutput(c2i, context_length, n_h, bs)</span>
+font-style: inherit;">=</span> PyTorchRNNMultiOutput(c2i, n_h, bs)</span>
 <span id="cb30-12"></span>
 <span id="cb30-13">subs <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -2168,47 +2168,47 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <tr class="even">
 <td>0</td>
 <td>eval</td>
-<td>2.221</td>
+<td>2.223</td>
 </tr>
 <tr class="odd">
 <td>1</td>
 <td>train</td>
-<td>2.178</td>
+<td>2.183</td>
 </tr>
 <tr class="even">
 <td>1</td>
 <td>eval</td>
-<td>2.158</td>
+<td>2.168</td>
 </tr>
 <tr class="odd">
 <td>2</td>
 <td>train</td>
-<td>2.113</td>
+<td>2.120</td>
 </tr>
 <tr class="even">
 <td>2</td>
 <td>eval</td>
-<td>2.115</td>
+<td>2.126</td>
 </tr>
 <tr class="odd">
 <td>3</td>
 <td>train</td>
-<td>2.064</td>
-</tr>
-<tr class="even">
-<td>3</td>
-<td>eval</td>
-<td>2.080</td>
-</tr>
-<tr class="odd">
-<td>4</td>
-<td>train</td>
-<td>2.025</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>eval</td>
 <td>2.069</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>eval</td>
+<td>2.087</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>train</td>
+<td>2.031</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>eval</td>
+<td>2.076</td>
 </tr>
 </tbody>
 </table>
@@ -2219,7 +2219,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 </div>
 <p>The loss improved a bit from this fix, and the spikes are smaller, but still visible. This is not surprising since the very first batch in each epoch still has the difficulty of working with an empty hidden state. This is not a big issue however, since the hidden state is quickly filling up. Accordingly, the following batches show again a loss that is in-line with the loss of the end of the previous epoch.</p>
 <p>Last but not least, PyTorch <code>nn.RNN</code> accepts two parameters, one for the features in the inputs and one for the features in the hidden state. Previously we used one single parameter for this to make sure we can add the activations. Apparently, <code>nn.RNN</code> is doing another multiplication to align them. So let’s use these two values as separate arguments to see whether we can further improve performance through tweaking them.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb31" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> PyTorchRNNMultiOutput(nn.Module):</span>
@@ -2350,7 +2350,7 @@ background-color: null;
 font-style: inherit;">self</span>.h).to(device)</span></code></pre></div>
 </div>
 <p>Trying for around 10 minutes with different settings shows me that performance can be slightly improved by increasing the size of the hidden state by quite a bit, and keeping the embedding dimension smaller:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb32" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Train parameters</span></span>
@@ -2460,32 +2460,32 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <tr class="odd">
 <td>0</td>
 <td>train</td>
-<td>2.370</td>
+<td>2.391</td>
 </tr>
 <tr class="even">
 <td>0</td>
 <td>eval</td>
-<td>2.180</td>
+<td>2.177</td>
 </tr>
 <tr class="odd">
 <td>1</td>
 <td>train</td>
-<td>2.133</td>
+<td>2.127</td>
 </tr>
 <tr class="even">
 <td>1</td>
 <td>eval</td>
-<td>2.131</td>
+<td>2.122</td>
 </tr>
 <tr class="odd">
 <td>2</td>
 <td>train</td>
-<td>2.045</td>
+<td>2.040</td>
 </tr>
 <tr class="even">
 <td>2</td>
 <td>eval</td>
-<td>2.056</td>
+<td>2.051</td>
 </tr>
 <tr class="odd">
 <td>3</td>
@@ -2500,12 +2500,12 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <tr class="odd">
 <td>4</td>
 <td>train</td>
-<td>1.817</td>
+<td>1.821</td>
 </tr>
 <tr class="even">
 <td>4</td>
 <td>eval</td>
-<td>1.986</td>
+<td>1.985</td>
 </tr>
 </tbody>
 </table>
@@ -2515,18 +2515,334 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 </div>
 </div>
 </section>
+<section id="multilayer-rnns" class="level2">
+<h2 class="anchored" data-anchor-id="multilayer-rnns">MultiLayer RNN’s</h2>
+<p>Last but not least, RNN’s can be stacked on top of eachother. In the diagram below, a 2-layer RNN with a sequence length of 3 is shown. The only difference is that instead of passing the hidden activations of the first layer directly through the hidden-to-out layer to get to our output activations, we pass it through an additional hidden-to-hidden layer (with it’s own weights).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://lucasvw.github.io/posts/15_rnn/rnnmulti.drawio.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Multilayer RNN</figcaption>
+</figure>
+</div>
+<p>Two implement this in our model is extremely easy, the only thing we have to change is adding a <code>layers</code> argument into the model which is passed both to the creation of the dummy activations as well as to the <code>nn.RNN</code> module:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> MultiLayerRNN(nn.Module):</span>
+<span id="cb33-2">    </span>
+<span id="cb33-3">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, c2i, embedding_dim, hidden_size, bs, layers<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>):</span>
+<span id="cb33-4">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">super</span>().<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>()</span>
+<span id="cb33-5">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.c2i <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> c2i</span>
+<span id="cb33-6">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.bs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> bs</span>
+<span id="cb33-7">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.embedding_dim <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> embedding_dim</span>
+<span id="cb33-8">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.hidden_size <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> hidden_size</span>
+<span id="cb33-9">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.register_buffer(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'h'</span>, torch.zeros((layers, bs, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.hidden_size)))    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># &lt;- initialize dummy activations for n layers</span></span>
+<span id="cb33-10">        </span>
+<span id="cb33-11">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.input2hidden   <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> nn.Embedding(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(c2i), embedding_dim)               <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># multiple layers in the rnn module ↓ </span></span>
+<span id="cb33-12">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.rnn            <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> nn.RNN(embedding_dim, hidden_size, nonlinearity<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'relu'</span>, batch_first<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>, num_layers<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>layers)</span>
+<span id="cb33-13">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.hidden2out     <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> nn.Linear(hidden_size, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(c2i))</span>
+<span id="cb33-14">        </span>
+<span id="cb33-15">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, x):</span>
+<span id="cb33-16">        inputs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.input2hidden(x)</span>
+<span id="cb33-17">        hs, h <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.rnn(inputs, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.h)</span>
+<span id="cb33-18">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># hs : [bs, context_length, hidden_size]</span></span>
+<span id="cb33-19">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># h  : [layers, bs, hidden_size]</span></span>
+<span id="cb33-20">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.h <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> h.detach()</span>
+<span id="cb33-21">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.hidden2out(hs)</span>
+<span id="cb33-22">    </span>
+<span id="cb33-23">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> reset_hidden_state(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb33-24">        device <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.h.get_device()</span>
+<span id="cb33-25">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.h <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.zeros_like(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.h).to(device)</span></code></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Train parameters</span></span>
+<span id="cb34-2">epochs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span></span>
+<span id="cb34-3">lr     <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1e-2</span></span>
+<span id="cb34-4">bs     <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">300</span></span>
+<span id="cb34-5"></span>
+<span id="cb34-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Hyperparameters</span></span>
+<span id="cb34-7">context_length <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span></span>
+<span id="cb34-8">n_h            <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span></span>
+<span id="cb34-9">embedding_dim  <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span></span>
+<span id="cb34-10">layers         <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span></span>
+<span id="cb34-11"></span>
+<span id="cb34-12">dls <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> get_dls(context_length, bs)</span>
+<span id="cb34-13">rnn <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> MultiLayerRNN(c2i, embedding_dim, n_h, bs, layers)</span>
+<span id="cb34-14"></span>
+<span id="cb34-15">subs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [ProgressS(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>),</span>
+<span id="cb34-16">        MetricsS(),</span>
+<span id="cb34-17">        DeviceS(device),</span>
+<span id="cb34-18">        HiddenStateResetterS()]</span>
+<span id="cb34-19"></span>
+<span id="cb34-20">scheduler <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> partial(torch.optim.lr_scheduler.OneCycleLR, max_lr<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>lr, epochs<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>epochs, steps_per_epoch<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(dls.train))</span>
+<span id="cb34-21"></span>
+<span id="cb34-22">l <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Learner(rnn, dls, multi_output_cross_entropy, torch.optim.Adam, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>, subs<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>subs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> [SchedulerS(scheduler)])</span>
+<span id="cb34-23">l.fit(epochs, lr<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>lr)</span></code></pre></div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">epoch</th>
+<th data-quarto-table-cell-role="th">mode</th>
+<th data-quarto-table-cell-role="th">loss</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>train</td>
+<td>2.379</td>
+</tr>
+<tr class="even">
+<td>0</td>
+<td>eval</td>
+<td>2.213</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>train</td>
+<td>2.158</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>eval</td>
+<td>2.134</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>train</td>
+<td>2.062</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>eval</td>
+<td>2.057</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>train</td>
+<td>1.946</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>eval</td>
+<td>2.000</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>train</td>
+<td>1.826</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>eval</td>
+<td>1.976</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="https://lucasvw.github.io/posts/15_rnn/index_files/figure-html/cell-29-output-3.png" class="img-fluid"></p>
+</div>
+</div>
+<p>And this performs even better then the model we obtained with a single layer!</p>
+</section>
 <section id="sampling-names" class="level2">
 <h2 class="anchored" data-anchor-id="sampling-names">Sampling names</h2>
 <p>And as we did with the MLP, let’s conclude with some sampled names from this model</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><span class="at" style="color: #657422;
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@fc.patch</span></span>
-<span id="cb33-2"><span class="kw" style="color: #003B4F;
+<span id="cb35-2"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> generate(<span class="va" style="color: #111111;
 background-color: null;
-font-style: inherit;">self</span>:PyTorchRNNMultiOutput, n<span class="op" style="color: #5E5E5E;
+font-style: inherit;">self</span>:MultiLayerRNN, n<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
 background-color: null;
@@ -2535,52 +2851,54 @@ background-color: null;
 font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">None</span>):</span>
-<span id="cb33-3">    <span class="co" style="color: #5E5E5E;
+<span id="cb35-3">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># For unbatched input we need a 2D hidden state tensor of size [1, hidden_size]</span></span>
-<span id="cb33-4">    <span class="va" style="color: #111111;
+<span id="cb35-4">    <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.h <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> torch.zeros((<span class="dv" style="color: #AD0000;
+font-style: inherit;">=</span> torch.zeros((<span class="va" style="color: #111111;
 background-color: null;
-font-style: inherit;">1</span>, <span class="va" style="color: #111111;
+font-style: inherit;">self</span>.h.shape[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.hidden_size)).cuda()</span>
-<span id="cb33-5">    </span>
-<span id="cb33-6">    names <span class="op" style="color: #5E5E5E;
+<span id="cb35-5">    </span>
+<span id="cb35-6">    names <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> []</span>
-<span id="cb33-7">    <span class="cf" style="color: #003B4F;
+<span id="cb35-7">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">range</span>(n):</span>
-<span id="cb33-8">        name <span class="op" style="color: #5E5E5E;
+<span id="cb35-8">        name <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'.'</span></span>
-<span id="cb33-9">        <span class="cf" style="color: #003B4F;
+<span id="cb35-9">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">while</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">True</span>:</span>
-<span id="cb33-10">            idx <span class="op" style="color: #5E5E5E;
+<span id="cb35-10">            idx <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.tensor([c2i[name[<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>]]]).cuda()</span>
-<span id="cb33-11">            logits <span class="op" style="color: #5E5E5E;
+<span id="cb35-11">            logits <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.forward(idx)</span>
-<span id="cb33-12">            s <span class="op" style="color: #5E5E5E;
+<span id="cb35-12">            s <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.multinomial(F.softmax(logits, dim<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -2591,40 +2909,40 @@ background-color: null;
 font-style: inherit;">1</span>, generator<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>generator)</span>
-<span id="cb33-13">            c <span class="op" style="color: #5E5E5E;
+<span id="cb35-13">            c <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> i2c[s.item()]</span>
-<span id="cb33-14">            name <span class="op" style="color: #5E5E5E;
+<span id="cb35-14">            name <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+=</span> c</span>
-<span id="cb33-15">            <span class="cf" style="color: #003B4F;
+<span id="cb35-15">            <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> c <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">==</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'.'</span>:</span>
-<span id="cb33-16">                names.append(name)</span>
-<span id="cb33-17">                <span class="cf" style="color: #003B4F;
+<span id="cb35-16">                names.append(name)</span>
+<span id="cb35-17">                <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">break</span></span>
-<span id="cb33-18">    <span class="cf" style="color: #003B4F;
+<span id="cb35-18">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> names</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1">rnn.generate()</span></code></pre></div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1">rnn.generate()</span></code></pre></div>
 <div class="cell-output cell-output-display">
-<pre><code>['.elanora.',
- '.alaijah.',
- '.zabra.',
- '.diriyah.',
- '.juannabella.',
- '.kayahni.',
- '.ziak.',
- '.skydir.',
- '.braved.',
- '.robina.']</code></pre>
+<pre><code>['.jemira.',
+ '.prance.',
+ '.lizabeth.',
+ '.yuanna.',
+ '.martomi.',
+ '.fabrielle.',
+ '.kolbi.',
+ '.kamias.',
+ '.zyide.',
+ '.banniel.']</code></pre>
 </div>
 </div>
 </section>
@@ -19750,7 +20068,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-29964"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-29964").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-82555"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-82555").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>
