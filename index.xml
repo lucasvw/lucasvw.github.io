@@ -5945,7 +5945,7 @@ Note
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>token</strong>: When creating language models, we have to decide on the granularity of the data. We can for example build a model that deals with single characters (a-z), entire words or word-parts. This decision is formalized by the use of a <strong>dictionary</strong>, which is the list of unique elements occurring in the data. For the character level model we are building, the dictionary will consist of all letters (a-z). The elements of the dictionary are referred to as tokens. Besides the letters a-z, we will also add a token to the dictionary (a dot: “.”) reflecting the start and end of names.</li>
+<li><strong>token</strong>: When creating language models, we have to decide on the granularity of the data. We can for example build a model that deals with single characters (a-z), entire words or word-parts. This decision is formalized by the use of a <strong>vocabulary</strong>, which is the list of unique elements occurring in the data. For the character level model we are building, the vocabulary will consist of all letters (a-z). The elements of the vocabulary are referred to as tokens. Besides the letters a-z, we will also add a token to the vocabulary (a dot: “.”) reflecting the start and end of names.</li>
 <li><strong>context</strong>: Related to the distinction between <em>features</em> (<img src="https://latex.codecogs.com/png.latex?X">) and <em>labels</em> (<img src="https://latex.codecogs.com/png.latex?y">). The <strong>context</strong> is the equivalent to the <em>features</em>: the data that is used as input to the model and from which a prediction is made (for the next character in a sequence).</li>
 </ul>
 </div>
@@ -6122,7 +6122,7 @@ len(lines)=32033</code></pre>
 </section>
 <section id="bi-gram-count-model" class="level2">
 <h2 class="anchored" data-anchor-id="bi-gram-count-model">Bi-gram count model</h2>
-<p>From the data, we first create the dictionary:</p>
+<p>From the data, we first create the vocabulary:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">unique_chars <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -6134,7 +6134,7 @@ font-style: inherit;">set</span>(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">""</span>.join(lines)))</span>
 <span id="cb4-2">unique_chars.sort()</span>
-<span id="cb4-3">dictionary <span class="op" style="color: #5E5E5E;
+<span id="cb4-3">vocabulary <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> unique_chars <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -6147,7 +6147,7 @@ font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">{</span>dictionary<span class="op" style="color: #5E5E5E;
+font-style: inherit;">{</span>vocabulary<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -6162,7 +6162,7 @@ font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">{</span><span class="bu" style="color: null;
 background-color: null;
-font-style: inherit;">len</span>(dictionary)<span class="op" style="color: #5E5E5E;
+font-style: inherit;">len</span>(vocabulary)<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -6170,11 +6170,11 @@ font-style: inherit;">}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'</span>)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>dictionary=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '.']
-len(dictionary)=27</code></pre>
+<pre><code>vocabulary=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '.']
+len(vocabulary)=27</code></pre>
 </div>
 </div>
-<p>From the dictionary we create a mapping from token to integer. We will use this mapping to encode our tokens (characters) into integers. This is called <strong>numericalisation</strong>:</p>
+<p>From the vocabulary we create a mapping from token to integer. We will use this mapping to encode our tokens (characters) into integers. This is called <strong>numericalisation</strong>:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">c2i <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -6184,7 +6184,7 @@ font-style: inherit;">for</span> i, c <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
-font-style: inherit;">enumerate</span>(dictionary)}</span>
+font-style: inherit;">enumerate</span>(vocabulary)}</span>
 <span id="cb6-2">i2c <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> {i:c <span class="cf" style="color: #003B4F;
@@ -6193,7 +6193,7 @@ font-style: inherit;">for</span> i, c <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
-font-style: inherit;">enumerate</span>(dictionary)}</span></code></pre></div>
+font-style: inherit;">enumerate</span>(vocabulary)}</span></code></pre></div>
 </div>
 <p>And just for clarity, let’s have a look at the bi-grams for the first name in the dataset:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
@@ -6332,7 +6332,7 @@ n --&gt; g      numericalized: 13 --&gt;  6
 g --&gt; .      numericalized:  6 --&gt; 26</code></pre>
 </div>
 </div>
-<p>To keep track of the occurrences we will use a matrix of size <img src="https://latex.codecogs.com/png.latex?%5B27,%2027%5D"> (the size of the dictionary). The rows reflect the possible values of the context and the columns reflect any possible character following this context. We will initialize this matrix with zeros, and increase the value of the associated cell by one, every time we encounter an n-gram:</p>
+<p>To keep track of the occurrences we will use a matrix of size <img src="https://latex.codecogs.com/png.latex?%5B27,%2027%5D"> (the size of the vocabulary). The rows reflect the possible values of the context and the columns reflect any possible character following this context. We will initialize this matrix with zeros, and increase the value of the associated cell by one, every time we encounter an n-gram:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">counts <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -6608,7 +6608,7 @@ Note
 <p>An <strong>embedding layer</strong> is a layer that is used to “encode” our data, which roughly translates to the way we input our data into a neural network. We already saw above that we numericalized our characters (a-z) as integers. We will have to do something similar for our neural network, since we can’t input characters into a neural network. However, instead of feeding integers into our network, we can also employ an embedding layer, which will basically create a vector out of our integers. Each integer value will be mapped to it’s own vector, and the values contained in this vector will be learned during training. The advantage of this, is that the model can easily learn different “attributes” that make up the individual tokens. For example, it <em>could</em> use the first dimension in the vector to denote whether the token is a vowel (a, e, i, o, u) and the second dimension to represent the likelihood of starting a sentence. The emphasis in the last sentence is on <em>could</em>, since these things have to be learned by the network itself during the training-process.</p>
 </div>
 </div>
-<p>If we create an embedding layer with embedding dimensions equal to that of the dictionary, the outputs of this layer will also conform to the size of our dictionary, e.g.&nbsp;<code>[batch_size * 26]</code>. These raw outputs of our model are referred to as logits, and they can be anything: positive, negative, small or large. We can exponentiate these logits to get numbers that are always positive, and these values are equivalent to values in the “counts” matrix. We can then normalize these exponentiated logits row-wise, to get to probabilities. And finally adding a negative log-likelihood loss on these probabilities is guiding the network to establish an embedding matrix with weights that are practically identical to the (log transformed) counts matrix from above. The combined operation of exponentiating, normalizing and negative log-likelihood is what we call cross-entropy loss. See also an earlier blog <a href="https://lucasvw.github.io/posts/05_crossentropy/">post</a>.</p>
+<p>If we create an embedding layer with embedding dimensions equal to that of the vocabulary, the outputs of this layer will also conform to the size of our vocabulary, e.g.&nbsp;<code>[batch_size * 26]</code>. These raw outputs of our model are referred to as logits, and they can be anything: positive, negative, small or large. We can exponentiate these logits to get numbers that are always positive, and these values are equivalent to values in the “counts” matrix. We can then normalize these exponentiated logits row-wise, to get to probabilities. And finally adding a negative log-likelihood loss on these probabilities is guiding the network to establish an embedding matrix with weights that are practically identical to the (log transformed) counts matrix from above. The combined operation of exponentiating, normalizing and negative log-likelihood is what we call cross-entropy loss. See also an earlier blog <a href="https://lucasvw.github.io/posts/05_crossentropy/">post</a>.</p>
 <p>We are going to train this model using <a href="https://lucasvw.github.io/posts/08_nntrain_setup/"><code>nntrain</code></a>, the small neural network training library we have been created before. But before we do, we have to create the datasets and dataloaders. Let’s make the dataset generic so that it can create datasets for any n-gram model we wish. As a reminder, let’s have a quick look how 2-grams, 3-grams and 4-grams look for the first name in the data <em>Emma</em>:</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
@@ -7869,7 +7869,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 <ol type="1">
 <li><p>Many samples in the training data have the same context (features), but a different next character (label). Consider a bi-gram model and two names: “Emma”, “Esmeralda”. The first bi-gram for each of these names (skipping the start name token) are (e, m) for Emma and (e, s) for Esmeralda. They have the same context (e) but a different label (m and s respectively). This happens of course quite often in the data, and shows there is not a 1:1 relation from inputs to outputs. The model thus needs to learn a <em>probability distribution</em> over the possible labels. This learned probability distribution is what makes the model <em>generative</em>, since we can sample iteratively from it to create new names.</p></li>
 <li><p>The point above is formalized in the models we created, by setting up a loss function that is used for multi-class classification (cross entropy loss). In non-generative models, this loss is used to predict the correct (single!) class for any input. During inference, the class that has the largest logit will be our prediction for the input. However, for generative models we don’t look at the class with the largest logit, instead we look at all the logits and turn it into a probability distribution (by taking the softmax) to sample over it. In this regard, there is no difference in network architecture between generative and non-generative models per se, but a difference in the way we <em>use</em> the network.</p></li>
-<li><p>Language models have a finite set of values the inputs and outputs can take on. Since we are working with a dictionary, any input or output token is necessarily an element in this set. This is different for example from a regression problem in which we try to estimate the housing price from the square footage. In that case both the feature (square footage) and the label (price) can take on any value. The fact that the output has a finite set of outcomes is formalized by the loss function described above. The fact that the input is finite, is formalized by making use of an embedding matrix to encode our inputs.</p></li>
+<li><p>Language models have a finite set of values the inputs and outputs can take on. Since we are working with a vocabulary, any input or output token is necessarily an element in this set. This is different for example from a regression problem in which we try to estimate the housing price from the square footage. In that case both the feature (square footage) and the label (price) can take on any value. The fact that the output has a finite set of outcomes is formalized by the loss function described above. The fact that the input is finite, is formalized by making use of an embedding matrix to encode our inputs.</p></li>
 <li><p>In the past I have worked a couple of times on time series forecasting. And one simple way to create a <em>probabilistic</em> forecast, would be to employ the n-gram models defined above. The only requirement would be that the values are discretized.</p></li>
 </ol>
 
@@ -21333,7 +21333,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-24276"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-24276").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-99462"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-99462").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>
