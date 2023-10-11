@@ -167,8 +167,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#end-of-last-post" id="toc-end-of-last-post" class="nav-link active" data-scroll-target="#end-of-last-post">End of last post:</a></li>
-  <li><a href="#datasets" id="toc-datasets" class="nav-link" data-scroll-target="#datasets">Datasets:</a></li>
+  <li><a href="#end-of-last-post" id="toc-end-of-last-post" class="nav-link active" data-scroll-target="#end-of-last-post">End of last post</a></li>
+  <li><a href="#datasets" id="toc-datasets" class="nav-link" data-scroll-target="#datasets">Datasets</a></li>
   <li><a href="#next-up-shuffling-the-data" id="toc-next-up-shuffling-the-data" class="nav-link" data-scroll-target="#next-up-shuffling-the-data">Next up: shuffling the data</a></li>
   <li><a href="#collation" id="toc-collation" class="nav-link" data-scroll-target="#collation">Collation</a></li>
   <li><a href="#validation-set" id="toc-validation-set" class="nav-link" data-scroll-target="#validation-set">Validation set</a></li>
@@ -183,9 +183,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="quarto-title">
 <h1 class="title"><code>nntrain</code> (1/n): Datasets and Dataloaders</h1>
   <div class="quarto-categories">
-    <div class="quarto-category">code</div>
-    <div class="quarto-category">neural network</div>
-    <div class="quarto-category">deep learning</div>
+    <div class="quarto-category">dataloading</div>
+    <div class="quarto-category">training</div>
+    <div class="quarto-category">collation</div>
+    <div class="quarto-category">sampler</div>
   </div>
   </div>
 
@@ -223,7 +224,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><code>nb_dev</code> is another great project from the fastai community, which allows python libraries to be written in jupyter notebooks. This may sound a bit weird and controversial, but it has the advantage that we can create the source code for our library in the very same environment in which we want to experiment and interact with our methods, objects and structure <strong>while we are building the library</strong>. For more details on why this is a good idea and other nice features of <code>nb_dev</code>, see <a href="https://www.fast.ai/posts/2022-07-28-nbdev2.html">here</a>.</p>
 <p>So without further ado, let’s start with where we left off in the previous <a href="https://lucasvw.github.io/posts/08_nntrain_setup/">post</a>:</p>
 <section id="end-of-last-post" class="level2">
-<h2 class="anchored" data-anchor-id="end-of-last-post">End of last post:</h2>
+<h2 class="anchored" data-anchor-id="end-of-last-post">End of last post</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset,load_dataset_builder</span>
 <span id="cb1-2"><a href="#cb1-2"></a><span class="im">import</span> torchvision.transforms.functional <span class="im">as</span> TF</span>
 <span id="cb1-3"><a href="#cb1-3"></a><span class="im">import</span> torch</span>
@@ -274,7 +275,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-48"><a href="#cb1-48"></a>fit(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="datasets" class="level2">
-<h2 class="anchored" data-anchor-id="datasets">Datasets:</h2>
+<h2 class="anchored" data-anchor-id="datasets">Datasets</h2>
 <p>All the stuff in this post will be based on tackling the minibatch construct we currently have in the training loop on lines 16-18:</p>
 <div class="sourceCode" id="cb2" data-startfrom="15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 14;"><span id="cb2-15"><a href="#cb2-15"></a>...</span>
 <span id="cb2-16"><a href="#cb2-16"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>,<span class="bu">len</span>(x_train), bs):</span>

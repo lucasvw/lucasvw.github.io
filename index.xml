@@ -1257,9 +1257,8 @@ font-style: inherit;">return</span> names</span></code></pre></div>
 </section>
 
  ]]></description>
-  <category>code</category>
-  <category>neural network</category>
   <category>nlp</category>
+  <category>rnn</category>
   <category>lstm</category>
   <guid>https://lucasvw.github.io/posts/16_lstm/index.html</guid>
   <pubDate>Mon, 09 Oct 2023 00:00:00 GMT</pubDate>
@@ -1278,7 +1277,7 @@ font-style: inherit;">return</span> names</span></code></pre></div>
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
 <p>Everything starts with training data, for a description see the earlier <a href="https://lucasvw.github.io/posts/13_ngram/">post</a></p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -1372,7 +1371,7 @@ background-color: null;
 font-style: inherit;">*</span></span></code></pre></div>
 </details>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">########### Load the data ###########</span></span>
@@ -1592,7 +1591,7 @@ Note
 </div>
 </div>
 <p>Let’s put this RNN architecture into code:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> FixedContextRNN(nn.Module):</span>
@@ -1693,7 +1692,7 @@ font-style: inherit;">self</span>.hidden2out(out)</span></code></pre></div>
 </div>
 <p>Observe that both the embedding dimension and the size of the hidden layer need to be equal (<code>hidden_size</code>) because the activations from both these layers are added together and thus need to be of equal shape. This also means that there is just one hyperparameter influencing the amount of parameters in this network.</p>
 <p>We can generalize this model, so that it accepts data of arbitrary context length. Also, we will make use of a <em>dummy hidden-layer activation tensor</em> (initialized to zeros) so that we can do the addition for all iterations (and not just for the second iteration onward):</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> VariableContextRNN(nn.Module):</span>
@@ -1794,7 +1793,7 @@ background-color: null;
 font-style: inherit;"># [bs, classes]</span></span></code></pre></div>
 </div>
 <p>Let’s see how this model performs with a similar configuration to the first MLP we build in the previous <a href="https://lucasvw.github.io/posts/14_mlp/#using-embeddings-effectively">post</a> (context length of 3 and a hidden size of 50):</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Train parameters</span></span>
@@ -1957,7 +1956,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <section id="combing-data-addition-or-concatenation" class="level2">
 <h2 class="anchored" data-anchor-id="combing-data-addition-or-concatenation">Combing data: addition or concatenation</h2>
 <p>As mentioned, the first time I learned about the fact that we are simply adding activations from the hidden layer and the embedding layer, I was pretty surprised. Instead of simple addition of the activations we could also concatenate these activations instead. This means that our <code>hidden2hidden</code> layer shape needs to be updated:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> VariableContextRNNConcat(nn.Module):</span>
@@ -2063,7 +2062,7 @@ font-style: inherit;">self</span>.hidden2out(h)                    <span class="
 background-color: null;
 font-style: inherit;"># [bs, classes]</span></span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">rnn <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> VariableContextRNNConcat(c2i, n_h)</span>
@@ -2177,7 +2176,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <li>when forwarding data through the rnn module, it expects the input data to have the context_length as first dimension. We can alter this by setting <code>batch_first=True</code></li>
 <li><code>nn.RNN</code> returns two parameters. The first parameter is a tensor containing the hidden activation from each iteration, the second parameter has the final hidden activation. For the moment we are only interested in the last hidden activations and pass it to the output layer but we will use the aggregated hidden activations in a section below</li>
 </ul>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> PyTorchRNN(nn.Module):</span>
@@ -2277,7 +2276,7 @@ font-style: inherit;">0</span>)) <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># squeeze out the first empty dimension</span></span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">rnn <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> PyTorchRNN(c2i, context_length, n_h)</span>
@@ -2383,7 +2382,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <section id="optimizing-dataloading-and-model-for-sequential-data-bptt" class="level2">
 <h2 class="anchored" data-anchor-id="optimizing-dataloading-and-model-for-sequential-data-bptt">Optimizing dataloading and model for sequential data (BPTT)</h2>
 <p>Although the previous RNN’s are perfectly valid models, there is a pretty big improvement we can make for the training of these models. To realize that, let’s have a look at the samples for the first name <em>Yuheng</em> in our dataset:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">xb, yb <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> dls.train.dataset[<span class="dv" style="color: #AD0000;
@@ -2440,7 +2439,7 @@ font-style: inherit;">'--&gt;'</span> ,i2c[y.item()])</span></code></pre></div>
 <li>Feeding the hidden activations into the processing of the next token means that the computational graph of the loss is getting more and more complex. If we do this for the entirety of our dataset, the backward pass will become intractable. We thus have to cut it off at some point.</li>
 </ol>
 <p>We need to go from samples (combinations of <code>X</code> and <code>y</code>) that look like this (and don’t pass over the hidden state from sample to sample):</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">xb, yb <span class="op" style="color: #5E5E5E;
@@ -2480,7 +2479,7 @@ font-style: inherit;">'--&gt;'</span> ,i2c[y.item()])</span></code></pre></div>
 </div>
 </div>
 <p>to samples that simply look like this (and <em>do</em> pass the hidden state from sample to sample):</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">name <span class="op" style="color: #5E5E5E;
@@ -2534,7 +2533,7 @@ font-style: inherit;">"</span>)</span></code></pre></div>
 </div>
 </div>
 <p>However, we want to keep the sequence length dimension since we will use that as the maximal amount of tokens through which we will backpropagate. This addresses the second issue mentioned above. We thus need a dataset that looks like this (for a sequence length of 3):</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><span class="bu" style="color: null;
@@ -2563,7 +2562,7 @@ font-style: inherit;">"['e', 'n', 'g']"</span>)</span></code></pre></div>
 </div>
 <p>For the above example, we would still pass the hidden state computed in the first sample to the second sample, but only the values are passed and not the computational history. This is essentially what’s referred to as (truncated) backpropagation through time. Also, note that this means that one single sample (<code>['.', 'y', 'u']</code>) will create 3 outputs (for the 3 labels <code>['y', 'u', 'h']</code>). This means we will have to update our loss function as well.</p>
 <p>Let’s create a new dataset for this purpose:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> SequentialDataset():</span>
@@ -2696,7 +2695,7 @@ font-style: inherit;">=</span> SequentialDataset(val_lines, c2i, <span class="dv
 background-color: null;
 font-style: inherit;">3</span>)</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
@@ -2752,7 +2751,7 @@ Note
 <figcaption class="figure-caption">“Vertical” sampling order</figcaption>
 </figure>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> VerticalSampler():</span>
@@ -2833,7 +2832,7 @@ background-color: null;
 font-style: inherit;">self</span>.batch_size</span></code></pre></div>
 </div>
 <p>With this sampler we can then create a dataloader with the associated batch size to load exactly the batches into the model as described!</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1">train_dl <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.utils.data.DataLoader(train_ds, shuffle<span class="op" style="color: #5E5E5E;
@@ -2862,7 +2861,7 @@ background-color: null;
 font-style: inherit;">=</span> DataLoaders(train_dl, valid_dl)</span></code></pre></div>
 </div>
 <p>Now let’s update our model to pass all the hidden states to the output layer:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> PyTorchRNNMultiOutput(nn.Module):</span>
@@ -2971,7 +2970,7 @@ background-color: null;
 font-style: inherit;"># pass all hidden states to the output layer</span></span></code></pre></div>
 </div>
 <p>And finally, we have to create a custom loss function that can deal with the multiple output activations and multiple labels:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> multi_output_cross_entropy(logits, targets):</span>
@@ -3005,7 +3004,7 @@ font-style: inherit;">1</span>, output_classes)</span>
 background-color: null;
 font-style: inherit;">return</span> F.cross_entropy(logits, targets)</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> get_dls(context_length, batch_size):</span>
@@ -3044,7 +3043,7 @@ background-color: null;
 font-style: inherit;">return</span> DataLoaders(train_dl, valid_dl)</span></code></pre></div>
 </div>
 <p>Note that we drop the batch size to a value of 300 (1/3 of 1000). We do this, to roughly keep the amount of weight updates per batch constant. Previously, we had 1000 sequences in the batch, and from each sequence we would receive one “weight update”. Now, we have 3 times the amount of sequences in a batch, so we have to reduce the batch size by 3 to keep the amount of “weight updates” roughly equal.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Train parameters</span></span>
@@ -3203,7 +3202,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 </div>
 </div>
 <p>Performance is pretty good, however what’s up with the spikes in the loss? These spikes occur at the beginning of every epoch and they happen because moving from the last batch in an epoch, to the first batch in the next epoch is not a sequential step in the data. Looking at the image above in which we laid out the “vertical ordering of the data”, wee see that for the first batch in any epoch &gt; 1, we would feed the hidden state originating from samples (20, 40, 60, 80, 100) into the samples (1, 21, 41, 61, 81), e.g.:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1">frm <span class="op" style="color: #5E5E5E;
@@ -3280,7 +3279,7 @@ Note
 <p>Based on the observation that we could realign the hidden activations by moving them one row down, I implemented this solution but was surprised to see that this doesn’t improve things at all. I then found that we generally don’t have a fully connected sequential dataset that fits exactly into a whole number of batches, we thus lose some data in the end, and the data doesn’t connect easily by shifting it “one row down”. In terms of the sample ordering diagram above: we generally don’t have (20, 40, 60, 80, 100) as final batch of an epoch but instead something like (18, 38, 58, 78, 98).</p>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb29" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> HiddenStateResetterS(Subscriber):</span>
@@ -3312,7 +3311,7 @@ font-style: inherit;">=</span> torch.zeros_like(<span class="va" style="color: #
 background-color: null;
 font-style: inherit;">self</span>.h).to(device)</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Train parameters</span></span>
@@ -3473,7 +3472,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 </div>
 <p>The loss improved a bit from this fix, and the spikes are smaller, but still visible. This is not surprising since the very first batch in each epoch still has the difficulty of working with an empty hidden state. This is not a big issue however, since the hidden state is quickly filling up. Accordingly, the following batches show again a loss that is in-line with the loss of the end of the previous epoch.</p>
 <p>Last but not least, PyTorch <code>nn.RNN</code> accepts two parameters, one for the features in the inputs and one for the features in the hidden state. Previously we used one single parameter for this to make sure we can add the activations. Apparently, <code>nn.RNN</code> is doing another multiplication to align them. So let’s use these two values as separate arguments to see whether we can further improve performance through tweaking them.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb31" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> PyTorchRNNMultiOutput(nn.Module):</span>
@@ -3604,7 +3603,7 @@ background-color: null;
 font-style: inherit;">self</span>.h).to(device)</span></code></pre></div>
 </div>
 <p>Trying for around 10 minutes with different settings shows me that performance can be slightly improved by increasing the size of the hidden state by quite a bit, and keeping the embedding dimension smaller:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb32" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Train parameters</span></span>
@@ -3779,7 +3778,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 </figure>
 </div>
 <p>Two implement this in our model is extremely easy, the only thing we have to change is adding a <code>layers</code> argument into the model which is passed both to the creation of the dummy activations as well as to the <code>nn.RNN</code> module:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> MultiLayerRNN(nn.Module):</span>
@@ -3914,7 +3913,7 @@ font-style: inherit;">=</span> torch.zeros_like(<span class="va" style="color: #
 background-color: null;
 font-style: inherit;">self</span>.h).to(device)</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Train parameters</span></span>
@@ -4088,7 +4087,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <section id="sampling-names" class="level2">
 <h2 class="anchored" data-anchor-id="sampling-names">Sampling names</h2>
 <p>And as we did with the MLP, let’s conclude with some sampled names from this model</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb35" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@fc.patch</span></span>
@@ -4184,7 +4183,7 @@ font-style: inherit;">break</span></span>
 background-color: null;
 font-style: inherit;">return</span> names</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb36" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1">rnn.generate()</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>['.erwan.',
@@ -4208,10 +4207,9 @@ font-style: inherit;">return</span> names</span></code></pre></div>
 </section>
 
  ]]></description>
-  <category>code</category>
-  <category>neural network</category>
   <category>nlp</category>
-  <category>rnns</category>
+  <category>rnn</category>
+  <category>bptt</category>
   <guid>https://lucasvw.github.io/posts/15_rnn/index.html</guid>
   <pubDate>Thu, 14 Sep 2023 00:00:00 GMT</pubDate>
   <media:content url="https://lucasvw.github.io/posts/15_rnn/rnn3.drawio.png" medium="image" type="image/png"/>
@@ -4236,7 +4234,7 @@ font-style: inherit;">return</span> names</span></code></pre></div>
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
 <p>Everything starts with training data, for a description see the previous <a href="https://lucasvw.github.io/posts/13_ngram/">post</a></p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -4330,7 +4328,7 @@ background-color: null;
 font-style: inherit;">*</span></span></code></pre></div>
 </details>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">########### Load the data ###########</span></span>
@@ -4446,7 +4444,7 @@ font-style: inherit;">enumerate</span>(vocabulary)}</span></code></pre></div>
 <section id="one-hot-encoding" class="level3">
 <h3 class="anchored" data-anchor-id="one-hot-encoding">One-hot encoding</h3>
 <p>So how then should we treat these variables? If you are familiar with linear regression you have probably heard of <em>one hot encoding</em>. This is a technique in which we replace integer values with a vector. This vector will be of length equal to the amount of possible values the integer can take on and consists of zeros in all but one position, in that nonzero position the value will be <code>1</code>. Each integer will have this <code>1</code> in a different position. For a vocabulary of length 4, the 4 vectors will be:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
@@ -4475,7 +4473,7 @@ tensor([0, 0, 0, 1])</code></pre>
 <section id="embedding-encoding" class="level3">
 <h3 class="anchored" data-anchor-id="embedding-encoding">Embedding encoding</h3>
 <p>For a neural network, something very similar happens. Here an example when we feed these 4 vectors into a linear layer consisting of <strong>2 neurons</strong>:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">integer_value <span class="op" style="color: #5E5E5E;
@@ -4576,7 +4574,7 @@ tensor([0.1354, 0.9329])</code></pre>
 </div>
 <p>We conclude: <strong>multiplying a one-hot encoded vector with a weight matrix, simply returns the weights of the associated row of that weight matrix</strong>.</p>
 <p>Mathematically this is thus equivalent to indexing into the weight matrix at the row equal to the integer value:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">linear[integer_value]</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>tensor([0.1354, 0.9329])</code></pre>
@@ -4584,7 +4582,7 @@ tensor([0.1354, 0.9329])</code></pre>
 </div>
 <p>If we compare now the inputs (integer values) with the outputs (vector of floats), we have verified the statement we made earlier: <em>However, instead of feeding integers into our network, we can also employ an embedding layer, which will basically create a vector out of our integers</em>.</p>
 <p>And now let’s also do this explicitly with an <code>nn.Embedding</code> layer:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">emb <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> nn.Embedding(<span class="dv" style="color: #AD0000;
@@ -4679,7 +4677,7 @@ Note
 <p>Finally the activations get passed through another linear layer, which maps the activations to the correct amount of classes (i.e.&nbsp;the number of tokens in the vocabulary).</p>
 <p><img src="https://lucasvw.github.io/posts/14_mlp/arch.png" class="img-fluid" width="600"></p>
 <p>Let’s build this model and train it with <code>nntrain</code>:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Datasets and loaders</span></span>
@@ -4775,7 +4773,7 @@ background-color: null;
 font-style: inherit;">=</span> DataLoaders(train_loader, val_loader)</span></code></pre></div>
 </div>
 <p>As a reminder, let’s have a look at the samples for the first name in the dataset (“Yuheng”)</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">xb, yb <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> train_ds[<span class="dv" style="color: #AD0000;
@@ -4810,7 +4808,7 @@ font-style: inherit;">'--&gt;'</span> ,i2c[y.item()])</span></code></pre></div>
 ['h', 'e', 'n'] --&gt; g</code></pre>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> MLP(nn.Module):</span>
@@ -4897,7 +4895,7 @@ background-color: null;
 font-style: inherit;">return</span> out</span></code></pre></div>
 </div>
 <p>Let’s find a good learning rate:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">mlp <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> MLP(c2i, emb_dim<span class="op" style="color: #5E5E5E;
@@ -4943,7 +4941,7 @@ font-style: inherit;">1e-4</span>)</span>
 </div>
 </div>
 <p>Let’s take a learning rate of <code>3e-2</code>, and use the <code>OneCycleLR</code> scheduler together with an <code>Adam</code> optimizer:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">epochs <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
@@ -5092,7 +5090,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 </div>
 </div>
 <p>Next, let’s see if we can tweak the hyperparameters to get the best performance. Below I show the result of trying for around 10 minutes to get the best results:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> get_dls(bs, context_length):</span>
@@ -5147,7 +5145,7 @@ font-style: inherit;">=</span> DataLoaders(train_loader, val_loader)</span>
 background-color: null;
 font-style: inherit;">return</span> dls</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Train parameters</span></span>
@@ -5306,7 +5304,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 <section id="tanh-activation-function" class="level2">
 <h2 class="anchored" data-anchor-id="tanh-activation-function">Tanh activation function</h2>
 <p>The MLP model we have used, is employing a tanh activation function which we haven’t encountered so far. So let’s have a quick look at it:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">x <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> np.linspace(<span class="op" style="color: #5E5E5E;
@@ -5365,7 +5363,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 </div>
 <p>Observe that the tanh activation function has y limits at -1 and 1: however large or small the input, the output is always between -1 and 1. These asymptotes are very flat, meaning that the derivatives in these areas are extremely small. Thinking back at the learning mechanism of neural networks, and remembering that gradients are flowing back through the network by making use of the chain rule: having very small local gradients of a tanh activation function leads to the cancelling-out of whatever gradient has been accumulated so far. This means that the weight updates of all upstream weights is impacted. Previously, this behavior was mentioned in terms of the ReLU activation function, see <a href="https://lucasvw.github.io/posts/11_nntrain_activations/#activations">here</a>.</p>
 <p>This becomes a serious problem, if for all our data (in a batch, or even worse in an epoch) this is the case. So let’s check how we are doing by creating a <a href="https://github.com/lucasvw/nntrain/blob/main/nntrain/activations.py#L39"><code>ActivationStatsS</code></a> subclass tailored towards tracking stats for the tanh activation.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> TanhActivationS(ActivationStatsS):</span>
@@ -5446,7 +5444,7 @@ font-style: inherit;"># compute not firing rate per activations (so across the s
 background-color: null;
 font-style: inherit;">1</span>].append(nf_rate_p_act)   </span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Train parameters</span></span>
@@ -5614,7 +5612,7 @@ font-style: inherit;">=</span>lr)</span></code></pre></div>
 </div>
 </div>
 <p>And, let’s now plot all histograms of the activations during training as a heatmap:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1">fig, ax <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
@@ -5731,7 +5729,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 </div>
 </div>
 <p>On the top, the histograms are shown for all of training (800+ batches), and on the bottom the histograms for the first 20 batches are shown. We observe that during the beginning of training, we don’t have over-saturated tanh activations, but as training progresses the activations become more and more saturated. We can also look at the dead rate per neuron: which is the amount of activations with absolute value &gt; 0.99 across a batch per neuron:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1">fig, ax <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
@@ -5773,7 +5771,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 </div>
 </div>
 <p>However, this doesn’t seem to be problematic. Foremost, we need to make sure that we don’t initialize in a way that causes over-saturated tanh activations. And as mentioned, during the beginning of training, this is not the case. Also, when looking at a histogram of the dead rate per neuron across the very last training batch we see that most neurons have a low dead-rate, and we don’t have any neuron for which the dead-rate is higher then 75%:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1">plt.hist(dead_rate[:,<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
@@ -5793,7 +5791,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 <section id="sampling-names" class="level2">
 <h2 class="anchored" data-anchor-id="sampling-names">Sampling names</h2>
 <p>To conclude, let’s sample from this model:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@fc.patch</span></span>
@@ -5882,7 +5880,7 @@ font-style: inherit;">break</span></span>
 background-color: null;
 font-style: inherit;">return</span> names</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1">names <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> mlp.generate()</span>
@@ -5916,10 +5914,9 @@ font-style: inherit;">in</span> names]</span></code></pre></div>
 </section>
 
  ]]></description>
-  <category>code</category>
-  <category>neural network</category>
+  <category>embeddings</category>
+  <category>mlp</category>
   <category>nlp</category>
-  <category>embedding</category>
   <guid>https://lucasvw.github.io/posts/14_mlp/index.html</guid>
   <pubDate>Mon, 11 Sep 2023 00:00:00 GMT</pubDate>
   <media:content url="https://lucasvw.github.io/posts/14_mlp/arch.png" medium="image" type="image/png" height="116" width="144"/>
@@ -5960,7 +5957,7 @@ Note
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
 <p>Everything starts with training data:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> random</span>
@@ -6032,7 +6029,7 @@ font-style: inherit;">import</span> <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span></span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">path <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Path(<span class="st" style="color: #20794D;
@@ -6123,7 +6120,7 @@ len(lines)=32033</code></pre>
 <section id="bi-gram-count-model" class="level2">
 <h2 class="anchored" data-anchor-id="bi-gram-count-model">Bi-gram count model</h2>
 <p>From the data, we first create the dictionary:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">unique_chars <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
@@ -6175,7 +6172,7 @@ len(dictionary)=27</code></pre>
 </div>
 </div>
 <p>From the dictionary we create a mapping from token to integer. We will use this mapping to encode our tokens (characters) into integers. This is called <strong>numericalisation</strong>:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">c2i <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> {c:i <span class="cf" style="color: #003B4F;
@@ -6196,7 +6193,7 @@ background-color: null;
 font-style: inherit;">enumerate</span>(dictionary)}</span></code></pre></div>
 </div>
 <p>And just for clarity, let’s have a look at the bi-grams for the first name in the dataset:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">cutoff <span class="op" style="color: #5E5E5E;
@@ -6333,7 +6330,7 @@ g --&gt; .      numericalized:  6 --&gt; 26</code></pre>
 </div>
 </div>
 <p>To keep track of the occurrences we will use a matrix of size <img src="https://latex.codecogs.com/png.latex?%5B27,%2027%5D"> (the size of the dictionary). The rows reflect the possible values of the context and the columns reflect any possible character following this context. We will initialize this matrix with zeros, and increase the value of the associated cell by one, every time we encounter an n-gram:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">counts <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.zeros([<span class="dv" style="color: #AD0000;
@@ -6404,7 +6401,7 @@ font-style: inherit;"># increase the counts in the matrix for the encountered bi
 <li>Looking at the first row: an “a” is followed very often either by an “n” or even more often by a “.”. Names often end with an “a”!</li>
 <li>Looking at the last row: names also start pretty often with an “a”</li>
 </ul>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">fig, ax <span class="op" style="color: #5E5E5E;
@@ -6471,7 +6468,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 </div>
 </div>
 <p>Let’s use this language model to generate some new names:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">g <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.Generator().manual_seed(<span class="dv" style="color: #AD0000;
@@ -6610,7 +6607,7 @@ Note
 </div>
 <p>If we create an embedding layer with embedding dimensions equal to that of the dictionary, the outputs of this layer will also conform to the size of our dictionary, e.g.&nbsp;<code>[batch_size * 26]</code>. These raw outputs of our model are referred to as logits, and they can be anything: positive, negative, small or large. We can exponentiate these logits to get numbers that are always positive, and these values are equivalent to values in the “counts” matrix. We can then normalize these exponentiated logits row-wise, to get to probabilities. And finally adding a negative log-likelihood loss on these probabilities is guiding the network to establish an embedding matrix with weights that are practically identical to the (log transformed) counts matrix from above. The combined operation of exponentiating, normalizing and negative log-likelihood is what we call cross-entropy loss. See also an earlier blog <a href="https://lucasvw.github.io/posts/05_crossentropy/">post</a>.</p>
 <p>We are going to train this model using <a href="https://lucasvw.github.io/posts/08_nntrain_setup/"><code>nntrain</code></a>, the small neural network training library we have been created before. But before we do, we have to create the datasets and dataloaders. Let’s make the dataset generic so that it can create datasets for any n-gram model we wish. As a reminder, let’s have a quick look how 2-grams, 3-grams and 4-grams look for the first name in the data <em>Emma</em>:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">name <span class="op" style="color: #5E5E5E;
@@ -6668,7 +6665,7 @@ n ---&gt; g
 g ---&gt; .</code></pre>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">name <span class="op" style="color: #5E5E5E;
@@ -6734,7 +6731,7 @@ e n ---&gt; g
 n g ---&gt; .</code></pre>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1">name <span class="op" style="color: #5E5E5E;
@@ -6814,7 +6811,7 @@ e n g ---&gt; .</code></pre>
 <li>when we increase the context to n=3 and n=4, we need to add additional start-word tokens to make sure we don’t skip the first sample(s)</li>
 </ul>
 <p>Let’s create a dataset in which we can set the value of <code>n</code>:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> NgramDataset():</span>
@@ -6945,7 +6942,7 @@ background-color: null;
 font-style: inherit;">self</span>.x)</span></code></pre></div>
 </div>
 <p>Next, let’s create the model, which should also be able to deal with n-grams. Instead of using PyTorch’s <code>nn.Embedding</code> layer, we will use a custom weight tensor which will act as the weights of our embedding layer. The reason for this, is that <code>nn.Embedding</code> is only two dimensional. For an n-gram of n &gt; 2, we would thus have to stack-up all the possible character combinations of the context in the row dimension. This is a bit tedious to implement, so instead we will use an explicit n-dimensional weight tensor. For the trigram this means: the first (second) dimension is for the first (second) character in the context, and the last dimension is for the label.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> NgramNet(nn.Module):</span>
@@ -7014,7 +7011,7 @@ font-style: inherit;">1</span>)]]</span>
 background-color: null;
 font-style: inherit;">return</span> logits</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1">train_ds <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> NgramDataset(train_lines)</span>
@@ -7049,7 +7046,7 @@ font-style: inherit;">2</span>)</span>
 background-color: null;
 font-style: inherit;">=</span> DataLoaders(train_loader, val_loader)</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1">m <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> NgramNet()</span>
@@ -7165,7 +7162,7 @@ font-style: inherit;">1e-1</span>)</span></code></pre></div>
 </div>
 </div>
 <p>Now, let’s patch our model with a <code>generate()</code> method, returning names sampled from the learned representation. We can pass in a generator to make sure we get the same random behavior as we have seen above when generating names with the counts model:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@fc.patch</span></span>
@@ -7276,7 +7273,7 @@ font-style: inherit;">break</span></span>
 background-color: null;
 font-style: inherit;">return</span> names</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1">m.generate(generator<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>torch.Generator().manual_seed(<span class="dv" style="color: #AD0000;
@@ -7298,7 +7295,7 @@ font-style: inherit;">42</span>))</span></code></pre></div>
 <p>As you can see, these names are extremely similar to the ones we created above with the counts based model, and this is actually pretty surprising. One model was based on common sense, logic and simple counting. The other model on neural networks, embedding layers, loss functions, training loops, backward passes etc etc. Nonetheless, the results are the same!</p>
 <p>The reason for this, is that the network architecture (and the loss) implies mathematical equivalence between both approaches. This can probably be shown explicitly with lots of complicated math, which I am not even going to try (I guess the answer will involve the principle of “maximum likelihood”..)</p>
 <p>We can also have a look at both the weight matrices to see that the embedding matrix is extremely similar to the counts matrix. The way this network is set-up, is thus resulting in a weight matrix which is practically identical to the counts matrix!</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1">fig, axs <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
@@ -7354,7 +7351,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 <h2 class="anchored" data-anchor-id="next-steps">Next steps</h2>
 <p>This extremely cool equivalence means we can switch to a neural network paradigm and tweak the network to improve performance. In other words, we can use any trick in the book for training neural networks! This is neat, because with the explicit counting based approach we were stuck with the “curse of dimensionality” for growing values of n.</p>
 <p>In the next post, I’ll discuss a first improvement: a simple but interesting model from Y. Bengio et al described in the paper <em>A Neural Probabilistic Language Model</em>. But let’s quickly train a couple of networks with higher n-grams to see how that goes.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> fit_ngram(n):</span>
@@ -7420,12 +7417,12 @@ font-style: inherit;">1e-1</span>)</span>
 background-color: null;
 font-style: inherit;">return</span> n_elem, l.loss.detach().cpu()</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1">num_elems, eval_losses <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> [], []</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb29" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1">ngram <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
@@ -7522,7 +7519,7 @@ font-style: inherit;">=</span> fit_ngram(ngram)</span>
 </div>
 </div>
 <p>The evaluation loss went down from 2.595 for the bi-gram model to 2.437 for the tri-gram model, an improvement! Let’s try a 4-gram model as well:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1">ngram <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
@@ -7618,7 +7615,7 @@ font-style: inherit;">=</span> fit_ngram(ngram)</span>
 <p><img src="https://lucasvw.github.io/posts/13_ngram/index_files/figure-html/cell-23-output-3.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb31" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1">ngram <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
@@ -7715,7 +7712,7 @@ font-style: inherit;">=</span> fit_ngram(ngram)</span>
 </div>
 </div>
 <p>And here, we start to see problems. The train loss is still getting better (1.735 for 5-gram vs 1.932 for 4-gram) but the evaluation loss is worse (2.198 for 5-gram vs 2.129 for 4-gram).</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb32" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1">fig, ax <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
@@ -7789,7 +7786,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 </div>
 </div>
 <p>Let’s also quickly compare the number of elements in the embedding layer for the 2, 3 and 4-gram models:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1">fig, ax <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
@@ -7877,9 +7874,9 @@ font-style: inherit;">;</span></span></code></pre></div>
 </section>
 
  ]]></description>
-  <category>code</category>
-  <category>neural network</category>
+  <category>n-gram</category>
   <category>nlp</category>
+  <category>embeddings</category>
   <guid>https://lucasvw.github.io/posts/13_ngram/index.html</guid>
   <pubDate>Wed, 06 Sep 2023 00:00:00 GMT</pubDate>
   <media:content url="https://lucasvw.github.io/posts/13_ngram/image.png" medium="image" type="image/png" height="98" width="144"/>
@@ -7922,7 +7919,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 <p>And then going back to updating the weights:</p>
 <img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Baligned%7D%0Aw_%7Bwd%7D%20&amp;%5Cleftarrow%20w_%7Bwd%7D%20-%20lr%20%5Ccdot%20grad_%7Bwd%7D%20%20%5C%5C%0A&amp;=%20w_%7Bwd%7D%20-%20lr%20%5Ccdot%20(grad%20+%20d%20%5Ccdot%20w_%7Bwd%7D)%20%5C%5C%0A&amp;=%20w_%7Bwd%7D%20-%20lr%20%5Ccdot%20grad%20-%20lr%20%5Ccdot%20d%20%5Ccdot%20w_%7Bwd%7D%20%5C%5C%0A&amp;=%20w_%7Bwd%7D(1%20-%20lr%20%5Ccdot%20d)%20-%20lr%20%5Ccdot%20grad%0A%5Cend%7Baligned%7D">
 <p>If we compare this expression to the regular update step: <img src="https://latex.codecogs.com/png.latex?w%20%5Cleftarrow%20w%20-%20lr%20%5Ccdot%20grad%5E%7Bw%7D">, we find that we can simply multiply the weights by <img src="https://latex.codecogs.com/png.latex?(1%20-%20lr%20%5Ccdot%20d)"> before we do the step:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
@@ -8062,7 +8059,7 @@ font-style: inherit;">self</span>.params:</span>
 <span id="cb1-25">            p.grad.data.zero_()</span></code></pre></div>
 </div>
 <p>Let’s try it out:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
@@ -8092,7 +8089,7 @@ background-color: null;
 font-style: inherit;">*</span></span></code></pre></div>
 </details>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;
@@ -8153,7 +8150,7 @@ background-color: null;
 font-style: inherit;">as</span> np</span></code></pre></div>
 </details>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">name <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
@@ -8432,7 +8429,7 @@ Dataset fashion_mnist downloaded and prepared to /root/.cache/huggingface/datase
 <p><img src="https://latex.codecogs.com/png.latex?%0Agrad%5C_avg%20%5Cleftarrow%20(1%20-%20%5Ctau)%20grad%20+%20%5Cmu%20%5Ccdot%20grad%5C_avg%0A"></p>
 <p>Jeremy Howard from Fastai suggests we take a weighted average between the grad and the running average. This is equivalent to setting <img src="https://latex.codecogs.com/png.latex?%5Ctau%20=%20%5Cmu"> (dampening = momentum) in PyTorch:</p>
 <p><img src="https://latex.codecogs.com/png.latex?%0Agrad%5C_avg%20%5Cleftarrow%20(1-c)%20grad%20+%20c%20%5Ccdot%20grad%5C_avg%0A"></p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
@@ -8510,7 +8507,7 @@ font-style: inherit;">self</span>.lr <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span> p.grad_avg</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">set_seed(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>)</span>
@@ -8643,7 +8640,7 @@ font-style: inherit;">5</span>)</span></code></pre></div>
 <p>where</p>
 <p><img src="https://latex.codecogs.com/png.latex?%0Aacc%5C_sqrd%5C_grad%20=%20c%20%5Ccdot%20acc%5C_sqrd%5C_grad%20+%20(1-c)%20grad%5E2%0A"></p>
 <p>From which it should be clear that using RMSprop has a large impact on the weight updates, you will thus have to recalibrate your learning rate.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
@@ -8745,7 +8742,7 @@ font-style: inherit;">+</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.eps)</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">set_seed(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>)</span>
@@ -8873,7 +8870,7 @@ font-style: inherit;">5</span>)</span></code></pre></div>
 <h2 class="anchored" data-anchor-id="adam">Adam</h2>
 <p>Adam is probably the most common optimizer used in practice, and is nothing more then the combination of RMSProp and Momentum:</p>
 <p><img src="https://latex.codecogs.com/png.latex?%0Aw%20%5Cleftarrow%20w%20-%20lr%20%5Ccdot%20%5Cfrac%7Bavg%5C_grad%7D%7B%5Csqrt%7Bacc%5C_sqrd%5C_grad%7D%7D%0A"></p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
@@ -9033,7 +9030,7 @@ font-style: inherit;">+</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.eps).sqrt()</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">set_seed(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>)</span>
@@ -9159,7 +9156,7 @@ font-style: inherit;">5</span>)</span></code></pre></div>
 <h2 class="anchored" data-anchor-id="learning-rate-schedulers">Learning Rate Schedulers</h2>
 <p>Now let’s look at learning rate schedulers: these are objects that change important parameters such as the learning rate and momentum <strong>during training</strong>. The <code>OneCycleLR</code> scheduler for example starts with a low learning rate, then increases it to a maximum value and then anneales it back to the lower value.</p>
 <p>The idea being that initially, when our weights are random, we don’t want to take too large steps. As the weights are getting somewhat reasonable, we speed up the learning and once we arrive at a better solution because of this, we decrease the learning rate again to make sure we can squeeze out the last bit of performance gain:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">opt <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.optim.SGD(model.parameters(), lr<span class="op" style="color: #5E5E5E;
@@ -9268,7 +9265,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 </div>
 <p>Besides the cycling of the learning rate, the momentum is cycled inversely with the <code>OneCycleLr</code> scheduler</p>
 <p>Let’s see if we can create a Subscriber that enables the use of Schedulers in our framework:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
@@ -9316,7 +9313,7 @@ font-style: inherit;">self</span>, learn):</span>
 background-color: null;
 font-style: inherit;">self</span>.scheduler.step()</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">set_seed(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>)</span>
@@ -9462,7 +9459,7 @@ font-style: inherit;">=</span> Learner(model, dls, F.cross_entropy, torch.optim.
 <section id="resnet" class="level2">
 <h2 class="anchored" data-anchor-id="resnet">ResNet</h2>
 <p>Next, let’s see if we can increase the depth of the model even more: we can use a reduced stride (=1) in the first convolution so that we don’t reduce the pixel-grid. We can thus add one more convolution at the end, to end up with a 1x1 pixel grid:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> cnn_layers_more_depth():</span>
@@ -9651,7 +9648,7 @@ font-style: inherit;">=</span> Learner(model, dls, F.cross_entropy, torch.optim.
 <p>The name for the block shown above is a ResBlock, and a model that is using them is called a ResNet. Res is short for residual, and that name becomes apparent when we look at this block in the following way:</p>
 <img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Baligned%7D%0A&amp;%20y%20&amp;&amp;=%20x%20+%20conv_2(conv_1(x))%20%5C%5C%0A&amp;%20y%20-%20x%20&amp;&amp;=%20conv_2(conv_1(x))%20%5C%5C%0A&amp;%20residual%20&amp;&amp;=%20conv_2(conv_1(x))%0A%5Cend%7Baligned%7D">
 <p>The term <img src="https://latex.codecogs.com/png.latex?y-x"> is often called “the residual” in statistics. Now let’s see how we can create such a ResBlock, we start with the convolutional path:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
@@ -9708,7 +9705,7 @@ font-style: inherit;">True</span>)</span>
 </ul></li>
 <li>Note also that the second convolution doesn’t have an activation, this is because we want to apply the activation after summing both the contributions from the identity path and the convolutional path</li>
 </ul>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
@@ -9858,7 +9855,7 @@ Note
 <p>Although the final BatchNorm layer has a positive impact on performance, I don’t have a good intuition as to the reasons why. I would think that the distributions of logits would be not very gaussian in an ideal setting: the correct categories should get much higher outputs then the other ones. Perhaps this works in some second order effect as regularization, or perhaps it has to do with the scaling that the BatchNorm layer does after the normalization. If anybody has a good intuition for this, please let me know🙏</p>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
@@ -9937,7 +9934,7 @@ background-color: null;
 font-style: inherit;"># final batchnorm layer</span></span>
 <span id="cb18-13">    )</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">set_seed(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>)</span>
@@ -9975,7 +9972,7 @@ font-style: inherit;">1</span>)</span>
 <p><img src="https://lucasvw.github.io/posts/12_nntrain_accelerations/index_files/figure-html/cell-19-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1">set_seed(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>)</span>
@@ -10112,7 +10109,7 @@ font-style: inherit;">=</span> Learner(model, dls, F.cross_entropy, torch.optim.
 <section id="parameters-and-macs" class="level2">
 <h2 class="anchored" data-anchor-id="parameters-and-macs">Parameters and MACs</h2>
 <p>Now that we are able to create fairly deep models, it’s a good idea to be able to track the memory footprint and the amount of compute that is involved in doing a single forward pass. To track the memory, we can look at the amount of parameters of each layer, and for the compute we can try to estimate something equivalent to Multiply–accumulate operations (MACs). Let’s create a small Subscriber that tracks thes stats by running one single batch and then cancels the fit:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
@@ -10462,7 +10459,7 @@ font-style: inherit;">'</span> <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span> out</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1">model <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> resnet().<span class="bu" style="color: null;
@@ -10517,7 +10514,7 @@ layer                : input                : output               :   # params 
 <h2 class="anchored" data-anchor-id="augmentation">Augmentation</h2>
 <p>We have finally come to the point of data augmentation. Once you have a good model, you would ideally train for much longer times. When doing so, the problem that arises is that of overfitting. Which we described before as the tendency of the model to start to memorize our training data and no longer generalize well to the validation set.</p>
 <p>To overcome this, data augmentation is used to increase the variety in the training data. For example we can rotate the images, or (horizontally or vertically) flip the image. For such augmentations the label stays the same, since a rotated image of a shoe is still a shoe, but there exist also augmentations that for example mix images, and thus also the labels are altereed. There are great libraries out there such as <a href="https://demo.albumentations.ai/">Albumentations</a> with a huge variety of transformations that can be applied to images, so we won’t be going into the full details. But let’s at least figure out how we can build this into our framework.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"> <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#| export</span></span>
@@ -10557,7 +10554,7 @@ font-style: inherit;">self</span>.transform(learn.batch[<span class="dv" style="
 background-color: null;
 font-style: inherit;">0</span>])</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> torchvision <span class="im" style="color: #00769E;
@@ -10577,7 +10574,7 @@ font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>))</span></code></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1">set_seed(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>)</span>
@@ -10906,9 +10903,13 @@ font-style: inherit;">=</span> Learner(model, dls, F.cross_entropy, torch.optim.
 </section>
 
  ]]></description>
-  <category>code</category>
-  <category>neural network</category>
-  <category>deep learning</category>
+  <category>weight decay</category>
+  <category>momentum</category>
+  <category>RMSProp</category>
+  <category>Adam</category>
+  <category>Resnet</category>
+  <category>learning rate scheduler</category>
+  <category>data augmentation</category>
   <guid>https://lucasvw.github.io/posts/12_nntrain_accelerations/index.html</guid>
   <pubDate>Mon, 28 Aug 2023 00:00:00 GMT</pubDate>
   <media:content url="https://lucasvw.github.io/posts/12_nntrain_accelerations/loss_surface.png" medium="image" type="image/png" height="105" width="144"/>
@@ -13507,9 +13508,10 @@ font-style: inherit;">True</span>)</span></code></pre></div>
 </section>
 
  ]]></description>
-  <category>code</category>
-  <category>neural network</category>
-  <category>deep learning</category>
+  <category>convolutions</category>
+  <category>activations</category>
+  <category>initialization</category>
+  <category>batch normalization</category>
   <guid>https://lucasvw.github.io/posts/11_nntrain_activations/index.html</guid>
   <pubDate>Sun, 20 Aug 2023 00:00:00 GMT</pubDate>
   <media:content url="https://lucasvw.github.io/posts/11_nntrain_activations/image.png" medium="image" type="image/png" height="89" width="144"/>
@@ -16166,9 +16168,10 @@ font-style: inherit;">5</span>)</span></code></pre></div>
 </section>
 
  ]]></description>
-  <category>code</category>
-  <category>neural network</category>
-  <category>deep learning</category>
+  <category>training</category>
+  <category>momentum</category>
+  <category>subscribers</category>
+  <category>learning rate finder</category>
   <guid>https://lucasvw.github.io/posts/10_nntrain_learner/index.html</guid>
   <pubDate>Wed, 16 Aug 2023 00:00:00 GMT</pubDate>
   <media:content url="https://lucasvw.github.io/posts/10_nntrain_learner/image.png" medium="image" type="image/png" height="97" width="144"/>
@@ -16191,7 +16194,7 @@ font-style: inherit;">5</span>)</span></code></pre></div>
 <p><code>nb_dev</code> is another great project from the fastai community, which allows python libraries to be written in jupyter notebooks. This may sound a bit weird and controversial, but it has the advantage that we can create the source code for our library in the very same environment in which we want to experiment and interact with our methods, objects and structure <strong>while we are building the library</strong>. For more details on why this is a good idea and other nice features of <code>nb_dev</code>, see <a href="https://www.fast.ai/posts/2022-07-28-nbdev2.html">here</a>.</p>
 <p>So without further ado, let’s start with where we left off in the previous <a href="https://lucasvw.github.io/posts/08_nntrain_setup/">post</a>:</p>
 <section id="end-of-last-post" class="level2">
-<h2 class="anchored" data-anchor-id="end-of-last-post">End of last post:</h2>
+<h2 class="anchored" data-anchor-id="end-of-last-post">End of last post</h2>
 <div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> datasets <span class="im" style="color: #00769E;
@@ -16406,7 +16409,7 @@ background-color: null;
 font-style: inherit;">5</span>)</span></code></pre></div>
 </section>
 <section id="datasets" class="level2">
-<h2 class="anchored" data-anchor-id="datasets">Datasets:</h2>
+<h2 class="anchored" data-anchor-id="datasets">Datasets</h2>
 <p>All the stuff in this post will be based on tackling the minibatch construct we currently have in the training loop on lines 16-18:</p>
 <div class="sourceCode" id="cb2" data-startfrom="15" style="background: #f1f3f5;"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 14;"><span id="cb2-15">...</span>
 <span id="cb2-16"><span class="cf" style="color: #003B4F;
@@ -18113,9 +18116,10 @@ font-style: inherit;">;</span> nbdev.nbdev_export()</span></code></pre></div>
 </section>
 
  ]]></description>
-  <category>code</category>
-  <category>neural network</category>
-  <category>deep learning</category>
+  <category>dataloading</category>
+  <category>training</category>
+  <category>collation</category>
+  <category>sampler</category>
   <guid>https://lucasvw.github.io/posts/09_nntrain_ds/index.html</guid>
   <pubDate>Mon, 14 Aug 2023 00:00:00 GMT</pubDate>
   <media:content url="https://lucasvw.github.io/posts/09_nntrain_ds/image.png" medium="image" type="image/png" height="58" width="144"/>
@@ -20633,9 +20637,11 @@ epoch=4 | loss=1.179 | acc=0.635</code></pre>
 </section>
 
  ]]></description>
-  <category>code</category>
   <category>neural network</category>
   <category>deep learning</category>
+  <category>foundations</category>
+  <category>PyTorch</category>
+  <category>nn.Module</category>
   <guid>https://lucasvw.github.io/posts/08_nntrain_setup/index.html</guid>
   <pubDate>Wed, 09 Aug 2023 00:00:00 GMT</pubDate>
   <media:content url="https://lucasvw.github.io/posts/08_nntrain_setup/image.png" medium="image" type="image/png" height="116" width="144"/>
@@ -21322,7 +21328,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-50367"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-50367").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-29298"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-29298").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>
@@ -21723,7 +21729,6 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
   <category>generative</category>
   <category>stable diffusion</category>
   <category>diffusers</category>
-  <category>code</category>
   <guid>https://lucasvw.github.io/posts/07_stable_diffusion_code/index.html</guid>
   <pubDate>Mon, 03 Jul 2023 00:00:00 GMT</pubDate>
   <media:content url="https://lucasvw.github.io/posts/07_stable_diffusion_code/image.png" medium="image" type="image/png" height="144" width="144"/>
@@ -21976,7 +21981,6 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
   <category>generative</category>
   <category>stable diffusion</category>
   <category>diffusers</category>
-  <category>concepts</category>
   <guid>https://lucasvw.github.io/posts/06_stable_diffusion_basics/index.html</guid>
   <pubDate>Sat, 18 Mar 2023 00:00:00 GMT</pubDate>
   <media:content url="https://lucasvw.github.io/posts/06_stable_diffusion_basics/image.png" medium="image" type="image/png" height="131" width="144"/>
@@ -22388,7 +22392,6 @@ font-style: inherit;"># at some other point in your code, compute the loss as pe
   <category>softmax</category>
   <category>nll</category>
   <category>cross entropy</category>
-  <category>code</category>
   <guid>https://lucasvw.github.io/posts/05_crossentropy/index.html</guid>
   <pubDate>Wed, 15 Mar 2023 00:00:00 GMT</pubDate>
   <media:content url="https://lucasvw.github.io/posts/05_crossentropy/image.png" medium="image" type="image/png" height="82" width="144"/>
@@ -23090,10 +23093,9 @@ font-style: inherit;">@</span>b</span></code></pre></div>
 
  ]]></description>
   <category>foundations</category>
-  <category>maths</category>
+  <category>math</category>
   <category>vectorization</category>
   <category>linear algebra</category>
-  <category>code</category>
   <guid>https://lucasvw.github.io/posts/04_matmul/index.html</guid>
   <pubDate>Tue, 07 Mar 2023 00:00:00 GMT</pubDate>
   <media:content url="https://lucasvw.github.io/posts/04_matmul/image.png" medium="image" type="image/png" height="89" width="144"/>
@@ -23581,9 +23583,6 @@ font-style: inherit;">$PATH</span></span></code></pre></div>
 
  ]]></description>
   <category>setup</category>
-  <category>paperspace</category>
-  <category>gpu</category>
-  <category>how-to</category>
   <category>mlops</category>
   <guid>https://lucasvw.github.io/posts/02_paperspace_setup/index.html</guid>
   <pubDate>Sun, 26 Feb 2023 00:00:00 GMT</pubDate>
@@ -23940,9 +23939,7 @@ font-style: inherit;"> ${{ secrets.GITHUB_TOKEN }}</span></span></code></pre></d
 </section>
 
  ]]></description>
-  <category>blogging</category>
   <category>setup</category>
-  <category>how-to</category>
   <guid>https://lucasvw.github.io/posts/01_blog_setup/index.html</guid>
   <pubDate>Fri, 24 Feb 2023 00:00:00 GMT</pubDate>
   <media:content url="https://lucasvw.github.io/posts/01_blog_setup/profile.png" medium="image" type="image/png" height="133" width="144"/>

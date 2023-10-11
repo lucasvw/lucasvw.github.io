@@ -183,9 +183,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="quarto-title">
 <h1 class="title">N-gram language models</h1>
   <div class="quarto-categories">
-    <div class="quarto-category">code</div>
-    <div class="quarto-category">neural network</div>
+    <div class="quarto-category">n-gram</div>
     <div class="quarto-category">nlp</div>
+    <div class="quarto-category">embeddings</div>
   </div>
   </div>
 
@@ -241,7 +241,7 @@ Note
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
 <p>Everything starts with training data:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> functools <span class="im">import</span> <span class="bu">reduce</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
@@ -257,7 +257,7 @@ Note
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nntrain.learner <span class="im">import</span> <span class="op">*</span></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nntrain.activations <span class="im">import</span> <span class="op">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> Path(<span class="st">'./data'</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>path.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> path <span class="op">/</span> <span class="st">'names.txt'</span></span>
@@ -284,7 +284,7 @@ len(lines)=32033</code></pre>
 <section id="bi-gram-count-model" class="level2">
 <h2 class="anchored" data-anchor-id="bi-gram-count-model">Bi-gram count model</h2>
 <p>From the data, we first create the dictionary:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>unique_chars <span class="op">=</span> <span class="bu">list</span>(<span class="bu">set</span>(<span class="st">""</span>.join(lines)))</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>unique_chars.sort()</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>dictionary <span class="op">=</span> unique_chars <span class="op">+</span> [<span class="st">'.'</span>]</span>
@@ -296,12 +296,12 @@ len(dictionary)=27</code></pre>
 </div>
 </div>
 <p>From the dictionary we create a mapping from token to integer. We will use this mapping to encode our tokens (characters) into integers. This is called <strong>numericalisation</strong>:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>c2i <span class="op">=</span> {c:i <span class="cf">for</span> i, c <span class="kw">in</span> <span class="bu">enumerate</span>(dictionary)}</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>i2c <span class="op">=</span> {i:c <span class="cf">for</span> i, c <span class="kw">in</span> <span class="bu">enumerate</span>(dictionary)}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>And just for clarity, let’s have a look at the bi-grams for the first name in the dataset:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>cutoff <span class="op">=</span> <span class="bu">round</span>(<span class="bu">len</span>(lines) <span class="op">*</span> <span class="fl">0.8</span>)</span>
@@ -332,7 +332,7 @@ g --&gt; .      numericalized:  6 --&gt; 26</code></pre>
 </div>
 </div>
 <p>To keep track of the occurrences we will use a matrix of size <span class="math inline">\([27, 27]\)</span> (the size of the dictionary). The rows reflect the possible values of the context and the columns reflect any possible character following this context. We will initialize this matrix with zeros, and increase the value of the associated cell by one, every time we encounter an n-gram:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> torch.zeros([<span class="dv">27</span>,<span class="dv">27</span>], dtype<span class="op">=</span><span class="bu">int</span>)              <span class="co"># initialize counts matrix</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> train_lines:                              <span class="co"># iterate through all the names</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    name <span class="op">=</span> <span class="st">"."</span> <span class="op">+</span> name <span class="op">+</span> <span class="st">"."</span>                           <span class="co"># add start and end token to the name</span></span>
@@ -345,7 +345,7 @@ g --&gt; .      numericalized:  6 --&gt; 26</code></pre>
 <li>Looking at the first row: an “a” is followed very often either by an “n” or even more often by a “.”. Names often end with an “a”!</li>
 <li>Looking at the last row: names also start pretty often with an “a”</li>
 </ul>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>,<span class="dv">10</span>))</span>
@@ -360,7 +360,7 @@ g --&gt; .      numericalized:  6 --&gt; 26</code></pre>
 </div>
 </div>
 <p>Let’s use this language model to generate some new names:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> torch.Generator().manual_seed(<span class="dv">42</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize over the rows</span></span>
@@ -415,7 +415,7 @@ Note
 </div>
 <p>If we create an embedding layer with embedding dimensions equal to that of the dictionary, the outputs of this layer will also conform to the size of our dictionary, e.g.&nbsp;<code>[batch_size * 26]</code>. These raw outputs of our model are referred to as logits, and they can be anything: positive, negative, small or large. We can exponentiate these logits to get numbers that are always positive, and these values are equivalent to values in the “counts” matrix. We can then normalize these exponentiated logits row-wise, to get to probabilities. And finally adding a negative log-likelihood loss on these probabilities is guiding the network to establish an embedding matrix with weights that are practically identical to the (log transformed) counts matrix from above. The combined operation of exponentiating, normalizing and negative log-likelihood is what we call cross-entropy loss. See also an earlier blog <a href="https://lucasvw.github.io/posts/05_crossentropy/">post</a>.</p>
 <p>We are going to train this model using <a href="https://lucasvw.github.io/posts/08_nntrain_setup/"><code>nntrain</code></a>, the small neural network training library we have been created before. But before we do, we have to create the datasets and dataloaders. Let’s make the dataset generic so that it can create datasets for any n-gram model we wish. As a reminder, let’s have a quick look how 2-grams, 3-grams and 4-grams look for the first name in the data <em>Emma</em>:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>name <span class="op">=</span> lines[<span class="dv">0</span>]</span>
@@ -435,7 +435,7 @@ n ---&gt; g
 g ---&gt; .</code></pre>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>name <span class="op">=</span> lines[<span class="dv">0</span>]</span>
@@ -455,7 +455,7 @@ e n ---&gt; g
 n g ---&gt; .</code></pre>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>name <span class="op">=</span> lines[<span class="dv">0</span>]</span>
@@ -481,7 +481,7 @@ e n g ---&gt; .</code></pre>
 <li>when we increase the context to n=3 and n=4, we need to add additional start-word tokens to make sure we don’t skip the first sample(s)</li>
 </ul>
 <p>Let’s create a dataset in which we can set the value of <code>n</code>:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NgramDataset():</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, lines, n<span class="op">=</span><span class="dv">2</span>):</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.x <span class="op">=</span> []    <span class="co"># store the xs, the context, the left hand side of the n-gram</span></span>
@@ -502,7 +502,7 @@ e n g ---&gt; .</code></pre>
 <span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Next, let’s create the model, which should also be able to deal with n-grams. Instead of using PyTorch’s <code>nn.Embedding</code> layer, we will use a custom weight tensor which will act as the weights of our embedding layer. The reason for this, is that <code>nn.Embedding</code> is only two dimensional. For an n-gram of n &gt; 2, we would thus have to stack-up all the possible character combinations of the context in the row dimension. This is a bit tedious to implement, so instead we will use an explicit n-dimensional weight tensor. For the trigram this means: the first (second) dimension is for the first (second) character in the context, and the last dimension is for the label.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NgramNet(nn.Module):</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, n<span class="op">=</span><span class="dv">2</span>):</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
@@ -515,7 +515,7 @@ e n g ---&gt; .</code></pre>
 <span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> <span class="va">self</span>.embedding[[x[:,i] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>,<span class="va">self</span>.n<span class="op">-</span><span class="dv">1</span>)]]</span>
 <span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> logits</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>train_ds <span class="op">=</span> NgramDataset(train_lines)</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>val_ds <span class="op">=</span> NgramDataset(val_lines)</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -524,7 +524,7 @@ e n g ---&gt; .</code></pre>
 <span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>val_loader <span class="op">=</span> torch.utils.data.DataLoader(val_ds, batch_size<span class="op">=</span>bs<span class="op">*</span><span class="dv">2</span>)</span>
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> DataLoaders(train_loader, val_loader)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> NgramNet()</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>n_2gram <span class="op">=</span> m.embedding.numel()</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -620,7 +620,7 @@ e n g ---&gt; .</code></pre>
 </div>
 </div>
 <p>Now, let’s patch our model with a <code>generate()</code> method, returning names sampled from the learned representation. We can pass in a generator to make sure we get the same random behavior as we have seen above when generating names with the counts model:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="at">@fc.patch</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate(<span class="va">self</span>:NgramNet, n<span class="op">=</span><span class="dv">10</span>, generator<span class="op">=</span><span class="va">None</span>):</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    names <span class="op">=</span> []</span>
@@ -641,7 +641,7 @@ e n g ---&gt; .</code></pre>
 <span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
 <span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> names</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>m.generate(generator<span class="op">=</span>torch.Generator().manual_seed(<span class="dv">42</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>['.akyleloniatanacaro.',
@@ -659,7 +659,7 @@ e n g ---&gt; .</code></pre>
 <p>As you can see, these names are extremely similar to the ones we created above with the counts based model, and this is actually pretty surprising. One model was based on common sense, logic and simple counting. The other model on neural networks, embedding layers, loss functions, training loops, backward passes etc etc. Nonetheless, the results are the same!</p>
 <p>The reason for this, is that the network architecture (and the loss) implies mathematical equivalence between both approaches. This can probably be shown explicitly with lots of complicated math, which I am not even going to try (I guess the answer will involve the principle of “maximum likelihood”..)</p>
 <p>We can also have a look at both the weight matrices to see that the embedding matrix is extremely similar to the counts matrix. The way this network is set-up, is thus resulting in a weight matrix which is practically identical to the counts matrix!</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>,<span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>,<span class="dv">5</span>))</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].imshow(F.softmax(m.embedding.detach().cpu(), dim<span class="op">=</span><span class="dv">1</span>).numpy())<span class="op">;</span></span>
@@ -675,7 +675,7 @@ e n g ---&gt; .</code></pre>
 <h2 class="anchored" data-anchor-id="next-steps">Next steps</h2>
 <p>This extremely cool equivalence means we can switch to a neural network paradigm and tweak the network to improve performance. In other words, we can use any trick in the book for training neural networks! This is neat, because with the explicit counting based approach we were stuck with the “curse of dimensionality” for growing values of n.</p>
 <p>In the next post, I’ll discuss a first improvement: a simple but interesting model from Y. Bengio et al described in the paper <em>A Neural Probabilistic Language Model</em>. But let’s quickly train a couple of networks with higher n-grams to see how that goes.</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit_ngram(n):</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    train_ds <span class="op">=</span> NgramDataset(train_lines, n<span class="op">=</span>ngram)</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    val_ds <span class="op">=</span> NgramDataset(val_lines, n<span class="op">=</span>ngram)</span>
@@ -693,10 +693,10 @@ e n g ---&gt; .</code></pre>
 <span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> n_elem, l.loss.detach().cpu()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>num_elems, eval_losses <span class="op">=</span> [], []</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>ngram <span class="op">=</span> <span class="dv">3</span></span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>num_elem, eval_loss <span class="op">=</span> fit_ngram(ngram)</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>num_elems.append(num_elem)</span>
@@ -787,7 +787,7 @@ e n g ---&gt; .</code></pre>
 </div>
 </div>
 <p>The evaluation loss went down from 2.595 for the bi-gram model to 2.437 for the tri-gram model, an improvement! Let’s try a 4-gram model as well:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>ngram <span class="op">=</span> <span class="dv">4</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>num_elem, eval_loss <span class="op">=</span> fit_ngram(ngram)</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>num_elems.append(num_elem)</span>
@@ -877,7 +877,7 @@ e n g ---&gt; .</code></pre>
 <p><img src="index_files/figure-html/cell-23-output-3.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>ngram <span class="op">=</span> <span class="dv">5</span></span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>num_elem, eval_loss <span class="op">=</span> fit_ngram(ngram)</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>num_elems.append(num_elem)</span>
@@ -968,7 +968,7 @@ e n g ---&gt; .</code></pre>
 </div>
 </div>
 <p>And here, we start to see problems. The train loss is still getting better (1.735 for 5-gram vs 1.932 for 4-gram) but the evaluation loss is worse (2.198 for 5-gram vs 2.129 for 4-gram).</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>)</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>ax.bar(<span class="bu">range</span>(<span class="dv">0</span>,<span class="dv">3</span>), eval_losses)</span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(<span class="bu">range</span>(<span class="dv">0</span>,<span class="dv">3</span>), [<span class="ss">f'3gram </span><span class="ch">\n</span><span class="ss"> loss: </span><span class="sc">{</span>eval_losses[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">'</span>, <span class="ss">f'4gram </span><span class="ch">\n</span><span class="ss"> loss: </span><span class="sc">{</span>eval_losses[<span class="dv">1</span>]<span class="sc">:.3f}</span><span class="ss">'</span>, <span class="ss">f'5gram </span><span class="ch">\n</span><span class="ss"> loss: </span><span class="sc">{</span>eval_losses[<span class="dv">2</span>]<span class="sc">:.3f}</span><span class="ss">'</span>])<span class="op">;</span></span>
@@ -978,7 +978,7 @@ e n g ---&gt; .</code></pre>
 </div>
 </div>
 <p>Let’s also quickly compare the number of elements in the embedding layer for the 2, 3 and 4-gram models:</p>
-<div class="cell">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>)</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>ax.bar(<span class="bu">range</span>(<span class="dv">0</span>,<span class="dv">3</span>), num_elems)</span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(<span class="bu">range</span>(<span class="dv">0</span>,<span class="dv">3</span>), [<span class="ss">f'3gram </span><span class="ch">\n</span><span class="ss"> #: </span><span class="sc">{</span>num_elems[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">'</span>, <span class="ss">f'4gram </span><span class="ch">\n</span><span class="ss"> #: </span><span class="sc">{</span>num_elems[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">'</span>, <span class="ss">f'5gram </span><span class="ch">\n</span><span class="ss"> #: </span><span class="sc">{</span>num_elems[<span class="dv">2</span>]<span class="sc">}</span><span class="ss">'</span>])<span class="op">;</span></span>
