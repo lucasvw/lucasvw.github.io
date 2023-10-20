@@ -22,12 +22,16 @@
   
 .cell > .sourceCode {
     margin-bottom: 0;
-    font-size: 0.875em;
 }
 
 .sourceCode > .sourceCode {
     margin-bottom: 0;
 }
+
+.sourceCode > .sourceCode > .sourceCode {
+    font-size: 0.875em;
+}
+
 
 p {
     margin-top: 1rem;
