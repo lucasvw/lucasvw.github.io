@@ -205,16 +205,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<p>In this blog post I’ll explain how I created this blog, using Quarto and GitHub. In step 4 I’ll show how to setup GitHub Actions, this has advantages over the other ways to publish our blog:</p>
-<ol type="1">
-<li>Our source code is also stored safely on GitHub</li>
-<li>We can easily create blog entries anywhere we want, especially also from our deep learning server without having to install quarto. We can simply push to the remote branch and GitHub Actions will build the blog for us.</li>
-</ol>
+<p>In this blog post I’ll explain how I created this blog, using Quarto and GitHub.</p>
 <p>I’m working on a Macbook, and using VS Code for code editing. If you are on a Linux or Windows machine, be aware that things might be a bit different from what I describe here.</p>
 <p>I am assuming you already have a GitHub account, that VS Code is installed and configured to run Python and Jupyter Notebooks.</p>
 <section id="step-1-install-quarto" class="level2">
 <h2 class="anchored" data-anchor-id="step-1-install-quarto">Step 1: install Quarto</h2>
-<p>First of all you need to install Quarto, go <a href="https://quarto.org/docs/get-started/">here</a>, download and install the software. You should do this on the machine that you want to use for writing your blog, in my case my Macbook laptop.</p>
+<p>First of all you need to install Quarto, go <a href="https://quarto.org/docs/get-started/">here</a> to download and install the software. Make sure to install the software on the machine that you are going to use for writing your blog, in my case my Macbook laptop.</p>
 <p>Once installed you will have access to the quarto Command Line Interface (CLI). To make sure everything works as expected, open a terminal and execute:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
@@ -226,9 +222,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="step-2-create-a-github-repo" class="level2">
 <h2 class="anchored" data-anchor-id="step-2-create-a-github-repo">Step 2: create a GitHub repo</h2>
-<p>To host our blog we will use GitHub Pages, which is a service to host a website from a GitHub repository. Based on the name you pick for your repository you will create a so-called project-website or your unique user-website. For any general repo named <code>my-awesome-repo</code>, the website will be hosted on <code>https://&lt;github-username&gt;.github.io/my-awesome-repo</code>. This is a project-websites and you can create as many as you like.</p>
-<p>To create your user-website, you have to name the repo exactly like this: <code>&lt;github-username&gt;.github.io</code>, the user-website will be hosted at <code>https://&lt;github-username&gt;.github.io</code>.</p>
-<p>This is exactly what I want, so I create a new repo with the name: <code>lucasvw.github.io</code>.</p>
+<p>The blog will be hosted on GitHub Pages, which is a service to host a website from a GitHub repository: all the files that are needed to render your blog are stored in a GitHub repository. Based on the name you pick for your repository you will create a so-called project-website or your unique user-website. For any general repo named <code>my-awesome-repo</code>, the website will be hosted on <code>https://&lt;github-username&gt;.github.io/my-awesome-repo</code>. This is a project-websites and you can create as many as you like.</p>
+<p>To create your user-website, the repo has to be named: <code>&lt;github-username&gt;.github.io</code>. After which the website will be hosted at <code>https://&lt;github-username&gt;.github.io</code>.</p>
+<p>Since I want the blog to be my user-website I want the latter and create a new repo with the name: <code>lucasvw.github.io</code>.</p>
 <p>I find it helpful to add a <code>.gitignore</code> file with a Python template, to which we can later add some more entries to facilitate storing the right files on GitHub. Also make sure that the repo is Public (and not set to Private). Additionally, I added a README file and choose the Apache2 License.</p>
 <p>Next, I clone this repo to my machine by running:</p>
 <div class="code-with-filename">
@@ -247,7 +243,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> create-project <span class="at">--type</span> website:blog</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>This will add a number of files to our repo, which represent the basic structure of our blog. Most importantly:</p>
+<p>This will add a number of files to our repo, which represent the basic structure of the blog. Most importantly:</p>
 <ul>
 <li><code>posts</code>: here we will create our blog entries (one subfolder per blog entry)</li>
 <li><code>_quarto.yml</code>: configuration file for our blog such as the theme, name, GitHub and Twitter links</li>
@@ -267,7 +263,7 @@ Note
 <p><code>.qmd</code> files are like markdown files, but with lots of additional functionality from Quarto. Go <a href="https://www.markdownguide.org/basic-syntax/">here</a> for more information on Markdown syntax and <a href="https://nbdev.fast.ai/tutorials/qmd_intro.html">here</a> for Quarto Markdown</p>
 </div>
 </div>
-<p>To see what we currently have, let’s render our blog locally:</p>
+<p>Let’s preview the blog locally:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
@@ -287,7 +283,7 @@ Note
 </section>
 <section id="step-4-finalize-set-up-github-actions" class="level2">
 <h2 class="anchored" data-anchor-id="step-4-finalize-set-up-github-actions">Step 4: Finalize set-up: GitHub Actions</h2>
-<p>When we run the <code>quarto publish gh-pages</code> command, Quarto processes our files and turns them into web readable files (HTML, JS, CSS etc). It stores these files in our <code>gh-pages</code> branch and pushes them to our remote GitHub repo. This is great, but it means that this doesn’t store our source files.</p>
+<p>When we run the <code>quarto publish gh-pages</code> command, Quarto processes our files and turns them into web readable files (HTML, JS, CSS etc). It stores these files in our <code>gh-pages</code> branch and pushes them to our remote GitHub repo. This is a very helpful command, but it means that this doesn’t store our source files on GitHub, which makes it difficult to create blog entries from multiple computers. So let’s set up a GitHub Action to build the site whenever we push our source code to the main branch.</p>
 <p>To do so, let’s first open our <code>.gitignore</code> file and make sure that it contains the following entries so that we don’t check in any files we don’t need.</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
@@ -301,12 +297,6 @@ Note
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>.DS_Store</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Next, we can commit all the remaining files to Git and push them to our remote repo. If we ever lose access to our local machine, we can restore everything we need from GitHub.</p>
-<p>However, now we have 2 things we need to do whenever we finish our work:</p>
-<ul>
-<li>store our source files on the main branch and push to GitHub</li>
-<li>run the publish command to update the blog</li>
-</ul>
-<p>This is a bit annoying and it would be much better if we can just push to the main branch and GitHub would take care of building our website and updating it. This also allows us to create blog entries on any machine that has access to git, we don’t need to have quarto installed. This is particularly practical if we want to write blog entries from our deep learning server. So let’s use GitHub actions for this.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -320,7 +310,7 @@ Note
 <p>Before you continue make sure you have at least once run a <code>quarto publish gh-pages</code> command, this is necessary for the things below to work</p>
 </div>
 </div>
-<p>First we need to add the following snippet to <code>_quarto.yml</code></p>
+<p>Next, add the following snippet to <code>_quarto.yml</code></p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>_quarto.yml</strong></pre>
@@ -360,7 +350,7 @@ Note
 <span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">env</span><span class="kw">:</span></span>
 <span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">GITHUB_TOKEN</span><span class="kw">:</span><span class="at"> ${{ secrets.GITHUB_TOKEN }}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Once we push these things to GitHub, we are good to go. Whenever we push anything to the <code>main</code> branch, this workflow will execute and take care of updating the <code>gh-pages</code> branch and updating the blog.</p>
+<p>Once we push these things to GitHub, we are good to go. Whenever we push anything to the <code>main</code> branch, this workflow will execute and take care of updating the <code>gh-pages</code> branch and update the blog.</p>
 
 
 </section>
