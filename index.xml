@@ -27187,7 +27187,7 @@ font-style: inherit;">;</span> nbdev.nbdev_export()</span></code></pre></div>
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
 <p>To keep things simple, let’s use the fashion-mnist dataset. We can get the data from the huggingface datasets library:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> datasets <span class="im" style="color: #00769E;
@@ -27205,16 +27205,6 @@ font-style: inherit;">=</span> load_dataset_builder(name)</span>
 <span id="cb1-5"><span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(ds_builder.info.description)</span></code></pre></div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"c5560f33795d4f909a836d1f45406647","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
-</script>
-</div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"c83cbfb7d8c94ec0aea4b283cfe45bbd","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
-</script>
-</div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Fashion-MNIST is a dataset of Zalando's article images—consisting of a training set of
 60,000 examples and a test set of 10,000 examples. Each example is a 28x28 grayscale image,
@@ -27224,7 +27214,7 @@ It shares the same image size and structure of training and testing splits.
 </code></pre>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">ds <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> load_dataset(name, split<span class="op" style="color: #5E5E5E;
@@ -27232,53 +27222,12 @@ background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'train'</span>)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Downloading and preparing dataset fashion_mnist/fashion_mnist (download: 29.45 MiB, generated: 34.84 MiB, post-processed: Unknown size, total: 64.29 MiB) to /root/.cache/huggingface/datasets/fashion_mnist/fashion_mnist/1.0.0/8d6c32399aa01613d96e2cbc9b13638f359ef62bb33612b077b4c247f6ef99c1...
-Dataset fashion_mnist downloaded and prepared to /root/.cache/huggingface/datasets/fashion_mnist/fashion_mnist/1.0.0/8d6c32399aa01613d96e2cbc9b13638f359ef62bb33612b077b4c247f6ef99c1. Subsequent calls will reuse this data.</code></pre>
-</div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"96135b6e859f40feb917a91d2d632d3d","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
-</script>
-</div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"ceb12d93da8d47338206756873c30a38","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
-</script>
-</div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"5f3f6ddcc7f44c8dbe1b3b24222a1a7a","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
-</script>
-</div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"8a23bbe688274c5ba8260579c9899aea","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
-</script>
-</div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"bf2b57bcc16b402aa7d0ba9132af4aa4","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
-</script>
-</div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"1ac53f4aa94c4a988d373db11c1d127f","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
-</script>
-</div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
-</script>
-</div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
-</script>
+<div class="cell-output cell-output-stderr">
+<pre><code>Reusing dataset fashion_mnist (/root/.cache/huggingface/datasets/fashion_mnist/fashion_mnist/1.0.0/8d6c32399aa01613d96e2cbc9b13638f359ef62bb33612b077b4c247f6ef99c1)</code></pre>
 </div>
 </div>
 <p><code>ds</code> is a <code>Dataset</code> object. These kind of objects appear in many Deep Learning libraries and have two main functionalities: you can index into them and they have a length:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">ds[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>]</span></code></pre></div>
@@ -27287,7 +27236,7 @@ font-style: inherit;">0</span>]</span></code></pre></div>
  'label': 9}</code></pre>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">len</span>(ds)</span></code></pre></div>
@@ -27295,7 +27244,7 @@ font-style: inherit;">len</span>(ds)</span></code></pre></div>
 <pre><code>60000</code></pre>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">ds</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>Dataset({
@@ -27305,7 +27254,7 @@ font-style: inherit;">len</span>(ds)</span></code></pre></div>
 </div>
 </div>
 <p>Hugginface datasets (as opposed to PyTorch datasets) also have some properties, in this case <code>num_rows</code>, which is the length of the dataset (60000) and <code>features</code>, a dictionary giving metadata on what is returned when we index into the dataset:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">ds.features</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>{'image': Image(decode=True, id=None),
@@ -27313,7 +27262,7 @@ font-style: inherit;">len</span>(ds)</span></code></pre></div>
 </div>
 </div>
 <p>Let’s visualize one single item:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
@@ -27380,8 +27329,8 @@ font-style: inherit;">;</span></span></code></pre></div>
 <p><img src="https://lucasvw.github.io/posts/08_nntrain_setup/index_files/figure-html/cell-8-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<p>Since we want to start simple, and only later get to Datsets and Dataloaders: let’s pull out the data into a tensor so we can build simple linear layers.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<p>Since we want to start simple, and only later get to Datsets and Dataloaders: let’s pull out the data into a tensor so we can pull the data through some linear layers.</p>
+<div class="cell">
 <div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> torchvision.transforms.functional <span class="im" style="color: #00769E;
@@ -27434,7 +27383,7 @@ font-style: inherit;">0</span>])</span></code></pre></div>
 <section id="linear-layers" class="level2">
 <h2 class="anchored" data-anchor-id="linear-layers">Linear layers</h2>
 <p>Now that we have the data, let’s create our very first network operation: a linear layer which takes the 784 long flattened out image vector, and maps it to an output vector of length 10</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> torch</span>
@@ -27487,7 +27436,7 @@ Note
 </div>
 </div>
 <p>Let’s do the same for all our training data at once:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1">x_train <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> torch.stack(x_train)</span>
@@ -27500,9 +27449,9 @@ font-style: inherit;">=</span> lin(x_train, a,b)</span>
 </div>
 </div>
 <p>Nice, that’s basically a forward pass through our model on all our training data!</p>
-<p>Now if we want to increase the depth of our network by adding an additional layer, we need to add a non-linearity in the middle. Why? See for example the first paragraphs of this <a href="https://stats.stackexchange.com/a/335972">answer</a>.</p>
-<p>Let’s add a ReLu nonlinearity:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<p>Now, if we want to increase the depth of our network by adding an additional layer, we need to add a non-linearity in the middle. Why? See for example the first paragraphs of this <a href="https://stats.stackexchange.com/a/335972">answer</a>.</p>
+<p>Non-linearities are simple element-wise operations, we apply on (a tensor of) values. A common one is the ReLu nonlinearity:</p>
+<div class="cell">
 <div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> relu(x):</span>
@@ -27513,7 +27462,7 @@ background-color: null;
 font-style: inherit;">0.0</span>)</span></code></pre></div>
 </div>
 <p>And let’s combine these into our first “model”, consisting of two linear layers and a relu nonlinearity in the middle:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1">n_in <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
@@ -27562,20 +27511,23 @@ font-style: inherit;">=</span> relu(a1)</span>
 background-color: null;
 font-style: inherit;">return</span> lin(z1, w2, b2)</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1">out <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> model(x_train)</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1">out.shape</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>torch.Size([60000, 10])</code></pre>
 </div>
 </div>
-<p>Our “model” currently only does a forward pass through the network. And as a matter of fact, it’s doing a forward pass with random weights. When training a neural network, we want to change these parameters in a way that the outputs of the network align with the outputs (<code>y_train</code>). I will not go into the details of this, but here is a great <a href="https://youtu.be/VMj-3S1tku0">video</a> by Andrej Karpathy which in my opinion gives one of the best explanations into how this works.</p>
-<p>Before doing a backward pass, we first have to calculate the loss. Since the outputs represent any of the 10 classes the image corresponds with, cross entropy is a straight forward loss function. Some details about cross entropy loss can be found in a <a href="https://lucasvw.github.io/posts/05_crossentropy/">post</a> I wrote earlier. However, since we want to add the backpropagation ourselves and I don’t know how to backpropagate through cross entropy (and I don’t feel like spending a lot of time on it), let’s use a much easier loss function for now: mean squared error (MSE). This obviously doesn’t make any sense in the context of our data, but mathematically it’s possible. We just have to end up with a single activation of our model instead of 10:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<p>Our “model” currently only does a forward pass through the network. And as a matter of fact, it’s doing a forward pass with random weights. When training a neural network, we want to change these parameters in a way that the outputs of the network align with the labels (y_train). We thus need a way to compare the outputs of the network (the predictions) with the labels: the loss function.</p>
+<p>Since the outputs represent any of the 10 classes the image corresponds with, cross entropy is a straight forward loss function. Some details about cross entropy loss can be found in a <a href="https://lucasvw.github.io/posts/05_crossentropy/">post</a> I wrote earlier.</p>
+<p>Once the loss is computed, training the network means that we want to change the weights in a way that minimizes the loss. Perhaps you remember from high school that we can find the extreme values of a function <img src="https://latex.codecogs.com/png.latex?f(x)"> by finding the derivative of <img src="https://latex.codecogs.com/png.latex?f"> and setting it to zero: <img src="https://latex.codecogs.com/png.latex?f'(x)%20=%200">. Furthermore, we could use the second derivative to check whether we have found a minimum or maximum. Unfortunately, this doesn’t work in the context of neural networks because of the complexity of the function and the non-linearities. Instead, we use something called gradient descent which is an algorithm that calculates the gradient (derivative) of the loss function with respect to the parameters (weights and biases) of the neural network. It then adjusts the parameters in the opposite direction of the gradient to minimize the loss. This process is repeated iteratively until convergence or a stopping criterion is met.</p>
+<p>The way to compute these gradients is by making use of backpropagation, which is an algorithm to find the gradients of a loss function with respect to the weights. I won’t go into the details of backpropation, but <a href="https://www.youtube.com/watch?v=VMj-3S1tku0">here</a> is a great video by Andrej Karpathy which in my opinion gives one of the best explanations into how this works.</p>
+<p>Below, I would like to show how we can backpropagate the gradients through the network. However, since doing manual backpropagation of the cross entropy loss function is not super trivial, let’s use a much easier loss function for now: mean squared error (MSE). This obviously doesn’t make any sense in the context of our data, but mathematically it’s possible. We just have to end up with a single activation of our model instead of 10:</p>
+<div class="cell">
 <div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1">n_out <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
@@ -27608,14 +27560,14 @@ font-style: inherit;">return</span> lin(z1, w2, b2)</span>
 background-color: null;
 font-style: inherit;">=</span> model(x_train)</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1">out.shape</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>torch.Size([60000, 1])</code></pre>
 </div>
 </div>
 <p>From which we see that the outputs have an empty trailing dimension. <code>y_train</code> doesn’t have this, so we have to squeeze out this empty dimension when computing the MSE:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> mse(pred, targ): </span>
@@ -27638,11 +27590,11 @@ background-color: null;
 font-style: inherit;">=</span> torch.stack(y_train)</span>
 <span id="cb28-5">mse(out, y_train)</span></code></pre></div>
 <div class="cell-output cell-output-display">
-<pre><code>tensor(3015.2351)</code></pre>
+<pre><code>tensor(7615.3135)</code></pre>
 </div>
 </div>
 <p>The next step will be to add the backward pass. But let’s refactor our code to put things into classes, that way the backward pass can be added more easily:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> Linear():</span>
@@ -27657,7 +27609,11 @@ font-style: inherit;">self</span>, n_in, n_out):</span>
 background-color: null;
 font-style: inherit;">self</span>.w <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> torch.randn(n_in, n_out)</span>
+font-style: inherit;">=</span> torch.randn(n_in, n_out, requires_grad<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
 <span id="cb30-4">        <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.b <span class="op" style="color: #5E5E5E;
@@ -27817,13 +27773,13 @@ font-style: inherit;">return</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.loss(x, y)</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb31" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1">x_train.shape</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>torch.Size([60000, 784])</code></pre>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1">m <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Model(n_in, n_h, n_out)</span>
@@ -27832,7 +27788,7 @@ background-color: null;
 font-style: inherit;">=</span> m(x_train, y_train)</span></code></pre></div>
 </div>
 <p>To add in the functionality for the backward pass, redefining the whole class is a nuisance. So instead we’ll <code>patch</code> the classes. We can do this very easily by using the <code>fastcore</code> library. Let’s see a small example:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> fastcore.<span class="bu" style="color: null;
@@ -27879,7 +27835,7 @@ howdy 🤠</code></pre>
 </div>
 </div>
 <p>So with <code>fc.patch</code> we can extend or change the behavior of Classes that have been defined elsewhere, even on instances of the objects that are already created. Nice!</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb36" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@fc.patch</span></span>
@@ -28003,7 +27959,7 @@ font-style: inherit;">reversed</span>(<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.layers): l.backward()</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb37" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1">m <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Model(n_in, n_h, n_out)</span>
@@ -28020,17 +27976,18 @@ font-style: inherit;">=</span> m(x_train, y_train)</span>
 <li>This is the fundamental point about backpropagation of the gradient: in reverse order, layer by layer the gradients are being <em>propagated back</em> through the network using the chain rule</li>
 <li>Although we don’t derive the operations, we can see that that there <em>exist</em> operations that do this. These operations are not magical, they are just the result of calculus: not very different from the fact that if <img src="https://latex.codecogs.com/png.latex?f(x)%20=%20x%5E2"> then <img src="https://latex.codecogs.com/png.latex?f'(x)%20=%202x"> and if <img src="https://latex.codecogs.com/png.latex?h(x)%20=%20f(g(x))"> then <img src="https://latex.codecogs.com/png.latex?h'(x)%20=%20f'(g(x))%20*%20g'(x)"></li>
 </ol>
+<p>By calling backward, we have effectively computed the gradients of the loss with respect to the parameters in our network. With that, we know how the loss will change if we make a small change in these parameters and we can thus change them in such a way that the loss will decrease a tiny bit.</p>
 </section>
 <section id="first-refactor-module-baseclass-and-training-loop" class="level2">
 <h2 class="anchored" data-anchor-id="first-refactor-module-baseclass-and-training-loop">First refactor: <code>Module</code> baseclass and training loop</h2>
 <p>Now let’s see how we can make this a little better. One thing that seems a bit silly is that in each of the <code>Linear</code>, <code>MSE</code> and <code>Relu</code> classes, we are storing explicitly the inputs and outputs when doing a forward call. As mentioned, we need this to backpropagate the gradients. However, we rather not store that explicitly all the time when creating a new layer.</p>
 <p>So let’s create a base class that takes care of this:</p>
 <ul>
-<li>Pack the forward functionality of each layer in a dedicated <code>forward</code> method</li>
+<li>put the forward functionality of each layer in a dedicated <code>forward</code> method</li>
 <li>let the storing of inputs and ouputs be done in the <code>__call__</code> method of the baseclass, and call the <code>self.forward</code> method in between.</li>
 </ul>
 <p>This works, but there is one caveat: most layers just have one input when they are called (<code>x</code>), but the loss has 2 (<code>pred</code> and <code>targ</code>). To make this storing of the inputs generic we can store them as an array on the base class, and also pass them as positional arguments to <code>_backward</code>. This way, <code>forward</code> and <code>_backward</code> have the same arguments.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb38" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> Module():</span>
@@ -28288,7 +28245,7 @@ background-color: null;
 font-style: inherit;">self</span>.layers): l.backward()</span></code></pre></div>
 </div>
 <p>With these objects, let’s create our first training loop:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb39" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1">epochs <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
@@ -28427,11 +28384,11 @@ font-style: inherit;">:.1f}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'</span>)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>epoch=0 | loss=14242.1
-epoch=1 | loss=1329.6
-epoch=2 | loss=135.2
-epoch=3 | loss=21.2
-epoch=4 | loss=9.7</code></pre>
+<pre><code>epoch=0 | loss=4853.3
+epoch=1 | loss=518.7
+epoch=2 | loss=54.7
+epoch=3 | loss=12.3
+epoch=4 | loss=8.5</code></pre>
 </div>
 </div>
 <p>Awesome, the loss is decreasing i.e.&nbsp;the model is training!</p>
@@ -28439,7 +28396,7 @@ epoch=4 | loss=9.7</code></pre>
 <section id="second-refactor-simplify-the-weight-update" class="level2">
 <h2 class="anchored" data-anchor-id="second-refactor-simplify-the-weight-update">Second refactor: simplify the weight update</h2>
 <p>Let’s try to simplify our training loop, and make it more generic. By adding functionality to our Module class so that it has a reference to it’s trainable parameters, we can update the weights as shown below.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb41" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> fit(epochs):</span>
@@ -28523,7 +28480,7 @@ font-style: inherit;">'</span>)</span></code></pre></div>
 <li>Because we want to get the parameters directly out of a layer, as well as out of the model, we need to implement some logic in <code>_parameters()</code> to iterate through the lowest “level” and get the actual parameters out</li>
 <li>Last but not least we have to implement a <code>zero_grad()</code> method to zero the gradients on the parameters</li>
 </ol>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb42" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> NNModule:</span>
@@ -28698,7 +28655,7 @@ font-style: inherit;">*</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>._args)</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb43" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> Linear(NNModule):</span>
@@ -28927,7 +28884,7 @@ background-color: null;
 font-style: inherit;">self</span>.layers): l.backward()</span></code></pre></div>
 </div>
 <p>And now we can indeed call <code>parameters</code> on both the model as well as on individual layers:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb44" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1">m <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Model(n_in, n_h, n_out)</span>
@@ -28940,7 +28897,7 @@ font-style: inherit;">in</span> m.parameters()]</span></code></pre></div>
 <pre><code>[torch.Size([784, 50]), torch.Size([50]), torch.Size([50, 1]), torch.Size([1])]</code></pre>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb46" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1">[p.shape <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
@@ -28951,7 +28908,7 @@ font-style: inherit;">in</span> Linear(n_in, n_h).parameters()]</span></code></p
 </div>
 </div>
 <p>Let’s fit with our new training loop:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb48" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1">fit(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span>)</span></code></pre></div>
@@ -28967,7 +28924,7 @@ epoch=4 | loss=152958.9</code></pre>
 <section id="third-refactor-use-nn.module" class="level2">
 <h2 class="anchored" data-anchor-id="third-refactor-use-nn.module">Third refactor: use <code>nn.Module</code></h2>
 <p>Finally we are in a position to use PyTorch’s <code>nn.Module</code>, since we understand all of it’s behavior! We can simplify:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb50" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> torch.nn <span class="im" style="color: #00769E;
@@ -29050,7 +29007,7 @@ font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>), y)</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb51" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Autograd needs all tensors to be float</span></span>
@@ -29064,7 +29021,7 @@ font-style: inherit;">=</span> y_train.to(torch.float32)</span>
 background-color: null;
 font-style: inherit;">=</span> Model(n_in, n_h, n_out)</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb52" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> fit(epochs):</span>
@@ -29142,7 +29099,7 @@ font-style: inherit;">'</span>)</span></code></pre></div>
 <section id="fourth-refactor-nn.modulelist-and-nn.sequential" class="level2">
 <h2 class="anchored" data-anchor-id="fourth-refactor-nn.modulelist-and-nn.sequential">Fourth refactor: <code>nn.ModuleList</code> and <code>nn.Sequential</code></h2>
 <p>To simplify the storing of the layers array and the registration of the modules, we can use <code>nn.ModuleList</code>. Up till now, we compute the loss as part of the forward pass of the model, let’s change that and let the model return the predictions. With these predictions we can now also compute a metric: accuracy, which will represent the percentage of images correctly classified by the model.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb53" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> Model(nn.Module):</span>
@@ -29183,7 +29140,7 @@ background-color: null;
 font-style: inherit;">return</span> x</span></code></pre></div>
 </div>
 <p>This turns out to be such an elementary operation, that PyTorch has a module for it: <code>nn.Sequential</code>.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb54" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> torch.nn.functional <span class="im" style="color: #00769E;
@@ -29206,7 +29163,7 @@ font-style: inherit;">*</span>layers)</span></code></pre></div>
 <li>Let’s now also use a loss function that actually makes sense: cross entropy loss instead of MSE</li>
 <li>We then need to switch back to using 10 output activations conforming with the 10 categories</li>
 </ul>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb55" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1">n_out <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
@@ -29223,8 +29180,8 @@ background-color: null;
 font-style: inherit;">*</span>layers)</span></code></pre></div>
 </div>
 <p>Let’s also add a metric: accuracy, to see how our model is doing. For this, we need to find the class that our model predicts. However, the model is outputting not a single class, it outputs <em>logits</em>: the unweighted predictions for any of the 10 classes. When applying a softmax to these logits, we turn them into 10 probabilities: the probability that our model assigns to each class.</p>
-<p>When computing the accuracy, we don’t actually just use the logits instead of the probabilities, since the softmax is a monotonically increasing we largest logit, will also have the largest probability.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<p>When computing the accuracy, we actually just use the logits instead of the probabilities, since the softmax is a monotonically increasing we largest logit, will also have the largest probability.</p>
+<div class="cell">
 <div class="sourceCode cell-code" id="cb56" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1">x0 <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> x_train[<span class="dv" style="color: #AD0000;
@@ -29309,7 +29266,7 @@ probs=tensor([0.0844, 0.1127, 0.0906, 0.1027, 0.1016, 0.0931, 0.1136, 0.0935, 0.
         0.1171], grad_fn=&lt;SoftmaxBackward0&gt;)</code></pre>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb58" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> accuracy(preds, targs):</span>
@@ -29325,7 +29282,7 @@ font-style: inherit;">==</span> targs).<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">float</span>().mean()</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb59" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1">loss_func <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> F.cross_entropy</span>
@@ -29430,7 +29387,7 @@ epoch=4 | loss=0.853 | acc=0.706</code></pre>
 <section id="fifth-refactor-add-an-optimizer" class="level2">
 <h2 class="anchored" data-anchor-id="fifth-refactor-add-an-optimizer">Fifth refactor: add an Optimizer</h2>
 <p>We can further refactor the model by adding an Optimizer, this is an object that will have access to the <code>parameters</code> and does the updating of the weights (<code>step</code>) and zeroing the gradient. Most notably, we want to go from:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb61" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># ...</span></span>
@@ -29451,7 +29408,7 @@ background-color: null;
 font-style: inherit;"># ...</span></span></code></pre></div>
 </div>
 <p>to:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb62" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># opt.step()</span></span>
@@ -29460,7 +29417,7 @@ background-color: null;
 font-style: inherit;"># opt.zero_grad()</span></span></code></pre></div>
 </div>
 <p>So that the training loop becomes:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb63" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> fit(epochs):</span>
@@ -29541,7 +29498,7 @@ background-color: null;
 font-style: inherit;">'</span>)</span></code></pre></div>
 </div>
 <p>So we introduce the Optimizer, which has exactly these two methods:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb64" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb64-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">class</span> Optimizer():</span>
@@ -29607,7 +29564,7 @@ font-style: inherit;">in</span> <span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">self</span>.params: p.grad.zero_()</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb65" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb65-1">layers <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> [nn.Linear(n_in,n_h), nn.ReLU(), nn.Linear(n_h, n_out)]</span>
@@ -29622,7 +29579,7 @@ font-style: inherit;">*</span>layers)</span>
 background-color: null;
 font-style: inherit;">=</span> Optimizer(model.parameters(), lr)</span></code></pre></div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb66" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb66-1">fit(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span>)</span></code></pre></div>
@@ -29635,7 +29592,7 @@ epoch=4 | loss=1.195 | acc=0.673</code></pre>
 </div>
 </div>
 <p>The optimizer we just created is basically the <code>SGD</code> optimizer from PyTorch so let’s use that:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb68" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb68-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> get_model():</span>
@@ -30369,7 +30326,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-31321"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-31321").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-57009"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-57009").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>
