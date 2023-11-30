@@ -3118,6 +3118,13 @@ font-style: inherit;">100</span>)</span></code></pre></div>
 <h2 class="anchored" data-anchor-id="remarks">Remarks</h2>
 <p>The model is training fairly well, but it seems difficult to get the (validation) loss to the same level as what we saw for the <a href="https://lucasvw.github.io/posts/16_lstm/#pytorch-lstm">LSTM</a> which was around 1.95. This bugged me for a bit, but then I realised this is comparing apples to oranges. The LSTM (and RNN) architecture, and more precisely the way we load the data and deal with passing the hidden state from batch to batch (see <a href="https://lucasvw.github.io/posts/15_rnn/#optimizing-dataloading-and-model-for-sequential-data-bptt">here</a>), means that even for the first item in the sequence (<code>T=1</code>) we have information on the history from the previous batch. This is not the case for Transformers, where each batch starts out <em>fresh</em>, without any memory.</p>
 <p>I ran a small test to verify that this is indeed causing the difference in observed loss. I created a new loss function, which (during evaluation) only computes the loss on the last item in the sequence. I re-trained the transformer with a sequence length equal to what was used for the LSTM (5) and obtained a validation loss of 1.933. This shows indeed that a Transformer architecture is outperforming the LSTM on this dataset.</p>
+<p>Let’s wrap-up by looking at the Transformer architecture diagram from the original paper. In this blog-post we have described the decoder-only variant of this architecture and only encompasses the right side of this diagram. The left side of the diagram is the encoder part and plays an important role in tasks which involve sequence to sequence problems, for example when translating sentences from English to German. As you can see, in that case the queries from the decoder are combined with the values and key vectors of the encoder. This allows the model to efficiently work with information from the input sequence.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://lucasvw.github.io/posts/18_attention/attention.png" class="img-fluid figure-img" width="400"></p>
+<figcaption class="figure-caption">Transformer architecture diagram from <em>Attention is all you need</em> by Vaswani et al</figcaption>
+</figure>
+</div>
 
 
 </section>
@@ -3128,7 +3135,7 @@ font-style: inherit;">100</span>)</span></code></pre></div>
   <category>attention</category>
   <guid>https://lucasvw.github.io/posts/18_attention/index.html</guid>
   <pubDate>Fri, 03 Nov 2023 00:00:00 GMT</pubDate>
-  <media:content url="https://lucasvw.github.io/posts/18_attention/lstmcell.drawio.png" medium="image" type="image/png"/>
+  <media:content url="https://lucasvw.github.io/posts/18_attention/attention.png" medium="image" type="image/png" height="203" width="144"/>
 </item>
 <item>
   <title>Denoising Diffusion Probabilistic Models</title>
@@ -33439,7 +33446,7 @@ font-style: inherit;">=</span> scheduler.step(pred, t, latents).prev_sample</spa
 </div>
 </div>
 <p>Much better! As you can see, Classifier Free Guidance is a simple technique but it works very well. This morning (03-07-2023) I saw a tweet that introduced the same concept to the world of Large Language Models (LLMs):</p>
-<p></p><div id="tweet-25984"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-25984").innerHTML = tweet["html"];</script><p></p>
+<p></p><div id="tweet-38683"></div><script>tweet={"url":"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897","author_name":"AK","author_url":"https:\/\/twitter.com\/_akhaliq","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EStay on topic with Classifier-Free Guidance\u003Cbr\u003E\u003Cbr\u003Epaper page: \u003Ca href=\"https:\/\/t.co\/yYpAXON3ep\"\u003Ehttps:\/\/t.co\/yYpAXON3ep\u003C\/a\u003E\u003Cbr\u003E\u003Cbr\u003EClassifier-Free Guidance (CFG) has recently emerged in text-to-image generation as a lightweight technique to encourage prompt-adherence in generations. In this work, we demonstrate that CFG can be… \u003Ca href=\"https:\/\/t.co\/qCZHWKw7NO\"\u003Epic.twitter.com\/qCZHWKw7NO\u003C\/a\u003E\u003C\/p\u003E&mdash; AK (@_akhaliq) \u003Ca href=\"https:\/\/twitter.com\/_akhaliq\/status\/1675676002213584897?ref_src=twsrc%5Etfw\"\u003EJuly 3, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-38683").innerHTML = tweet["html"];</script><p></p>
 </section>
 <section id="negative-prompt" class="level2">
 <h2 class="anchored" data-anchor-id="negative-prompt">Negative Prompt</h2>

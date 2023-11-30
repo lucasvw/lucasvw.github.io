@@ -1468,6 +1468,13 @@ Note
 <h2 class="anchored" data-anchor-id="remarks">Remarks</h2>
 <p>The model is training fairly well, but it seems difficult to get the (validation) loss to the same level as what we saw for the <a href="https://lucasvw.github.io/posts/16_lstm/#pytorch-lstm">LSTM</a> which was around 1.95. This bugged me for a bit, but then I realised this is comparing apples to oranges. The LSTM (and RNN) architecture, and more precisely the way we load the data and deal with passing the hidden state from batch to batch (see <a href="https://lucasvw.github.io/posts/15_rnn/#optimizing-dataloading-and-model-for-sequential-data-bptt">here</a>), means that even for the first item in the sequence (<code>T=1</code>) we have information on the history from the previous batch. This is not the case for Transformers, where each batch starts out <em>fresh</em>, without any memory.</p>
 <p>I ran a small test to verify that this is indeed causing the difference in observed loss. I created a new loss function, which (during evaluation) only computes the loss on the last item in the sequence. I re-trained the transformer with a sequence length equal to what was used for the LSTM (5) and obtained a validation loss of 1.933. This shows indeed that a Transformer architecture is outperforming the LSTM on this dataset.</p>
+<p>Let’s wrap-up by looking at the Transformer architecture diagram from the original paper. In this blog-post we have described the decoder-only variant of this architecture and only encompasses the right side of this diagram. The left side of the diagram is the encoder part and plays an important role in tasks which involve sequence to sequence problems, for example when translating sentences from English to German. As you can see, in that case the queries from the decoder are combined with the values and key vectors of the encoder. This allows the model to efficiently work with information from the input sequence.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="attention.png" class="img-fluid figure-img" width="400"></p>
+<figcaption class="figure-caption">Transformer architecture diagram from <em>Attention is all you need</em> by Vaswani et al</figcaption>
+</figure>
+</div>
 
 
 </section>
