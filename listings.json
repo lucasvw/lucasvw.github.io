@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/18_attention/index.html",
       "/posts/17_ddpm/index.html",
       "/posts/16_lstm/index.html",
       "/posts/15_rnn/index.html",
